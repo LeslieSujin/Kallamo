@@ -1141,14 +1141,14 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
 
   const appearancePage = () => (
     <>
-      <SettingsHeader title="Appearance" description="How Kallamo looks. Changes apply right away." />
+      <SettingsHeader title={t('settings.appearance', 'Appearance')} description={t('settings.appearanceDescription', 'How Kallamo looks. Changes apply right away.')} />
       <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="min-w-0">
-          <SettingsGroup title="Look">
+          <SettingsGroup title={t('settings.look', 'Look')}>
              <SettingsRow label={t('settings.interfaceLanguage', 'Interface language')} description={t('settings.interfaceLanguageDescription', 'Choose the language used by the Kallamo interface.')}>
                <SelectMenu ariaLabel={t('settings.interfaceLanguage', 'Interface language')} className="w-44" value={locale} onChange={setLocale} options={locales} />
              </SettingsRow>
-            <SettingsRow label="Accent" description="Active items, the main action and the light at the top of each page.">
+            <SettingsRow label={t('settings.accent', 'Accent')} description={t('settings.accentDescription', 'Active items, the main action and the light at the top of each page.')}>
               <div className="flex gap-2.5">
                 {colors.map(c => (
                   <button
@@ -1163,31 +1163,31 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
                 ))}
               </div>
             </SettingsRow>
-            <SettingsRow label="Font">
-              <SegmentedControl label="Font" value={fontFamily} onChange={value => updateSetting('interface', 'fontFamily', value)} options={[{ value: 'sans', label: 'Inter' }, { value: 'serif', label: 'Merriweather' }, { value: 'monospace', label: 'JetBrains Mono' }]} />
+            <SettingsRow label={t('settings.font', 'Font')}>
+              <SegmentedControl label={t('settings.font', 'Font')} value={fontFamily} onChange={value => updateSetting('interface', 'fontFamily', value)} options={[{ value: 'sans', label: 'Inter' }, { value: 'serif', label: 'Merriweather' }, { value: 'monospace', label: 'JetBrains Mono' }]} />
             </SettingsRow>
-            <SettingsRow label="Text size">
-              <SegmentedControl label="Text size" value={fontSize} onChange={value => updateSetting('interface', 'fontSize', value)} options={[{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }]} />
+            <SettingsRow label={t('settings.textSize', 'Text size')}>
+              <SegmentedControl label={t('settings.textSize', 'Text size')} value={fontSize} onChange={value => updateSetting('interface', 'fontSize', value)} options={[{ value: 'small', label: t('settings.small', 'Small') }, { value: 'medium', label: t('settings.medium', 'Medium') }, { value: 'large', label: t('settings.large', 'Large') }]} />
             </SettingsRow>
-            <SettingsRow label="Background blur" description="Turn off on slower computers.">
-              <Toggle checked={blurEnabled} ariaLabel="Background blur" onChange={value => updateSetting('interface', 'blur', value)} />
+            <SettingsRow label={t('settings.backgroundBlur', 'Background blur')} description={t('settings.backgroundBlurDescription', 'Turn off on slower computers.')}>
+              <Toggle checked={blurEnabled} ariaLabel={t('settings.backgroundBlur', 'Background blur')} onChange={value => updateSetting('interface', 'blur', value)} />
             </SettingsRow>
           </SettingsGroup>
-          <SettingsGroup title="Chat">
-            <SettingsRow label="Layout" description="Speech bubbles, or one continuous page.">
-              <div role="radiogroup" aria-label="Chat layout" className="flex gap-2.5">
-                <OptionTile kind="bubbles" label="Bubbles" selected={layoutMode === 'bubbles'} onSelect={() => updateSetting('interface', 'layout', 'bubbles')} />
-                <OptionTile kind="document" label="Document" selected={layoutMode === 'document'} onSelect={() => updateSetting('interface', 'layout', 'document')} />
+          <SettingsGroup title={t('settings.chat', 'Chat')}>
+            <SettingsRow label={t('settings.layout', 'Layout')} description={t('settings.layoutDescription', 'Speech bubbles, or one continuous page.')}>
+              <div role="radiogroup" aria-label={t('settings.layout', 'Chat layout')} className="flex gap-2.5">
+                <OptionTile kind="bubbles" label={t('settings.bubbles', 'Bubbles')} selected={layoutMode === 'bubbles'} onSelect={() => updateSetting('interface', 'layout', 'bubbles')} />
+                <OptionTile kind="document" label={t('settings.document', 'Document')} selected={layoutMode === 'document'} onSelect={() => updateSetting('interface', 'layout', 'document')} />
               </div>
             </SettingsRow>
-            <SettingsRow label="Code theme">
-              <SelectMenu ariaLabel="Code theme" className="w-44" value={codeTheme} onChange={value => updateSetting('interface', 'codeTheme', value)} options={[{ value: 'github-dark', label: 'GitHub Dark' }, { value: 'atom-one-dark', label: 'Atom One Dark' }, { value: 'tokyo-night-dark', label: 'Tokyo Night Dark' }]} />
+            <SettingsRow label={t('settings.codeTheme', 'Code theme')}>
+              <SelectMenu ariaLabel={t('settings.codeTheme', 'Code theme')} className="w-44" value={codeTheme} onChange={value => updateSetting('interface', 'codeTheme', value)} options={[{ value: 'github-dark', label: 'GitHub Dark' }, { value: 'atom-one-dark', label: 'Atom One Dark' }, { value: 'tokyo-night-dark', label: 'Tokyo Night Dark' }]} />
             </SettingsRow>
-            <SettingsRow label="Line numbers in code">
-              <Toggle checked={lineNumbers} ariaLabel="Line numbers in code" onChange={value => updateSetting('interface', 'lineNumbers', value)} />
+            <SettingsRow label={t('settings.lineNumbers', 'Line numbers in code')}>
+              <Toggle checked={lineNumbers} ariaLabel={t('settings.lineNumbers', 'Line numbers in code')} onChange={value => updateSetting('interface', 'lineNumbers', value)} />
             </SettingsRow>
-            <SettingsRow label="Colored dialogue" description="Speech in replies gets its own color, in old messages too.">
-              <Toggle checked={coloredDialogue} ariaLabel="Colored dialogue" onChange={value => updateSetting('interface', 'coloredDialogue', value)} />
+            <SettingsRow label={t('settings.coloredDialogue', 'Colored dialogue')} description={t('settings.coloredDialogueDescription', 'Speech in replies gets its own color, in old messages too.')}>
+              <Toggle checked={coloredDialogue} ariaLabel={t('settings.coloredDialogue', 'Colored dialogue')} onChange={value => updateSetting('interface', 'coloredDialogue', value)} />
             </SettingsRow>
             {coloredDialogue && (
               <>
@@ -1245,21 +1245,21 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
               </>
             )}
           </SettingsGroup>
-          <SettingsGroup title="Writing Desk">
-            <SettingsRow label="Formatting toolbar" description="Fixed at the top, or over the selection.">
-              <div role="radiogroup" aria-label="Formatting toolbar" className="flex gap-2.5">
-                <OptionTile kind="fixed" label="Fixed" selected={writingToolbar === 'fixed'} onSelect={() => updateSetting('interface', 'writingToolbar', 'fixed')} />
-                <OptionTile kind="bubble" label="Bubble" selected={writingToolbar === 'bubble'} onSelect={() => updateSetting('interface', 'writingToolbar', 'bubble')} />
+          <SettingsGroup title={t('settings.writingDesk', 'Writing Desk')}>
+            <SettingsRow label={t('settings.formattingToolbar', 'Formatting toolbar')} description={t('settings.formattingToolbarDescription', 'Fixed at the top, or over the selection.')}>
+              <div role="radiogroup" aria-label={t('settings.formattingToolbar', 'Formatting toolbar')} className="flex gap-2.5">
+                <OptionTile kind="fixed" label={t('settings.fixed', 'Fixed')} selected={writingToolbar === 'fixed'} onSelect={() => updateSetting('interface', 'writingToolbar', 'fixed')} />
+                <OptionTile kind="bubble" label={t('settings.bubble', 'Bubble')} selected={writingToolbar === 'bubble'} onSelect={() => updateSetting('interface', 'writingToolbar', 'bubble')} />
               </div>
             </SettingsRow>
-            <SettingsRow label="Smart typography" description="Curly quotes, dashes and ellipses as you type, in documents only.">
-              <Toggle checked={smartTypography} ariaLabel="Smart typography" onChange={value => updateSetting('interface', 'smartTypography', value)} />
+            <SettingsRow label={t('settings.smartTypography', 'Smart typography')} description={t('settings.smartTypographyDescription', 'Curly quotes, dashes and ellipses as you type, in documents only.')}>
+              <Toggle checked={smartTypography} ariaLabel={t('settings.smartTypography', 'Smart typography')} onChange={value => updateSetting('interface', 'smartTypography', value)} />
             </SettingsRow>
           </SettingsGroup>
         </div>
         <div className="min-w-0">
           <div className="sticky top-0">
-            <h2 className="mb-2.5 mt-7 text-[0.8125rem] font-semibold text-text-secondary">Preview</h2>
+            <h2 className="mb-2.5 mt-7 text-[0.8125rem] font-semibold text-text-secondary">{t('settings.preview', 'Preview')}</h2>
             <AppearancePreview layout={layoutMode} fontClass={previewFont} blur={blurEnabled} codeTheme={codeTheme} lineNumbers={lineNumbers} />
           </div>
         </div>
@@ -1723,5 +1723,6 @@ function ConnectionRow({ connection, models, users, onEdit, onDuplicate, onAddMo
     </div>
   );
 }
+
 
 
