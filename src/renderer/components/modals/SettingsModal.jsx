@@ -15,6 +15,7 @@ import Popover from '../ui/Popover';
 import { Menu, MenuItem, MenuSeparator } from '../ui/Menu';
 import { SettingsHeader, SettingsGroup, SettingsRow, SettingsRadio, IconTile, RunsOnBar, fieldClass } from '../../features/settings/SettingsUi';
 import AppearancePreview, { OptionTile } from '../../features/settings/AppearancePreview';
+import { useI18n } from '../../i18n';
 import { AI_ENGINE_ROLE_DEFINITIONS, SYSTEM_AI_LANGUAGES } from '../../../shared/contracts/ai-engine-roles';
 import retrievalSettingsContract from '../../../shared/retrieval-settings.json';
 
@@ -45,6 +46,7 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
     deleteEngine,
     openWhatsNew
   } = useApp();
+  const { locale, setLocale, locales, t } = useI18n();
 
   const [activeTab, setActiveTab] = useState(() => startingPage(initialTab, initialSection));
   const [searchQuery, setSearchQuery] = useState('');
@@ -1143,6 +1145,9 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
       <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="min-w-0">
           <SettingsGroup title="Look">
+             <SettingsRow label={t('settings.interfaceLanguage', 'Interface language')} description={t('settings.interfaceLanguageDescription', 'Choose the language used by the Kallamo interface.')}>
+               <SelectMenu ariaLabel={t('settings.interfaceLanguage', 'Interface language')} className="w-44" value={locale} onChange={setLocale} options={locales} />
+             </SettingsRow>
             <SettingsRow label="Accent" description="Active items, the main action and the light at the top of each page.">
               <div className="flex gap-2.5">
                 {colors.map(c => (
@@ -1718,3 +1723,4 @@ function ConnectionRow({ connection, models, users, onEdit, onDuplicate, onAddMo
     </div>
   );
 }
+
