@@ -22,6 +22,7 @@ function readStoredLocale() {
 }
 
 function readMessage(messages, key) {
+  if (messages && Object.prototype.hasOwnProperty.call(messages, key)) return messages[key];
   return key.split('.').reduce((value, part) => value && value[part], messages);
 }
 
@@ -81,4 +82,5 @@ export function useI18n() {
   if (!context) throw new Error('useI18n must be used inside I18nProvider.');
   return context;
 }
+
 
