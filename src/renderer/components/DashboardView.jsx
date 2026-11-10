@@ -15,11 +15,9 @@ import EmptyWorkspaces from '../features/workspaces/EmptyWorkspaces';
 import DiscordButton from '../features/workspaces/DiscordButton';
 import ConfirmDialog from './ui/ConfirmDialog';
 import { useTour } from '../features/onboarding/GuidedTour';
+import { useI18n } from '../i18n';
 
-const SORTS = [
-  { value: 'recent', label: 'Recent' },
-  { value: 'name', label: 'Name' },
-];
+const SORT_VALUES = ['recent', 'name'];
 
 export default function DashboardView() {
   const {
@@ -37,6 +35,11 @@ export default function DashboardView() {
     uiFlags,
     dismissHint,
   } = useApp();
+  const { t } = useI18n();
+  const sorts = useMemo(() => SORT_VALUES.map(value => ({
+    value,
+    label: t(`dashboard.sort.${value}`, value === 'recent' ? 'Recent' : 'Name')
+  })), [t]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sort, setSort] = useState('recent');
@@ -119,7 +122,7 @@ export default function DashboardView() {
           )}
 
           <header className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-extrabold tracking-[-0.02em] text-text-primary">Workspaces</h1>
+            <h1 className="text-2xl font-extrabold tracking-[-0.02em] text-text-primary">{t('dashboard.workspaces', 'Workspaces')}</h1>
             <span className="caption text-[0.8125rem] tabular-nums">{isEmpty ? 0 : listed.length}</span>
             <span className="flex-1" />
             {!isEmpty && (
@@ -129,23 +132,23 @@ export default function DashboardView() {
                   <input
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    placeholder="Search workspaces"
-                    aria-label="Search workspaces"
+                    placeholder={t('dashboard.searchWorkspaces', 'Search workspaces')}
+                    aria-label={t('dashboard.searchWorkspaces', 'Search workspaces')}
                     className="h-9 w-full rounded-[0.625rem] border border-border-default bg-surface-inset/55 pl-9 pr-3 text-sm text-text-secondary placeholder:text-text-subtle focus:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
                   />
                 </div>
-                <SegmentedControl label="Sort workspaces" value={sort} onChange={setSort} options={SORTS} />
+                <SegmentedControl label={t('dashboard.sortWorkspaces', 'Sort workspaces')} value={sort} onChange={setSort} options={sorts} />
                 <span aria-hidden="true" className="mx-1 h-[1.375rem] w-px bg-tint/10" />
               </>
             )}
-            <HeaderButton icon={LibraryBig} tour="library-button" onClick={() => setCurrentView('library')}>Library</HeaderButton>
-            {!isEmpty && <HeaderButton icon={Plus} onClick={openCreate} primary>New workspace</HeaderButton>}
+            <HeaderButton icon={LibraryBig} tour="library-button" onClick={() => setCurrentView('library')}>{t('dashboard.library', 'Library')}</HeaderButton>
+            {!isEmpty && <HeaderButton icon={Plus} onClick={openCreate} primary>{t('dashboard.newWorkspace', 'New workspace')}</HeaderButton>}
           </header>
 
           {isEmpty ? (
             <EmptyWorkspaces onMoreOptions={draft => setChatModal({ chat: null, draft })} />
           ) : listed.length === 0 ? (
-            <EmptyState title="No matching workspaces" subtitle="Try a different title or clear the search." />
+            <EmptyState title={t('dashboard.noMatchingWorkspaces', 'No matching workspaces')} subtitle={t('dashboard.tryDifferentTitle', 'Try a different title or clear the search.')} />
           ) : (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {listed.map(chat => (
@@ -250,3 +253,4 @@ function HeaderButton({ icon: Icon, children, onClick, primary = false, tour }) 
     </button>
   );
 }
+
