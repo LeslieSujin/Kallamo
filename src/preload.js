@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // --- API CONNECTIONS ---
   getApiProfiles: () => ipcRenderer.invoke('get-api-profiles'),
+  listConnectionModels: (profile) => ipcRenderer.invoke('list-connection-models', profile),
   saveApiProfile: (profile) => ipcRenderer.invoke('save-api-profile', profile),
   deleteApiProfile: (id) => ipcRenderer.invoke('delete-api-profile', id),
 

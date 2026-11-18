@@ -1,4 +1,4 @@
-const { ipcMain, shell, dialog, BrowserWindow, clipboard, nativeImage } = require('electron');
+const { ipcMain, shell, dialog, BrowserWindow, clipboard, nativeImage, net } = require('electron');
 const log = require('electron-log');
 
 // navigator.clipboard is focus/permission-gated in Electron; the native clipboard is not.
@@ -34,6 +34,7 @@ const worldChanges = require('./features/worldbuild/world-changes');
 const packageParts = require('./features/worldbuild/package-parts');
 const { chunkText, extractTextFromFile, extractDocxHtml, vectorizeChunks, insertChunksToDb, deleteChunksFromDb, searchKnowledgeBase, searchChatKnowledgeBase, searchChatMemories, RAG_MODEL_ID, RAG_MODEL_DIM, generateEmbeddingVector, countTokens } = require('./rag-service');
 const { normalizeMaxApiPayload } = require('./features/llm/payload-budget');
+const { registerModelCatalogIpc } = require('./features/llm/model-catalog');
 const { detectedContextWindows, refreshContextWindow, refreshLocalContextWindows } = require('./features/llm/local-context-window');
 
 registerWorkspaceStateIpc(ipcMain);
@@ -404,6 +405,8 @@ async function indexChatKnowledgeBase(sender, chatId, knowledgeFilesInput) {
 
 
 // --- API CONNECTIONS IPC HANDLERS ---
+registerModelCatalogIpc(ipcMain, (url, options) => net.fetch(url, options));
+
 // Whether an API profile has usable credentials for its provider's shape (key, customConfig,
 // or none for local). Accepts a raw row (encrypted fields).
 function apiProfileHasCredentials(row) {

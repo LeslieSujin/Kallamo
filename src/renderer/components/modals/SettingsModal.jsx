@@ -15,6 +15,7 @@ import Popover from '../ui/Popover';
 import { Menu, MenuItem, MenuSeparator } from '../ui/Menu';
 import { SettingsHeader, SettingsGroup, SettingsRow, SettingsRadio, IconTile, RunsOnBar, fieldClass } from '../../features/settings/SettingsUi';
 import AppearancePreview, { OptionTile } from '../../features/settings/AppearancePreview';
+import ConnectionModels from '../../features/settings/ConnectionModels';
 import { useI18n } from '../../i18n';
 import { AI_ENGINE_ROLE_DEFINITIONS, SYSTEM_AI_LANGUAGES } from '../../../shared/contracts/ai-engine-roles';
 import retrievalSettingsContract from '../../../shared/retrieval-settings.json';
@@ -102,7 +103,6 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
 
 
   const [modelsList, setModelsList] = useState([]);
-  const [newModelName, setNewModelName] = useState('');
 
   const [accentColor, setAccentColor] = useState(settings.interface.accentColor || '#FBCB2D');
   const [fontFamily, setFontFamily] = useState(settings.interface.fontFamily || 'sans');
@@ -445,7 +445,6 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
     setAwsSecretAccessKey('');
     setAwsRegion('us-east-1');
     setModelsList([]);
-    setNewModelName('');
     setFocusModelInput(false);
     setShowAddApiForm(true);
   };
@@ -474,7 +473,6 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
     setAwsRegion(cfg.awsRegion || 'us-east-1');
 
     setModelsList(apiProf.models ? (typeof apiProf.models === 'string' ? JSON.parse(apiProf.models) : apiProf.models) : []);
-    setNewModelName('');
     setFocusModelInput(false);
     setShowAddApiForm(true);
   };
@@ -494,18 +492,6 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
     setAwsSecretAccessKey('');
     setAwsRegion('us-east-1');
     setModelsList([]);
-    setNewModelName('');
-  };
-
-  const handleAddModel = () => {
-    if (!newModelName.trim()) return;
-    if (modelsList.includes(newModelName.trim())) return;
-    setModelsList(prev => [...prev, newModelName.trim()]);
-    setNewModelName('');
-  };
-
-  const removeModel = (modelName) => {
-    setModelsList(prev => prev.filter(m => m !== modelName));
   };
 
   const handleSaveApi = async () => {
@@ -832,29 +818,17 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
         )}
       </SettingsGroup>
 
-      <SettingsGroup title={t("Models")} aside={t("Profiles and roles choose from these")} data-tour="connection-models">
-        <form
-          className="flex gap-2.5 px-[1.125rem] py-3"
-          onSubmit={e => { e.preventDefault(); handleAddModel(); }}
-        >
-          <input
-            value={newModelName}
-            onChange={e => setNewModelName(e.target.value)}
-            autoFocus={focusModelInput}
-            placeholder={`Type a model ID, like ${provider.modelPlaceholder}`}
-            className={`${fieldClass} flex-1 font-mono text-[0.8125rem]`}
-          />
-          <Button type="submit" variant="ghost" size="sm" icon={Plus} disabled={!newModelName.trim()}>{t("Add")}</Button>
-        </form>
-        {modelsList.length === 0 ? (
-          <p className="border-t border-tint/[0.055] px-[1.125rem] py-3 text-[0.8125rem] text-text-muted">{t("No models yet. Add at least one.")}</p>
-        ) : modelsList.map(m => (
-          <div key={m} className="flex items-center gap-3 border-t border-tint/[0.055] px-[1.125rem] py-2.5">
-            <span className="min-w-0 flex-1 truncate font-mono text-[0.8125rem] text-text-secondary">{m}</span>
-            <IconButton icon={X} label={`Remove ${m}`} size="sm" tone="danger" onClick={() => removeModel(m)} />
-          </div>
-        ))}
-      </SettingsGroup>
+      <ConnectionModels
+        key={editingApiId || 'new'}
+        provider={apiProvider}
+        baseUrl={apiBaseUrl}
+        apiKey={apiKey}
+        models={modelsList}
+        onChange={setModelsList}
+        api={electronAPI}
+        focusInput={focusModelInput}
+        modelPlaceholder={provider.modelPlaceholder}
+      />
 
     </>
   );
