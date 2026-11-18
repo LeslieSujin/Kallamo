@@ -17,6 +17,7 @@ export default function Toggle({
 
   const control = (
     <button
+      data-ui-switch=""
       type="button"
       role="switch"
       aria-checked={checked}

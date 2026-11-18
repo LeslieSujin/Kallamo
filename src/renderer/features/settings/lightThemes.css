@@ -1,18 +1,73 @@
-:root[data-color-scheme="light"] .surface-page {
-  background: var(--theme-surface-canvas);
+:root[data-color-scheme="light"] {
+  /* Tailwind's existing shape utilities share the selected material's scale.
+     Full circles and one-off corner treatments retain their own geometry. */
+  --radius-sm: var(--theme-radius-small);
+  --radius-md: var(--theme-radius-control);
+  --radius-lg: var(--theme-radius-card);
+  --radius-xl: var(--theme-radius-surface);
+  --radius-2xl: calc(var(--theme-radius-surface) + 0.25rem);
+  --radius-3xl: calc(var(--theme-radius-surface) + 0.5rem);
 }
 
-:root[data-color-scheme="light"] .surface-rail {
+:root[data-color-scheme="light"] :is(.surface-page, .ws-page:not(.has-backdrop)) {
+  background: var(--theme-page-finish);
+}
+
+:root[data-color-scheme="light"] :is(.surface-rail, .glass-rail:not(.has-backdrop *), .ws-rail:not(.has-backdrop *)) {
   background: var(--theme-surface-sidebar);
 }
 
-:root[data-color-scheme="light"] .surface-card {
-  background: var(--theme-surface-panel);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--theme-shade) 3%, transparent);
+:root[data-color-scheme="light"] :is(.surface-card, .glass-panel:not(.has-backdrop *), .ws-card:not(.has-backdrop *)) {
+  background: var(--theme-panel-finish);
+  border-color: var(--theme-border-subtle);
+  box-shadow: var(--theme-shadow-resting);
 }
 
 :root[data-color-scheme="light"] .glass-panel {
   background-color: color-mix(in srgb, var(--theme-surface-panel) 94%, transparent);
+}
+
+:root[data-color-scheme="light"] [data-floating-layer="popover"] {
+  background: var(--theme-panel-finish);
+  box-shadow: inset 0 1px 0 var(--theme-highlight), var(--theme-shadow-overlay);
+}
+
+/* Only resting controls receive material shadows; existing focus rings stay in charge. */
+:root[data-color-scheme="light"] :is(.field-input, input.rounded-control, textarea.rounded-control, button.rounded-control[aria-haspopup="listbox"]):not(:focus):not(:focus-visible) {
+  box-shadow: var(--theme-shadow-input);
+}
+
+:root[data-color-scheme="light"] [data-ui-button="primary"] {
+  background-image: var(--theme-button-finish);
+}
+
+:root[data-color-scheme="light"] [data-ui-button="primary"]:not(:focus-visible) {
+  box-shadow: var(--theme-shadow-button);
+}
+
+:root[data-color-scheme="light"] [data-ui-button="primary"]:active:not(:focus-visible) {
+  box-shadow: var(--theme-shadow-button-pressed);
+}
+
+:root[data-color-scheme="light"] [data-ui-button="ghost"]:not(:focus-visible) {
+  background-image: var(--theme-panel-finish);
+  box-shadow: inset 0 1px 0 var(--theme-highlight), 0 1px 1px color-mix(in srgb, var(--theme-shade) 5%, transparent);
+}
+
+:root[data-color-scheme="light"] [data-ui-switch] > span {
+  background: var(--theme-surface-panel);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--theme-shade) 22%, transparent), inset 0 1px 0 #ffffff;
+}
+
+/* An outline remains visible even on controls with an inline material shadow. */
+:root[data-color-scheme="light"] :is(button, input, textarea, select):focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 3px;
+}
+
+:root[data-color-scheme="light"] .ws-composer:not(.has-backdrop *) {
+  background: var(--theme-panel-finish);
+  box-shadow: inset 0 1px 0 var(--theme-highlight), var(--theme-shadow-panel);
 }
 
 :root[data-color-scheme="light"] ::selection {

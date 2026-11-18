@@ -16,7 +16,13 @@ const LIGHT_ROLES = {
   'discord-soft': '#e8ebfc', 'discord-soft-hover': '#dde2fa', 'discord-text': '#3f4aa0',
 };
 
-function lightTokens(colors) {
+const MATERIALS = {
+  paper: { small: '0.1875rem', control: '0.375rem', card: '0.5rem', surface: '0.75rem', lift: '03', spread: '0 2px 4px -2px', sheen: '9%', button: '0 1px 1px', input: '07' },
+  mist: { small: '0.25rem', control: '0.5rem', card: '0.75rem', surface: '1rem', lift: '10', spread: '0 6px 16px -10px', sheen: '42%', button: '0 2px 4px', input: '0e' },
+  rose: { small: '0.3125rem', control: '0.6875rem', card: '1rem', surface: '1.375rem', lift: '18', spread: '0 8px 18px -12px', sheen: '30%', button: '0 3px 6px', input: '0c' },
+};
+
+function lightTokens(colors, material) {
   return {
     ...LIGHT_ROLES,
     'surface-canvas': colors.canvas, 'surface-sidebar': colors.rail, 'surface-editor': colors.panel,
@@ -27,6 +33,15 @@ function lightTokens(colors) {
     'surface-raised': colors.panel, 'surface-raised-low': colors.soft, 'surface-inset': colors.soft,
     'surface-sunken': colors.panel, 'surface-sunken-low': colors.panel,
     'surface-well': colors.input, 'border-well': colors.border,
+    'radius-small': material.small, 'radius-control': material.control,
+    'radius-card': material.card, 'radius-surface': material.surface,
+    'page-finish': `linear-gradient(135deg, ${colors.canvas}, color-mix(in srgb, ${colors.soft} 48%, ${colors.canvas}))`,
+    'panel-finish': `linear-gradient(180deg, color-mix(in srgb, #ffffff ${material.sheen}, ${colors.panel}), ${colors.panel})`,
+    'button-finish': 'linear-gradient(180deg, #ffffff14, #ffffff00 45%, #0000000a)',
+    'shadow-resting': `inset 0 1px 0 #ffffffc4, 0 1px 1px ${colors.ink}08, ${material.spread} ${colors.ink}${material.lift}`,
+    'shadow-input': `inset 0 1px 2px ${colors.ink}${material.input}, inset 0 -1px 0 #ffffffaa`,
+    'shadow-button': `inset 0 1px 0 #ffffff30, inset 0 -1px 0 ${colors.ink}20, ${material.button} ${colors.ink}1a`,
+    'shadow-button-pressed': `inset 0 2px 3px ${colors.ink}26`,
     highlight: '#ffffffcc', 'glow-cool': 'transparent', 'titlebar-shade': colors.rail,
     'surface-abyss': colors.soft, 'surface-danger': '#f9eeee', scrim: colors.canvas,
     tint: colors.ink, shade: colors.ink, 'bubble-user': colors.hover,
@@ -44,24 +59,24 @@ function lightTokens(colors) {
 
 const LIGHT_THEMES = [
   {
-    id: 'paper', label: 'Paper & ink', description: 'Warm porcelain, quiet olive and deep green ink.',
+    id: 'paper', label: 'Paper & ink', description: 'Warm paper, crisp corners and a fine matte edge.',
     accent: '#345d4f', mode: 'light', codeTheme: 'github-light',
     colors: { canvas: '#f7f5f0', rail: '#eae7df', panel: '#fffefa', soft: '#f1eee6', input: '#f8f6f1', hover: '#e3e9df', ink: '#2c332e', secondary: '#465148', muted: '#626a60', disabled: '#92978e', border: '#d8d8cd', strong: '#acb5a7' },
   },
   {
-    id: 'mist', label: 'Silver mist', description: 'Pearl surfaces, mineral blue and precise contrast.',
+    id: 'mist', label: 'Silver mist', description: 'Cool pearl, precise corners and a softly raised surface.',
     accent: '#375c85', mode: 'light', codeTheme: 'github-light',
     colors: { canvas: '#f3f6f8', rail: '#e5ecf1', panel: '#fcfdfe', soft: '#edf2f6', input: '#f5f8fa', hover: '#dfe9f1', ink: '#283642', secondary: '#435769', muted: '#596875', disabled: '#8d9aa5', border: '#d3dde5', strong: '#a7bac9' },
   },
   {
-    id: 'rose', label: 'Rose sand', description: 'Limestone, soft clay and a restrained terracotta accent.',
+    id: 'rose', label: 'Rose sand', description: 'Warm clay, generous curves and a soft ceramic finish.',
     accent: '#8a4d48', mode: 'light', codeTheme: 'atom-one-light',
     colors: { canvas: '#f8f3f1', rail: '#eee3df', panel: '#fffcfa', soft: '#f4eae5', input: '#faf5f1', hover: '#f0dfd8', ink: '#3d302e', secondary: '#604944', muted: '#755e58', disabled: '#a28b83', border: '#dfd0c9', strong: '#c1a397' },
   },
 ];
 
 export const INTERFACE_THEMES = [
-  ...LIGHT_THEMES.map(theme => ({ ...theme, tokens: lightTokens(theme.colors) })),
+  ...LIGHT_THEMES.map(theme => ({ ...theme, tokens: lightTokens(theme.colors, MATERIALS[theme.id]) })),
   {
     id: 'dark', label: 'Original dark', description: 'Deep teal with the original warm gold accent.',
     accent: '#fbcb2d', mode: 'dark', codeTheme: 'github-dark', tokens: {},

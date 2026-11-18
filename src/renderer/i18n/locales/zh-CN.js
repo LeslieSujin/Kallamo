@@ -2749,10 +2749,10 @@ export default {
     "Silver mist": "雾银",
     "Rose sand": "玫瑰砂",
     "Original dark": "原版深色",
-    "Warm porcelain, quiet olive and deep green ink.": "暖瓷白、柔和橄榄灰与墨绿。",
-    "Pearl surfaces, mineral blue and precise contrast.": "珍珠白、矿物蓝与清晰的层次。",
-    "Limestone, soft clay and a restrained terracotta accent.": "石灰白、浅陶土与克制的陶红。",
+    "Warm paper, crisp corners and a fine matte edge.": "暖纸色、小圆角与细致的哑光边缘。",
+    "Cool pearl, precise corners and a softly raised surface.": "冷珍珠色、利落圆角与轻微浮起的层次。",
+    "Warm clay, generous curves and a soft ceramic finish.": "浅陶土色、舒展圆角与柔和的陶瓷质感。",
     "Deep teal with the original warm gold accent.": "深青底色，搭配原版暖金强调色。",
-    "Applies immediately, with a matching accent and code palette. You can adjust them below.": "立即应用，并搭配推荐的强调色和代码配色。你也可以在下方单独调整。"
+    "Applies colours, corners and surface depth immediately. Accent and code palette can be adjusted below.": "立即应用配色、圆角与表面层次。强调色和代码配色可在下方单独调整。"
   }
 };

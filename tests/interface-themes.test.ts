@@ -42,10 +42,14 @@ describe('interface theme palettes', () => {
     expect(root.dataset.theme).toBe('rose');
     expect(variables.get('--theme-surface-canvas')).toBe('#f8f3f1');
     expect(variables.get('--theme-status-info')).toBe('#35658d');
+    expect(variables.get('--theme-radius-control')).toBe('0.6875rem');
+    expect(variables.get('--theme-shadow-input')).toContain('inset');
     applyInterfaceTheme({ theme: 'dark' }, root, storage);
     expect(root.style.colorScheme).toBe('dark');
     expect(variables.has('--theme-surface-canvas')).toBe(false);
     expect(variables.has('--theme-status-info')).toBe(false);
+    expect(variables.has('--theme-radius-control')).toBe(false);
+    expect(variables.has('--theme-shadow-input')).toBe(false);
     expect(variables.get('--app-accent')).toBe('#fbcb2d');
     expect(JSON.parse(cached['kallamo.appearance']).theme).toBe('dark');
     expect(() => applyInterfaceTheme({ theme: 'paper' }, root, { setItem: () => { throw new Error('Storage unavailable'); } })).not.toThrow();

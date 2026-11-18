@@ -33,6 +33,7 @@ export default function Button({
 
   return (
     <button
+      data-ui-button={variant}
       disabled={isDisabled}
       className={[
         'inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-control font-semibold',
