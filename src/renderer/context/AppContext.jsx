@@ -1,4 +1,5 @@
 import { useI18n } from '../i18n';
+import { applyInterfaceTheme } from '../features/settings/interfaceThemes';
 import React, { createContext, useCallback, useContext, useState, useEffect, useRef } from 'react';
 import { useChatSession } from '../features/chat/useChatSession';
 import { isGenerationEventForWorkspace, isRetryableGenerationError } from '../features/chat/generation-target';
@@ -152,9 +153,7 @@ export const AppProvider = ({ children }) => {
       const fetchedSettings = await api.getSettings();
       if (fetchedSettings) {
         setSettings(fetchedSettings);
-        if (fetchedSettings.interface && fetchedSettings.interface.accentColor) {
-          document.documentElement.style.setProperty('--app-accent', fetchedSettings.interface.accentColor);
-        }
+        applyInterfaceTheme(fetchedSettings.interface || {});
         applyDialogueColor(fetchedSettings.interface);
       }
 
@@ -360,16 +359,10 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const updateAccentColor = (color) => {
-    document.documentElement.style.setProperty('--app-accent', color);
-  };
-
   const handleSaveSettings = async (newSettings) => {
     await api.saveSettings(newSettings);
     setSettings(newSettings);
-    if (newSettings.interface && newSettings.interface.accentColor) {
-      updateAccentColor(newSettings.interface.accentColor);
-    }
+    applyInterfaceTheme(newSettings.interface || {});
     applyDialogueColor(newSettings.interface);
   };
 

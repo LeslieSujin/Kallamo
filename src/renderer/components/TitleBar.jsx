@@ -67,7 +67,7 @@ export default function TitleBar({ onOpenSettings, onPreloadSettings }) {
           data-tooltip={t('common.close', 'Close')}
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" className="text-accent group-hover:text-text-primary transition-colors" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" className="text-accent group-hover:text-on-danger transition-colors" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
       </div>

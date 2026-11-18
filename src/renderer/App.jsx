@@ -1,4 +1,5 @@
 import { useI18n } from './i18n';
+import { resolveThemeCode } from './features/settings/interfaceThemes';
 import React, { Suspense, useState, useEffect } from 'react';
 import { AppProvider, useApp, useEngineDownloadProgress, useReindexingProgress, useToast } from './context/AppContext';
 import TitleBar from './components/TitleBar';
@@ -21,9 +22,13 @@ import { X, AlertCircle, Info, CircleCheck } from 'lucide-react';
 // Self-hosted highlight.js themes (bundled by Vite, served from the app origin instead of a CDN)
 import atomOneDarkThemeUrl from 'highlight.js/styles/atom-one-dark.css?url';
 import githubDarkThemeUrl from 'highlight.js/styles/github-dark.css?url';
+import githubLightThemeUrl from 'highlight.js/styles/github.css?url';
+import atomOneLightThemeUrl from 'highlight.js/styles/atom-one-light.css?url';
 import tokyoNightDarkThemeUrl from 'highlight.js/styles/tokyo-night-dark.css?url';
 
 const HLJS_THEME_URLS = {
+  'github-light': githubLightThemeUrl,
+  'atom-one-light': atomOneLightThemeUrl,
   'atom-one-dark': atomOneDarkThemeUrl,
   'github-dark': githubDarkThemeUrl,
   'tokyo-night-dark': tokyoNightDarkThemeUrl,
@@ -340,13 +345,13 @@ function MainLayout() {
   }, []);
 
   useEffect(() => {
-    if (settings?.interface?.codeTheme) {
+    if (settings?.interface) {
       const themeLink = document.getElementById('hljs-theme');
       if (themeLink) {
-        themeLink.href = HLJS_THEME_URLS[settings.interface.codeTheme] || HLJS_THEME_URLS['atom-one-dark'];
+        themeLink.href = HLJS_THEME_URLS[resolveThemeCode(settings.interface)] || HLJS_THEME_URLS['github-light'];
       }
     }
-  }, [settings?.interface?.codeTheme]);
+  }, [settings?.interface?.theme, settings?.interface?.codeTheme]);
 
   // The blur setting promises lighter rendering when off, so it applies to every element.
   useEffect(() => {

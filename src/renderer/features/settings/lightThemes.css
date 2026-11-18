@@ -1,0 +1,27 @@
+:root[data-color-scheme="light"] .surface-page {
+  background: var(--theme-surface-canvas);
+}
+
+:root[data-color-scheme="light"] .surface-rail {
+  background: var(--theme-surface-sidebar);
+}
+
+:root[data-color-scheme="light"] .surface-card {
+  background: var(--theme-surface-panel);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--theme-shade) 3%, transparent);
+}
+
+:root[data-color-scheme="light"] .glass-panel {
+  background-color: color-mix(in srgb, var(--theme-surface-panel) 94%, transparent);
+}
+
+:root[data-color-scheme="light"] ::selection {
+  background: color-mix(in srgb, var(--app-accent) 20%, var(--theme-surface-panel));
+  color: var(--theme-text-primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .theme-option:hover .theme-option-frame {
+    border-color: color-mix(in srgb, var(--app-accent) 55%, var(--theme-border-default));
+  }
+}

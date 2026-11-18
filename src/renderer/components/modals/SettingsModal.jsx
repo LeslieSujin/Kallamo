@@ -16,6 +16,8 @@ import { Menu, MenuItem, MenuSeparator } from '../ui/Menu';
 import { SettingsHeader, SettingsGroup, SettingsRow, SettingsRadio, IconTile, RunsOnBar, fieldClass } from '../../features/settings/SettingsUi';
 import AppearancePreview, { OptionTile } from '../../features/settings/AppearancePreview';
 import ConnectionModels from '../../features/settings/ConnectionModels';
+import ThemePicker from '../../features/settings/ThemePicker';
+import { getInterfaceTheme, resolveThemeCode } from '../../features/settings/interfaceThemes';
 import { useI18n } from '../../i18n';
 import { AI_ENGINE_ROLE_DEFINITIONS, SYSTEM_AI_LANGUAGES } from '../../../shared/contracts/ai-engine-roles';
 import retrievalSettingsContract from '../../../shared/retrieval-settings.json';
@@ -104,11 +106,12 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
 
   const [modelsList, setModelsList] = useState([]);
 
-  const [accentColor, setAccentColor] = useState(settings.interface.accentColor || '#FBCB2D');
+  const [interfaceTheme, setInterfaceTheme] = useState(getInterfaceTheme(settings.interface.theme).id);
+  const [accentColor, setAccentColor] = useState(settings.interface.theme ? settings.interface.accentColor || getInterfaceTheme(settings.interface.theme).accent : getInterfaceTheme().accent);
   const [fontFamily, setFontFamily] = useState(settings.interface.fontFamily || 'sans');
   const [fontSize, setFontSize] = useState(settings.interface.fontSize || 'medium');
   const [layoutMode, setLayoutMode] = useState(settings.interface.layout || 'bubbles');
-  const [codeTheme, setCodeTheme] = useState(settings.interface.codeTheme || 'github-dark');
+  const [codeTheme, setCodeTheme] = useState(resolveThemeCode(settings.interface));
   const [lineNumbers, setLineNumbers] = useState(settings.interface.lineNumbers || false);
   const [blurEnabled, setBlurEnabled] = useState(settings.interface.blur ?? true);
   const [writingToolbar, setWritingToolbar] = useState(settings.interface.writingToolbar || 'fixed');
@@ -216,7 +219,7 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
 
   // Keep ref of settings to prevent stale closures in debounce timeout
   const settingsRef = useRef({
-    accentColor, fontFamily, fontSize, layout: layoutMode, codeTheme, lineNumbers, blur: blurEnabled, writingToolbar, smartTypography, coloredDialogue, dialogueMarkers, dialogueColor, dialogueCustomColor, streaming: streamingEnabled,
+    interfaceTheme, accentColor, fontFamily, fontSize, layout: layoutMode, codeTheme, lineNumbers, blur: blurEnabled, writingToolbar, smartTypography, coloredDialogue, dialogueMarkers, dialogueColor, dialogueCustomColor, streaming: streamingEnabled,
     chunkSize, similarity, profileKnowledgeTopK, workspaceDocumentsTopK, longTermMemoryTopK, worldbuildEntityLimit, worldbuildBreadth, executionDevice, ragDebug, agenticDebug, tokenDebug, narrativeStateDebug,
     embeddingEngine, embeddingApiProfileId, embeddingModelName, systemApiProfileId, systemModelName, systemOutputLanguage,
     taggerMode, taggerApiProfileId, taggerModelName, summarizerMode, summarizerApiProfileId, summarizerModelName,
@@ -227,7 +230,7 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
 
   useEffect(() => {
     settingsRef.current = {
-      accentColor, fontFamily, fontSize, layout: layoutMode, codeTheme, lineNumbers, blur: blurEnabled, writingToolbar, smartTypography, coloredDialogue, dialogueMarkers, dialogueColor, dialogueCustomColor, streaming: streamingEnabled,
+      interfaceTheme, accentColor, fontFamily, fontSize, layout: layoutMode, codeTheme, lineNumbers, blur: blurEnabled, writingToolbar, smartTypography, coloredDialogue, dialogueMarkers, dialogueColor, dialogueCustomColor, streaming: streamingEnabled,
       chunkSize, similarity, profileKnowledgeTopK, workspaceDocumentsTopK, longTermMemoryTopK, worldbuildEntityLimit, worldbuildBreadth, executionDevice, ragDebug, agenticDebug, tokenDebug, narrativeStateDebug,
       embeddingEngine, embeddingApiProfileId, embeddingModelName, systemApiProfileId, systemModelName, systemOutputLanguage,
       taggerMode, taggerApiProfileId, taggerModelName, summarizerMode, summarizerApiProfileId, summarizerModelName,
@@ -235,10 +238,16 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
       retrievalPlannerMode, retrievalPlannerApiProfileId, retrievalPlannerModelName, agenticGate, agenticToolProtocol, allowAiEntityCreation, archiveSummarization,
       promptCache, promptCacheContextPlacement
     };
-  }, [accentColor, fontFamily, fontSize, layoutMode, codeTheme, lineNumbers, blurEnabled, writingToolbar, smartTypography, coloredDialogue, dialogueMarkers, dialogueColor, dialogueCustomColor, streamingEnabled, chunkSize, similarity, profileKnowledgeTopK, workspaceDocumentsTopK, longTermMemoryTopK, worldbuildEntityLimit, worldbuildBreadth, executionDevice, ragDebug, agenticDebug, tokenDebug, narrativeStateDebug, embeddingEngine, embeddingApiProfileId, embeddingModelName, systemApiProfileId, systemModelName, systemOutputLanguage, taggerMode, taggerApiProfileId, taggerModelName, summarizerMode, summarizerApiProfileId, summarizerModelName, narrativeStateMode, narrativeStateApiProfileId, narrativeStateModelName, retrievalPlannerMode, retrievalPlannerApiProfileId, retrievalPlannerModelName, agenticGate, agenticToolProtocol, allowAiEntityCreation, archiveSummarization, promptCache, promptCacheContextPlacement]);
+  }, [interfaceTheme, accentColor, fontFamily, fontSize, layoutMode, codeTheme, lineNumbers, blurEnabled, writingToolbar, smartTypography, coloredDialogue, dialogueMarkers, dialogueColor, dialogueCustomColor, streamingEnabled, chunkSize, similarity, profileKnowledgeTopK, workspaceDocumentsTopK, longTermMemoryTopK, worldbuildEntityLimit, worldbuildBreadth, executionDevice, ragDebug, agenticDebug, tokenDebug, narrativeStateDebug, embeddingEngine, embeddingApiProfileId, embeddingModelName, systemApiProfileId, systemModelName, systemOutputLanguage, taggerMode, taggerApiProfileId, taggerModelName, summarizerMode, summarizerApiProfileId, summarizerModelName, narrativeStateMode, narrativeStateApiProfileId, narrativeStateModelName, retrievalPlannerMode, retrievalPlannerApiProfileId, retrievalPlannerModelName, agenticGate, agenticToolProtocol, allowAiEntityCreation, archiveSummarization, promptCache, promptCacheContextPlacement]);
 
   const updateSetting = async (category, key, value) => {
     if (category === 'interface') {
+      if (key === 'theme') {
+        const preset = getInterfaceTheme(value);
+        setInterfaceTheme(preset.id);
+        setAccentColor(preset.accent);
+        setCodeTheme(preset.codeTheme);
+      }
       if (key === 'accentColor') setAccentColor(value);
       if (key === 'fontFamily') setFontFamily(value);
       if (key === 'fontSize') setFontSize(value);
@@ -287,11 +296,12 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
     const newSettings = {
       interface: {
         ...settings.interface,
-        accentColor: key === 'accentColor' ? value : current.accentColor,
+        theme: key === 'theme' ? getInterfaceTheme(value).id : current.interfaceTheme,
+        accentColor: key === 'theme' ? getInterfaceTheme(value).accent : key === 'accentColor' ? value : current.accentColor,
         fontFamily: key === 'fontFamily' ? value : current.fontFamily,
         fontSize: key === 'fontSize' ? value : current.fontSize,
         layout: key === 'layout' ? value : current.layout,
-        codeTheme: key === 'codeTheme' ? value : current.codeTheme,
+        codeTheme: key === 'theme' ? getInterfaceTheme(value).codeTheme : key === 'codeTheme' ? value : current.codeTheme,
         lineNumbers: key === 'lineNumbers' ? value : current.lineNumbers,
         blur: key === 'blur' ? value : current.blur,
         writingToolbar: key === 'writingToolbar' ? value : current.writingToolbar,
@@ -372,6 +382,7 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
       const newSettings = {
         interface: {
           ...settings.interface,
+          theme: current.interfaceTheme,
           accentColor: current.accentColor,
           fontFamily: current.fontFamily,
           fontSize: current.fontSize,
@@ -1114,6 +1125,9 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
       <SettingsHeader title={t('settings.appearance', 'Appearance')} description={t('settings.appearanceDescription', 'How Kallamo looks. Changes apply right away.')} />
       <div className="grid gap-7 xl:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="min-w-0">
+          <SettingsGroup title={t('Interface theme')}>
+            <div className="p-4"><ThemePicker value={interfaceTheme} onChange={value => updateSetting('interface', 'theme', value)} /></div>
+          </SettingsGroup>
           <SettingsGroup title={t('settings.look', 'Look')}>
              <SettingsRow label={t('settings.interfaceLanguage', 'Interface language')} description={t('settings.interfaceLanguageDescription', 'Choose the language used by the Kallamo interface.')}>
                <SelectMenu ariaLabel={t('settings.interfaceLanguage', 'Interface language')} className="w-44" value={locale} onChange={setLocale} options={locales} />
@@ -1151,7 +1165,7 @@ export default function SettingsModal({ onClose, initialTab, initialSection }) {
               </div>
             </SettingsRow>
             <SettingsRow label={t('settings.codeTheme', 'Code theme')}>
-              <SelectMenu ariaLabel={t('settings.codeTheme', 'Code theme')} className="w-44" value={codeTheme} onChange={value => updateSetting('interface', 'codeTheme', value)} options={[{ value: 'github-dark', label: 'GitHub Dark' }, { value: 'atom-one-dark', label: 'Atom One Dark' }, { value: 'tokyo-night-dark', label: 'Tokyo Night Dark' }]} />
+              <SelectMenu ariaLabel={t('settings.codeTheme', 'Code theme')} className="w-44" value={codeTheme} onChange={value => updateSetting('interface', 'codeTheme', value)} options={[{ value: 'github-light', label: 'GitHub Light' }, { value: 'atom-one-light', label: 'Atom One Light' }, { value: 'github-dark', label: 'GitHub Dark' }, { value: 'atom-one-dark', label: 'Atom One Dark' }, { value: 'tokyo-night-dark', label: 'Tokyo Night Dark' }]} />
             </SettingsRow>
             <SettingsRow label={t('settings.lineNumbers', 'Line numbers in code')}>
               <Toggle checked={lineNumbers} ariaLabel={t('settings.lineNumbers', 'Line numbers in code')} onChange={value => updateSetting('interface', 'lineNumbers', value)} />

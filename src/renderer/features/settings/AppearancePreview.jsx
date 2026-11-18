@@ -5,6 +5,8 @@ import { ProfileAvatar } from '../../components/modals/ProfileModal';
 import exampleBackground from '../../../assets/onboarding-bg.svg';
 
 const CODE_THEMES = {
+  'github-light': { bg: '#f6f8fa', keyword: '#cf222e', name: '#8250df', string: '#0a3069', number: '#0550ae', text: '#24292f' },
+  'atom-one-light': { bg: '#fafafa', keyword: '#a626a4', name: '#986801', string: '#50a14f', number: '#986801', text: '#383a42' },
   'github-dark': { bg: '#0d1117', keyword: '#ff7b72', name: '#d2a8ff', string: '#a5d6ff', number: '#79c0ff', text: '#e6edf3' },
   'atom-one-dark': { bg: '#282c34', keyword: '#c678dd', name: '#e5c07b', string: '#98c379', number: '#d19a66', text: '#abb2bf' },
   'tokyo-night-dark': { bg: '#1a1b26', keyword: '#bb9af7', name: '#7dcfff', string: '#9ece6a', number: '#ff9e64', text: '#c0caf5' },
@@ -48,7 +50,7 @@ export default function AppearancePreview({ layout, fontClass, blur, codeTheme, 
               <div className="flex max-w-[92%] gap-2.5">
                 <ProfileAvatar color={color} size={26} />
                 <div className="min-w-0">
-                  <div className="truncate text-xs font-bold [text-shadow:0_1px_3px_color-mix(in_srgb,var(--theme-shade)_85%,transparent)]" style={{ color }}>{sample.profile.name}</div>
+                  <div className="w-fit max-w-full truncate rounded bg-surface-panel/90 px-1.5 py-0.5 text-xs font-bold" style={{ color: 'var(--theme-preview-profile, #F2C14E)' }}>{sample.profile.name}</div>
                   <div
                     className={`mt-1 rounded-[0.875rem] rounded-tl-sm border px-3 py-2.5 text-[0.8125rem] leading-relaxed text-text-primary ${glass}`}
                     style={{ background: `color-mix(in srgb, ${color} 14%, var(--theme-surface-inset))`, borderColor: `color-mix(in srgb, ${color} 30%, transparent)` }}

@@ -2743,6 +2743,16 @@ export default {
     "The provider returned an unrecognized model list. You can still add IDs manually.": "服务商返回的模型列表格式无法识别，你仍可手动添加模型 ID。",
     "Fetching models timed out. Check the connection and try again.": "获取模型列表超时，请检查网络后重试。",
     "Could not reach the provider. Check the address and your network or proxy.": "无法连接服务商，请检查地址、网络或代理设置。",
-    "Restart the updated app to fetch models.": "请重启更新后的程序，再获取模型列表。"
+    "Restart the updated app to fetch models.": "请重启更新后的程序，再获取模型列表。",
+    "Interface theme": "界面配色",
+    "Paper & ink": "纸与墨",
+    "Silver mist": "雾银",
+    "Rose sand": "玫瑰砂",
+    "Original dark": "原版深色",
+    "Warm porcelain, quiet olive and deep green ink.": "暖瓷白、柔和橄榄灰与墨绿。",
+    "Pearl surfaces, mineral blue and precise contrast.": "珍珠白、矿物蓝与清晰的层次。",
+    "Limestone, soft clay and a restrained terracotta accent.": "石灰白、浅陶土与克制的陶红。",
+    "Deep teal with the original warm gold accent.": "深青底色，搭配原版暖金强调色。",
+    "Applies immediately, with a matching accent and code palette. You can adjust them below.": "立即应用，并搭配推荐的强调色和代码配色。你也可以在下方单独调整。"
   }
 };
