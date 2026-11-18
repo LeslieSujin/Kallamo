@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useEffect, useState } from 'react';
 import { ScrollText } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
@@ -9,6 +10,7 @@ const AUTHOR_TYPES = ['Characters', 'Creatures', 'Factions'];
 // Marks a chapter as something written inside the story, held by an item. The AI then reads it
 // only when that item is read, as what its author wrote.
 export default function InWorldTextDialog({ workspaceId, document, electronAPI, showToast, onClose, onChanged }) {
+  const { t } = useI18n();
   const [entities, setEntities] = useState([]);
   const [current, setCurrent] = useState(null);
   const [itemId, setItemId] = useState('');
@@ -48,36 +50,30 @@ export default function InWorldTextDialog({ workspaceId, document, electronAPI, 
   };
 
   return (
-    <Modal onClose={onClose} size="md" title="In-world text" icon={ScrollText}>
+    <Modal onClose={onClose} size="md" title={t("In-world text")} icon={ScrollText}>
       <div className="flex flex-col gap-4 p-5">
-        <p className="text-sm leading-relaxed text-text-muted">
-          A journal, a letter or a notice that exists inside the story. The AI reads it only when someone reads the item in a scene, as what its author wrote, and it stays out of story search and entity updates.
-        </p>
+        <p className="text-sm leading-relaxed text-text-muted">{t("A journal, a letter or a notice that exists inside the story. The AI reads it only when someone reads the item in a scene, as what its author wrote, and it stays out of story search and entity updates.")}</p>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-text-secondary">Written in</span>
-          <SearchableSelect ariaLabel="Item that holds the text" value={itemId} onChange={value => setItemId(value || '')} options={items}
-            placeholder={items.length ? 'Choose an item' : 'No items in this world yet'} emptyMessage="No item matches." searchInTrigger />
-          <span className="caption">The item a character has to hold or find to read it.</span>
+          <span className="text-sm font-medium text-text-secondary">{t("Written in")}</span>
+          <SearchableSelect ariaLabel={t("Item that holds the text")} value={itemId} onChange={value => setItemId(value || '')} options={items}
+            placeholder={items.length ? t("Choose an item") : t("No items in this world yet")} emptyMessage={t("No item matches.")} searchInTrigger />
+          <span className="caption">{t("The item a character has to hold or find to read it.")}</span>
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-text-secondary">Written by <span className="font-normal text-text-subtle">(optional)</span></span>
-          <SearchableSelect ariaLabel="Author of the text" value={authorId} onChange={value => setAuthorId(value || '')} options={authors}
-            placeholder="Unknown author" emptyMessage="No one matches." searchInTrigger />
-          <span className="caption">Readers learn what the text says as the author's word, not as fact.</span>
+          <span className="text-sm font-medium text-text-secondary">{t("Written by")}{' '}<span className="font-normal text-text-subtle">{t("(optional)")}</span></span>
+          <SearchableSelect ariaLabel={t("Author of the text")} value={authorId} onChange={value => setAuthorId(value || '')} options={authors}
+            placeholder={t("Unknown author")} emptyMessage={t("No one matches.")} searchInTrigger />
+          <span className="caption">{t("Readers learn what the text says as the author's word, not as fact.")}</span>
         </label>
       </div>
       <div className="flex items-center gap-2 border-t border-border-subtle px-5 py-3.5">
         {current && (
-          <Button variant="subtle" disabled={saving} onClick={() => run(() => electronAPI.clearInWorldText(document.id), `“${document.title || 'Untitled'}” is a story chapter again.`)}>
-            Make it a story chapter
-          </Button>
+          <Button variant="subtle" disabled={saving} onClick={() => run(() => electronAPI.clearInWorldText(document.id), `“${document.title || 'Untitled'}” is a story chapter again.`)}>{t("Make it a story chapter")}</Button>
         )}
         <span className="flex-1" />
-        <Button variant="ghost" onClick={onClose}>Cancel</Button>
+        <Button variant="ghost" onClick={onClose}>{t("Cancel")}</Button>
         <Button loading={saving} disabled={!itemId}
-          onClick={() => run(() => electronAPI.setInWorldText(document.id, itemId, authorId || null), `“${document.title || 'Untitled'}” is now written in ${items.find(item => item.id === itemId)?.label || 'the item'}.`)}>
-          Save
-        </Button>
+          onClick={() => run(() => electronAPI.setInWorldText(document.id, itemId, authorId || null), `“${document.title || 'Untitled'}” is now written in ${items.find(item => item.id === itemId)?.label || 'the item'}.`)}>{t("Save")}</Button>
       </div>
     </Modal>
   );

@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import SearchableSelect from '../../../components/ui/SearchableSelect';
@@ -15,6 +16,7 @@ const entityOption = entity => ({
 
 /** The live scene: who is played, where, who and what is present, and the situation. */
 export default function SceneBlock({ sectionRef, settings, scene, groups, locationOptions, onSaveSettings, onSaveScene, onDraftSettings }) {
+  const { t } = useI18n();
   const nearbyIds = [...new Set([...(scene.possibleObserverIds || []), ...(scene.nearbyIds || [])])];
   const actorOptions = groups.actors.map(entityOption);
   const locationChoices = locationOptions.map(option => ({ ...option, icon: undefined, dotClassName: 'bg-entity-location' }));
@@ -24,27 +26,27 @@ export default function SceneBlock({ sectionRef, settings, scene, groups, locati
   return (
     <div ref={sectionRef} data-section="roleplay-scene" className="scroll-mt-6 border-t border-border-subtle pt-5">
       <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <h3 className="text-sm font-semibold text-text-primary">Scene</h3>
-        <Help>Used on the next turn. The Roleplay panel in the chat changes the same scene.</Help>
+        <h3 className="text-sm font-semibold text-text-primary">{t("Scene")}</h3>
+        <Help>{t("Used on the next turn. The Roleplay panel in the chat changes the same scene.")}</Help>
       </div>
 
       <div className="mt-3.5 grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <FieldLabel>Player character</FieldLabel>
-          <SearchableSelect ariaLabel="Player character" value={settings.playerEntityId || ''} onChange={value => onSaveSettings({ playerEntityId: value || null })} options={actorOptions} placeholder="Choose a character" searchInTrigger clearable={false} />
-          <Help>Whose eyes the story follows.</Help>
+          <FieldLabel>{t("Player character")}</FieldLabel>
+          <SearchableSelect ariaLabel={t("Player character")} value={settings.playerEntityId || ''} onChange={value => onSaveSettings({ playerEntityId: value || null })} options={actorOptions} placeholder={t("Choose a character")} searchInTrigger clearable={false} />
+          <Help>{t("Whose eyes the story follows.")}</Help>
         </div>
         <div className="flex flex-col gap-1.5">
-          <FieldLabel>Location</FieldLabel>
-          <SearchableSelect ariaLabel="Location" value={scene.locationId || ''} onChange={value => onSaveScene({ locationId: value || null })} options={locationChoices} placeholder="Choose a location" searchInTrigger clearable={false} />
-          <Help>Where the scene is happening.</Help>
+          <FieldLabel>{t("Location")}</FieldLabel>
+          <SearchableSelect ariaLabel={t("Location")} value={scene.locationId || ''} onChange={value => onSaveScene({ locationId: value || null })} options={locationChoices} placeholder={t("Choose a location")} searchInTrigger clearable={false} />
+          <Help>{t("Where the scene is happening.")}</Help>
         </div>
       </div>
 
       <div className="mt-4">
         <ChipRow
-          label="Taking part"
-          help="In the scene with you."
+          label={t("Taking part")}
+          help={t("In the scene with you.")}
           ids={(scene.participantIds || []).filter(id => id !== settings.playerEntityId)}
           byId={byId}
           options={actorOptions.map(option => present.has(option.id) ? { ...option, disabled: true, disabledLabel: 'In scene' } : option)}
@@ -53,8 +55,8 @@ export default function SceneBlock({ sectionRef, settings, scene, groups, locati
           addLabel="Add someone taking part"
         />
         <ChipRow
-          label="Nearby"
-          help="Around, not in it. The AI decides what they notice."
+          label={t("Nearby")}
+          help={t("Around, not in it. The AI decides what they notice.")}
           ids={nearbyIds}
           byId={byId}
           options={actorOptions.map(option => present.has(option.id) ? { ...option, disabled: true, disabledLabel: 'In scene' } : option)}
@@ -63,8 +65,8 @@ export default function SceneBlock({ sectionRef, settings, scene, groups, locati
           addLabel="Add someone nearby"
         />
         <ChipRow
-          label="Objects here"
-          help="Being here doesn't change who owns them."
+          label={t("Objects here")}
+          help={t("Being here doesn't change who owns them.")}
           ids={scene.objectIds || []}
           byId={byId}
           options={groups.items.map(entityOption).map(option => (scene.objectIds || []).includes(option.id) ? { ...option, disabled: true, disabledLabel: 'Here' } : option)}
@@ -75,25 +77,25 @@ export default function SceneBlock({ sectionRef, settings, scene, groups, locati
         />
         <div className="grid gap-4 border-t border-border-subtle pt-3.5 md:grid-cols-[9.5rem_minmax(0,1fr)]">
           <div>
-            <span className="block text-[0.8125rem] font-semibold text-text-secondary">Scenario</span>
-            <Help className="mt-0.5">Optional. The immediate situation, without changing Worldbuild canon.</Help>
+            <span className="block text-[0.8125rem] font-semibold text-text-secondary">{t("Scenario")}</span>
+            <Help className="mt-0.5">{t("Optional. The immediate situation, without changing Worldbuild canon.")}</Help>
           </div>
           <div className="flex flex-col gap-2.5">
             <input
-              aria-label="Scenario name"
+              aria-label={t("Scenario name")}
               className="field-input h-10 px-3 text-sm"
               value={settings.scenarioName || ''}
               onChange={event => onDraftSettings({ scenarioName: event.target.value })}
               onBlur={() => onSaveSettings({ scenarioName: settings.scenarioName || '' })}
-              placeholder="Name, e.g. Siege at dawn"
+              placeholder={t("Name, e.g. Siege at dawn")}
             />
             <ResizableTextarea
-              aria-label="What is happening right now"
+              aria-label={t("What is happening right now")}
               storageKey="rules-scene-summary"
               value={settings.scenarioSummary || ''}
               onChange={event => onDraftSettings({ scenarioSummary: event.target.value })}
               onBlur={() => onSaveSettings({ scenarioSummary: settings.scenarioSummary || '' })}
-              placeholder="What is happening right now"
+              placeholder={t("What is happening right now")}
             />
           </div>
         </div>
@@ -103,6 +105,7 @@ export default function SceneBlock({ sectionRef, settings, scene, groups, locati
 }
 
 function ChipRow({ label, help, ids, byId, options, onAdd, onRemove, addLabel, emptyText = 'No one' }) {
+  const { t } = useI18n();
   const [adding, setAdding] = useState(false);
   return (
     <div className="grid gap-4 border-t border-border-subtle py-3.5 md:grid-cols-[9.5rem_minmax(0,1fr)]">
@@ -133,15 +136,14 @@ function ChipRow({ label, help, ids, byId, options, onAdd, onRemove, addLabel, e
             onClose={() => setAdding(false)}
             options={options}
             placeholder={addLabel}
-            searchPlaceholder="Search"
+            searchPlaceholder={t("Search")}
             ariaLabel={addLabel}
             searchInTrigger
             autoOpen
           />
         ) : (
           <button type="button" onClick={() => setAdding(true)} className="inline-flex h-7 items-center gap-1 rounded-control border border-dashed border-border-default px-2.5 text-xs font-semibold text-text-muted hover:border-border-strong hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-            <Plus aria-hidden="true" className="h-3.5 w-3.5" />Add
-          </button>
+            <Plus aria-hidden="true" className="h-3.5 w-3.5" />{t("Add")}</button>
         )}
       </div>
     </div>

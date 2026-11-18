@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useEffect, useId, useState } from 'react';
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
@@ -37,6 +38,7 @@ const blankToNull = value => (value === '' || value === null || value === undefi
  * holds who has their own base and growth, and each character's adjustment.
  */
 export default function ResourceModal({ initial, levels = false, workspaceId, api, groups, onCancel, onSave }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState(() => ({ ...EMPTY_RESOURCE, ...initial }));
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState('rules');
@@ -90,7 +92,7 @@ export default function ResourceModal({ initial, levels = false, workspaceId, ap
 
   return (
     <Modal
-      title={editing ? `Edit ${initial.name}` : 'New resource'}
+      title={editing ? `Edit ${initial.name}` : t("New resource")}
       subtitle={editing ? `${draft.scope === 'chosen' ? 'Only who you choose' : 'Everyone'}${holderCount ? ` · ${holderCount} with their own values` : ''}` : null}
       leading={<ResourceTile color={draft.color} />}
       onClose={() => { if (!saving) onCancel(); }}
@@ -99,127 +101,123 @@ export default function ResourceModal({ initial, levels = false, workspaceId, ap
       <form id={formId} onSubmit={submit} className="flex h-[min(78vh,56rem)] flex-col">
         <Tabs
           variant="underline"
-          label="Resource"
+          label={t("Resource")}
           className="shrink-0 px-6 pt-3"
           activeId={tab}
           onChange={setTab}
-          items={[{ id: 'rules', label: 'Rules' }, { id: 'holders', label: 'Races and characters', count: holderCount }]}
+          items={[{ id: 'rules', label: t("Rules") }, { id: 'holders', label: t("Races and characters"), count: holderCount }]}
         />
         <div className="flex min-h-0 flex-col gap-5 overflow-y-auto px-6 py-5 custom-scrollbar">
           {tab === 'rules' ? (
             <>
               <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem_8rem]">
                 <div className="flex flex-col gap-1.5">
-                  <FieldLabel htmlFor={`${formId}-name`}>Name</FieldLabel>
-                  <input id={`${formId}-name`} autoFocus className="field-input h-10 px-3 text-sm" value={draft.name} onChange={event => set({ name: event.target.value })} placeholder="Health, Mana, Sanity" />
+                  <FieldLabel htmlFor={`${formId}-name`}>{t("Name")}</FieldLabel>
+                  <input id={`${formId}-name`} autoFocus className="field-input h-10 px-3 text-sm" value={draft.name} onChange={event => set({ name: event.target.value })} placeholder={t("Health, Mana, Sanity")} />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <FieldLabel>Colour</FieldLabel>
-                  <ColorField ariaLabel="Resource colour" value={draft.color} onChange={color => set({ color })} />
+                  <FieldLabel>{t("Colour")}</FieldLabel>
+                  <ColorField ariaLabel={t("Resource colour")} value={draft.color} onChange={color => set({ color })} />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <FieldLabel htmlFor={`${formId}-unit`}>Unit</FieldLabel>
-                  <input id={`${formId}-unit`} className="field-input h-10 px-3 text-sm" value={draft.unit || ''} onChange={event => set({ unit: event.target.value })} placeholder="optional" />
+                  <FieldLabel htmlFor={`${formId}-unit`}>{t("Unit")}</FieldLabel>
+                  <input id={`${formId}-unit`} className="field-input h-10 px-3 text-sm" value={draft.unit || ''} onChange={event => set({ unit: event.target.value })} placeholder={t("optional")} />
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                <FieldLabel>Who has it</FieldLabel>
-                <div role="radiogroup" aria-label="Who has it" className="grid gap-2 sm:grid-cols-2">
-                  <ChoiceCard name={`${formId}-scope`} selected={draft.scope === 'everyone'} onSelect={() => set({ scope: 'everyone' })} title="Everyone" description="Every character and specific being has it." />
-                  <ChoiceCard name={`${formId}-scope`} selected={draft.scope === 'chosen'} onSelect={() => set({ scope: 'chosen' })} title="Only who I choose" description="Given to a character, a race or a species. For a mage's Mana, or a curse." />
+                <FieldLabel>{t("Who has it")}</FieldLabel>
+                <div role="radiogroup" aria-label={t("Who has it")} className="grid gap-2 sm:grid-cols-2">
+                  <ChoiceCard name={`${formId}-scope`} selected={draft.scope === 'everyone'} onSelect={() => set({ scope: 'everyone' })} title={t("Everyone")} description={t("Every character and specific being has it.")} />
+                  <ChoiceCard name={`${formId}-scope`} selected={draft.scope === 'chosen'} onSelect={() => set({ scope: 'chosen' })} title={t("Only who I choose")} description={t("Given to a character, a race or a species. For a mage's Mana, or a curse.")} />
                 </div>
               </div>
 
-              <Block title="Maximum">
+              <Block title={t("Maximum")}>
                 <div className="grid gap-2.5 sm:grid-cols-[7rem_9rem_minmax(0,1fr)]">
-                  <NumberLabel label="Lowest" value={draft.minimum} onChange={minimum => set({ minimum })} />
-                  <NumberLabel label={levels ? 'Maximum at level 1' : 'Maximum'} value={draft.maximum} onChange={maximum => set({ maximum })} />
+                  <NumberLabel label={t("Lowest")} value={draft.minimum} onChange={minimum => set({ minimum })} />
+                  <NumberLabel label={levels ? t("Maximum at level 1") : t("Maximum")} value={draft.maximum} onChange={maximum => set({ maximum })} />
                   <div className="flex flex-col gap-1">
-                    <span className={subLabel}>A new holder starts</span>
-                    <div><SegmentedControl label="A new holder starts" value={draft.startsFull ? 'full' : 'empty'} onChange={value => set({ startsFull: value === 'full' })} options={[{ value: 'full', label: 'Full' }, { value: 'empty', label: 'Empty' }]} /></div>
+                    <span className={subLabel}>{t("A new holder starts")}</span>
+                    <div><SegmentedControl label={t("A new holder starts")} value={draft.startsFull ? 'full' : 'empty'} onChange={value => set({ startsFull: value === 'full' })} options={[{ value: 'full', label: t("Full") }, { value: 'empty', label: t("Empty") }]} /></div>
                   </div>
                 </div>
-                {!rangeValid && <p className="text-xs text-status-danger">The maximum must be above the lowest.</p>}
+                {!rangeValid && <p className="text-xs text-status-danger">{t("The maximum must be above the lowest.")}</p>}
                 <Help>
                   {levels
-                    ? "Each character's maximum is worked out: this base, plus the growth for each level, plus their own adjustments. A race or species can set its own base and growth."
-                    : "Each character's maximum is this, plus their own adjustments. A race or species can set its own. With levels on in Progression, it can also grow per level."}
+                    ? t("Each character's maximum is worked out: this base, plus the growth for each level, plus their own adjustments. A race or species can set its own base and growth.")
+                    : t("Each character's maximum is this, plus their own adjustments. A race or species can set its own. With levels on in Progression, it can also grow per level.")}
                 </Help>
               </Block>
 
               {levels && (
-                <Block title="Per level" aside="Progression uses levels">
+                <Block title={t("Per level")} aside={t("Progression uses levels")}>
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5">
-                    <label className="flex items-center gap-2 text-[0.8125rem] text-text-secondary">
-                      Grows
-                      <NumberInput aria-label="Growth per level" className="field-input h-10 w-20 px-3 text-right text-sm tabular-nums" value={draft.growthPerLevel} integer={false} onChange={growthPerLevel => set({ growthPerLevel })} />
-                      per level
-                    </label>
-                    <Checkbox checked={Boolean(draft.refillOnLevelUp)} onChange={() => set({ refillOnLevelUp: !draft.refillOnLevelUp })} label="Refill when they level up" />
+                    <label className="flex items-center gap-2 text-[0.8125rem] text-text-secondary">{t("Grows")}<NumberInput aria-label={t("Growth per level")} className="field-input h-10 w-20 px-3 text-right text-sm tabular-nums" value={draft.growthPerLevel} integer={false} onChange={growthPerLevel => set({ growthPerLevel })} />{t("per level")}</label>
+                    <Checkbox checked={Boolean(draft.refillOnLevelUp)} onChange={() => set({ refillOnLevelUp: !draft.refillOnLevelUp })} label={t("Refill when they level up")} />
                   </div>
                   <p className="text-xs tabular-nums text-text-subtle">
                     {PREVIEW_LEVELS.map((level, index) => (
                       <span key={level}>
-                        {index ? ' · ' : ''}{index ? 'level' : 'Level'} {level}: <b className="font-semibold text-text-secondary">{formatNumber(Number(draft.maximum) + growth * (level - 1))}</b>
+                        {index ? ' · ' : ''}{index ? t("level") : t("Level")} {level}: <b className="font-semibold text-text-secondary">{formatNumber(Number(draft.maximum) + growth * (level - 1))}</b>
                       </span>
                     ))}
                   </p>
                 </Block>
               )}
 
-              <Block title="Over time">
+              <Block title={t("Over time")}>
                 <div className="flex flex-col gap-2.5 rounded-card border border-border-subtle bg-surface-inset p-3">
                   <div className="flex items-center gap-3">
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[0.8125rem] font-semibold text-text-secondary">Changes with time</span>
-                      <span className="block text-xs text-text-subtle">Only story time counts: what the Roleplay clock moves.</span>
+                      <span className="block text-[0.8125rem] font-semibold text-text-secondary">{t("Changes with time")}</span>
+                      <span className="block text-xs text-text-subtle">{t("Only story time counts: what the Roleplay clock moves.")}</span>
                     </span>
-                    <Toggle checked={timeOn} onChange={value => { setTimeOn(value); if (value && !rate) set({ timeRate: 1 }); }} ariaLabel="Changes with time" />
+                    <Toggle checked={timeOn} onChange={value => { setTimeOn(value); if (value && !rate) set({ timeRate: 1 }); }} ariaLabel={t("Changes with time")} />
                   </div>
                   {timeOn && (
                     <>
                       <div className="flex flex-wrap items-center gap-2">
-                        <SegmentedControl label="Direction" value={draft.timeDirection} onChange={timeDirection => set({ timeDirection })} options={[{ value: 'recovers', label: 'Recovers' }, { value: 'drains', label: 'Drains' }]} />
-                        <NumberInput aria-label="Amount" className="field-input h-10 w-20 px-3 text-sm tabular-nums" value={draft.timeRate} min={0} integer={false} onChange={timeRate => set({ timeRate })} />
-                        <span className={subLabel}>per</span>
-                        <SegmentedControl label="Period" value={draft.timePeriod} onChange={timePeriod => set({ timePeriod })} options={[{ value: 'hour', label: 'hour' }, { value: 'day', label: 'day' }]} />
+                        <SegmentedControl label={t("Direction")} value={draft.timeDirection} onChange={timeDirection => set({ timeDirection })} options={[{ value: 'recovers', label: t("Recovers") }, { value: 'drains', label: t("Drains") }]} />
+                        <NumberInput aria-label={t("Amount")} className="field-input h-10 w-20 px-3 text-sm tabular-nums" value={draft.timeRate} min={0} integer={false} onChange={timeRate => set({ timeRate })} />
+                        <span className={subLabel}>{t("per")}</span>
+                        <SegmentedControl label={t("Period")} value={draft.timePeriod} onChange={timePeriod => set({ timePeriod })} options={[{ value: 'hour', label: t("hour") }, { value: 'day', label: t("day") }]} />
                       </div>
-                      <Help>{example} Use Drains for hunger or a curse.</Help>
+                      <Help>{example}{' '}{t("Use Drains for hunger or a curse.")}</Help>
                     </>
                   )}
                 </div>
               </Block>
 
-              <Block title="For the AI" aside="Sent to the narrator and to Narrative State">
+              <Block title={t("For the AI")} aside={t("Sent to the narrator and to Narrative State")}>
                 <div className="flex flex-col gap-1.5">
-                  <FieldLabel htmlFor={`${formId}-meaning`}>What it means</FieldLabel>
-                  <ResizableTextarea id={`${formId}-meaning`} storageKey="rules-resource-meaning" value={draft.description || ''} onChange={event => set({ description: event.target.value })} placeholder="What makes it go down, and what brings it back." />
+                  <FieldLabel htmlFor={`${formId}-meaning`}>{t("What it means")}</FieldLabel>
+                  <ResizableTextarea id={`${formId}-meaning`} storageKey="rules-resource-meaning" value={draft.description || ''} onChange={event => set({ description: event.target.value })} placeholder={t("What makes it go down, and what brings it back.")} />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <FieldLabel htmlFor={`${formId}-lowest`}>At the lowest</FieldLabel>
-                  <input id={`${formId}-lowest`} className="field-input h-10 px-3 text-sm" value={draft.lowestEffect || ''} onChange={event => set({ lowestEffect: event.target.value })} placeholder="Unconscious. Cannot act until someone helps." />
+                  <FieldLabel htmlFor={`${formId}-lowest`}>{t("At the lowest")}</FieldLabel>
+                  <input id={`${formId}-lowest`} className="field-input h-10 px-3 text-sm" value={draft.lowestEffect || ''} onChange={event => set({ lowestEffect: event.target.value })} placeholder={t("Unconscious. Cannot act until someone helps.")} />
                 </div>
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                  <FieldLabel className="flex-1">How the AI changes it</FieldLabel>
-                  <SegmentedControl label="How the AI changes it" value={draft.updatePolicy} onChange={updatePolicy => set({ updatePolicy })} options={POLICY_OPTIONS} />
+                  <FieldLabel className="flex-1">{t("How the AI changes it")}</FieldLabel>
+                  <SegmentedControl label={t("How the AI changes it")} value={draft.updatePolicy} onChange={updatePolicy => set({ updatePolicy })} options={POLICY_OPTIONS.map(option => ({ ...option, label: t(option.label) }))} />
                 </div>
-                {!editing && <Help className="-mt-2">Starts with the rule set in Configuration, Narrative State.</Help>}
+                {!editing && <Help className="-mt-2">{t("Starts with the rule set in Configuration, Narrative State.")}</Help>}
                 <div className={`flex flex-col gap-2.5 rounded-card border border-border-subtle bg-surface-inset p-3 ${manual ? 'opacity-60' : ''}`}>
                   <div className="flex items-center gap-3">
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[0.8125rem] font-semibold text-text-secondary">The AI can change the maximum</span>
+                      <span className="block text-[0.8125rem] font-semibold text-text-secondary">{t("The AI can change the maximum")}</span>
                       <span className="block text-xs text-text-subtle">
-                        {manual ? 'Manual keeps the AI away from this resource.' : 'For lasting change. Each one waits for your review, even with Automatic.'}
+                        {manual ? t("Manual keeps the AI away from this resource.") : t("For lasting change. Each one waits for your review, even with Automatic.")}
                       </span>
                     </span>
-                    <Toggle checked={Boolean(draft.aiChangesMaximum) && !manual} disabled={manual} onChange={aiChangesMaximum => set({ aiChangesMaximum })} ariaLabel="The AI can change the maximum" />
+                    <Toggle checked={Boolean(draft.aiChangesMaximum) && !manual} disabled={manual} onChange={aiChangesMaximum => set({ aiChangesMaximum })} ariaLabel={t("The AI can change the maximum")} />
                   </div>
                   {draft.aiChangesMaximum && !manual && (
                     <div className="flex flex-col gap-1.5">
-                      <FieldLabel htmlFor={`${formId}-maximum-rule`}>When the maximum changes</FieldLabel>
-                      <ResizableTextarea id={`${formId}-maximum-rule`} storageKey="rules-resource-maximum-rule" value={draft.maximumRule || ''} onChange={event => set({ maximumRule: event.target.value })} placeholder="Only after long training or a lasting change to the body. Between +5 and +20 each time." />
-                      <Help>A potion or a curse that will lift changes the current value, not the maximum.</Help>
+                      <FieldLabel htmlFor={`${formId}-maximum-rule`}>{t("When the maximum changes")}</FieldLabel>
+                      <ResizableTextarea id={`${formId}-maximum-rule`} storageKey="rules-resource-maximum-rule" value={draft.maximumRule || ''} onChange={event => set({ maximumRule: event.target.value })} placeholder={t("Only after long training or a lasting change to the body. Between +5 and +20 each time.")} />
+                      <Help>{t("A potion or a curse that will lift changes the current value, not the maximum.")}</Help>
                     </div>
                   )}
                 </div>
@@ -230,8 +228,8 @@ export default function ResourceModal({ initial, levels = false, workspaceId, ap
           )}
         </div>
         <div className="flex shrink-0 justify-end gap-2 border-t border-border-subtle px-6 py-4">
-          <Button type="button" variant="ghost" disabled={saving} onClick={onCancel}>Cancel</Button>
-          <Button type="submit" variant="primary" loading={saving} disabled={!draft.name.trim() || !rangeValid || !groupsValid}>{editing ? 'Save resource' : 'Create resource'}</Button>
+          <Button type="button" variant="ghost" disabled={saving} onClick={onCancel}>{t("Cancel")}</Button>
+          <Button type="submit" variant="primary" loading={saving} disabled={!draft.name.trim() || !rangeValid || !groupsValid}>{editing ? t("Save resource") : t("Create resource")}</Button>
         </div>
       </form>
     </Modal>
@@ -239,6 +237,7 @@ export default function ResourceModal({ initial, levels = false, workspaceId, ap
 }
 
 function HoldersTab({ draft, levels, groups, holders, setHolders }) {
+  const { t } = useI18n();
   const [addingGroup, setAddingGroup] = useState('');
   const [addingCharacter, setAddingCharacter] = useState('');
   const chosen = draft.scope === 'chosen';
@@ -269,11 +268,11 @@ function HoldersTab({ draft, levels, groups, holders, setHolders }) {
 
   return (
     <>
-      <Block title="Races and species" aside={levels ? 'Their own base and growth' : 'Their own base'} first>
+      <Block title={t("Races and species")} aside={levels ? t("Their own base and growth") : t("Their own base")} first>
         {holders.groups.length > 0 ? (
           <div>
             <div className="grid gap-3 px-3.5 pb-1.5 text-xs text-text-subtle" style={{ gridTemplateColumns: groupColumns }}>
-              <span>Race or species</span><span className="text-right">Base</span>{levels && <span className="text-right">Per level</span>}<span className="text-right">Members</span><span />
+              <span>{t("Race or species")}</span><span className="text-right">{t("Base")}</span>{levels && <span className="text-right">{t("Per level")}</span>}<span className="text-right">{t("Members")}</span><span />
             </div>
             <div className="divide-y divide-border-subtle overflow-hidden rounded-card border border-border-subtle bg-surface-inset">
               {holders.groups.map(group => (
@@ -281,30 +280,30 @@ function HoldersTab({ draft, levels, groups, holders, setHolders }) {
                   <span className="flex min-w-0 items-center gap-2">
                     <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${meta(group.targetType === 'race' ? 'Races' : 'Creatures').dot}`} />
                     <span className="truncate text-[0.8125rem] font-semibold text-text-primary">{group.name}</span>
-                    <span className="text-xs text-text-subtle">{group.targetType === 'race' ? 'Race' : 'Species'}</span>
+                    <span className="text-xs text-text-subtle">{group.targetType === 'race' ? t("Race") : t("Species")}</span>
                   </span>
                   <NumberInput aria-label={`${group.name} base`} className="field-input h-9 px-3 text-right text-sm tabular-nums" value={group.base === '' ? null : group.base} nullable placeholder={formatNumber(draft.maximum)} integer={false} onChange={base => updateGroup(group.targetId, { base: base ?? '' })} />
                   {levels && <NumberInput aria-label={`${group.name} growth per level`} className="field-input h-9 px-3 text-right text-sm tabular-nums" value={group.growth === '' ? null : group.growth} nullable placeholder={formatSigned(Number(draft.growthPerLevel) || 0)} integer={false} onChange={growth => updateGroup(group.targetId, { growth: growth ?? '' })} />}
-                  <span className="text-right text-xs tabular-nums text-text-muted">{group.members == null ? 'New' : `${group.members} ${group.members === 1 ? 'member' : 'members'}`}</span>
+                  <span className="text-right text-xs tabular-nums text-text-muted">{group.members == null ? t("New") : `${group.members} ${group.members === 1 ? 'member' : 'members'}`}</span>
                   <IconButton icon={X} size="sm" label={`Remove ${group.name}`} onClick={() => setHolders(current => ({ ...current, groups: current.groups.filter(item => item.targetId !== group.targetId) }))} />
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <p className="text-xs text-text-subtle">No race or species has its own values{chosen ? `, and none of their members have ${draft.name.trim() || 'it'}` : ''}.</p>
+          <p className="text-xs text-text-subtle">{t("No race or species has its own values")}{chosen ? `, and none of their members have ${draft.name.trim() || 'it'}` : ''}.</p>
         )}
         <div className="flex flex-wrap items-center gap-3">
-          <SearchableSelect className="w-60" value={addingGroup} onChange={addGroup} options={groupOptions} placeholder="Add a race or species" ariaLabel="Add a race or species" emptyMessage="No race or species left" />
-          <Help>Empty uses the resource: {formatNumber(draft.maximum)}{growthHint}.</Help>
+          <SearchableSelect className="w-60" value={addingGroup} onChange={addGroup} options={groupOptions} placeholder={t("Add a race or species")} ariaLabel={t("Add a race or species")} emptyMessage={t("No race or species left")} />
+          <Help>{t("Empty uses the resource:")}{' '}{formatNumber(draft.maximum)}{growthHint}.</Help>
         </div>
       </Block>
 
-      <Block title="Characters" aside="The maximum is worked out; the adjustment is theirs">
+      <Block title={t("Characters")} aside={t("The maximum is worked out; the adjustment is theirs")}>
         {holders.characters.length > 0 ? (
           <div>
             <div className="grid gap-3 px-3.5 pb-1.5 text-xs text-text-subtle" style={{ gridTemplateColumns: 'minmax(0,1fr) 8rem 6.5rem 2rem' }}>
-              <span>Character</span><span className="text-right">Now</span><span className="text-right">Adjustment</span><span />
+              <span>{t("Character")}</span><span className="text-right">{t("Now")}</span><span className="text-right">{t("Adjustment")}</span><span />
             </div>
             <div className="divide-y divide-border-subtle overflow-hidden rounded-card border border-border-subtle bg-surface-inset">
               {holders.characters.map(character => {
@@ -314,11 +313,11 @@ function HoldersTab({ draft, levels, groups, holders, setHolders }) {
                 <div key={character.entityId} className="grid items-center gap-x-3 gap-y-2 px-3.5 py-2" style={{ gridTemplateColumns: 'minmax(0,1fr) 8rem 6.5rem 2rem' }}>
                   <span className="min-w-0">
                     <span className="block truncate text-[0.8125rem] font-semibold text-text-primary">{character.name}</span>
-                    {character.level != null && <span className="block truncate text-xs text-text-subtle">{character.groupName || 'No race'}{levels ? ` · level ${character.level}` : ''}</span>}
+                    {character.level != null && <span className="block truncate text-xs text-text-subtle">{character.groupName || t("No race")}{levels ? ` · level ${character.level}` : ''}</span>}
                   </span>
                   <span className="text-right text-[0.8125rem] tabular-nums">
                     {character.maximum == null
-                      ? <span className="text-text-subtle">After saving</span>
+                      ? <span className="text-text-subtle">{t("After saving")}</span>
                       : <><span className="text-text-secondary">{formatNumber(character.current)}</span><span className="text-text-subtle"> / {formatNumber(character.maximum)}</span></>}
                   </span>
                   <NumberInput aria-label={`${character.name} adjustment`} className="field-input h-9 px-3 text-right text-sm tabular-nums" value={character.adjustment === '' ? null : character.adjustment} nullable placeholder="+0" integer={false} onChange={adjustment => updateCharacter(character.entityId, { adjustment: adjustment ?? '' })} />
@@ -330,15 +329,15 @@ function HoldersTab({ draft, levels, groups, holders, setHolders }) {
             </div>
           </div>
         ) : (
-          <p className="text-xs text-text-subtle">No character has an adjustment{chosen ? ' or was given it directly' : ''}.</p>
+          <p className="text-xs text-text-subtle">{t("No character has an adjustment")}{chosen ? t(" or was given it directly") : ''}.</p>
         )}
         <div className="flex flex-wrap items-center gap-3">
-          <SearchableSelect className="w-60" value={addingCharacter} onChange={addCharacter} options={characterOptions} placeholder={chosen ? 'Give to a character' : 'Adjust a character'} ariaLabel={chosen ? 'Give to a character' : 'Adjust a character'} emptyMessage="No character left" />
-          {chosen && <Help>Characters of a race above already have it.</Help>}
+          <SearchableSelect className="w-60" value={addingCharacter} onChange={addCharacter} options={characterOptions} placeholder={chosen ? t("Give to a character") : t("Adjust a character")} ariaLabel={chosen ? t("Give to a character") : t("Adjust a character")} emptyMessage={t("No character left")} />
+          {chosen && <Help>{t("Characters of a race above already have it.")}</Help>}
         </div>
       </Block>
 
-      <Help>The same numbers show on each race and character sheet, and can be changed there too.</Help>
+      <Help>{t("The same numbers show on each race and character sheet, and can be changed there too.")}</Help>
     </>
   );
 }

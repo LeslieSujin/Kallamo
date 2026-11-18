@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useRef, useState } from 'react';
 import { ChevronDown, Gauge, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
 import Button from '../../../components/ui/Button';
@@ -21,6 +22,7 @@ export function describeRange(definition, levels = false) {
 
 /** The world's resources and who holds them. Each character's current values live on their sheet. */
 export default function ResourcesSection({ sectionRef, workspaceId, api, showToast, definitions, assignments, groups, names, levels = false, defaultPolicy = 'review', onChanged, embedded = false }) {
+  const { t } = useI18n();
   const [openId, setOpenId] = useState(null);
   const [editing, setEditing] = useState(null);
   const [deleting, setDeleting] = useState(null);
@@ -74,9 +76,9 @@ export default function ResourcesSection({ sectionRef, workspaceId, api, showToa
       id="resources"
       sectionRef={sectionRef}
       icon={Gauge}
-      title="Resources"
-      description="Numbers the AI keeps for characters and creatures, such as Health or Mana. Each character's current values live on their sheet."
-      action={<Button variant="ghost" size="sm" icon={Plus} onClick={() => setEditing({ ...EMPTY_RESOURCE, updatePolicy: defaultPolicy })}>New resource</Button>}
+      title={t("Resources")}
+      description={t("Numbers the AI keeps for characters and creatures, such as Health or Mana. Each character's current values live on their sheet.")}
+      action={<Button variant="ghost" size="sm" icon={Plus} onClick={() => setEditing({ ...EMPTY_RESOURCE, updatePolicy: defaultPolicy })}>{t("New resource")}</Button>}
       embedded={embedded}
     >
       {definitions.length ? (
@@ -96,7 +98,7 @@ export default function ResourcesSection({ sectionRef, workspaceId, api, showToa
             ))}
           </div>
       ) : (
-        <p className="rounded-card border border-dashed border-border-subtle px-4 py-6 text-center text-[0.8125rem] text-text-muted">No resources yet. Add Health, Stamina, Mana or anything the story should count.</p>
+        <p className="rounded-card border border-dashed border-border-subtle px-4 py-6 text-center text-[0.8125rem] text-text-muted">{t("No resources yet. Add Health, Stamina, Mana or anything the story should count.")}</p>
       )}
 
       {editing && <ResourceModal initial={editing} levels={levels} workspaceId={workspaceId} api={api} groups={groups} onCancel={() => setEditing(null)} onSave={save} />}
@@ -104,10 +106,10 @@ export default function ResourcesSection({ sectionRef, workspaceId, api, showToa
         <ConfirmDialog
           tone="danger"
           title={`Delete ${deleting.name}?`}
-          message={<>Everyone loses <strong className="text-text-primary">{deleting.name}</strong>, with its values and its history.</>}
+          message={<>{t("Everyone loses")}{' '}<strong className="text-text-primary">{deleting.name}</strong>{t(", with its values and its history.")}</>}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => { if (!deletingBusy) setDeleting(null); } },
-            { label: 'Delete resource', variant: 'danger', loading: deletingBusy, autoFocus: true, onClick: () => remove(deleting) }
+            { label: t("Cancel"), variant: 'ghost', onClick: () => { if (!deletingBusy) setDeleting(null); } },
+            { label: t("Delete resource"), variant: 'danger', loading: deletingBusy, autoFocus: true, onClick: () => remove(deleting) }
           ]}
           onClose={() => { if (!deletingBusy) setDeleting(null); }}
         />
@@ -117,6 +119,7 @@ export default function ResourcesSection({ sectionRef, workspaceId, api, showToa
 }
 
 function ResourceRow({ definition, holders, levels, open, onToggle, onEdit, onDelete, names }) {
+  const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
   const chosen = definition.scope === 'chosen';
@@ -142,14 +145,14 @@ function ResourceRow({ definition, holders, levels, open, onToggle, onEdit, onDe
           {lowest && !open && <p className="mt-0.5 truncate text-xs text-text-subtle">{lowest}</p>}
         </div>
         <span className="inline-flex h-5.5 shrink-0 items-center whitespace-nowrap rounded-md bg-tint/[0.06] px-2 text-xs font-medium text-text-secondary">
-          {chosen ? `Only: ${holders.length} chosen` : 'Everyone'}
+          {chosen ? `Only: ${holders.length} chosen` : t("Everyone")}
         </span>
-        <span className="inline-flex h-5.5 shrink-0 items-center whitespace-nowrap rounded-md bg-tint/[0.06] px-2 text-xs font-medium text-text-secondary">AI: {POLICY_LABEL[definition.updatePolicy] || definition.updatePolicy}</span>
+        <span className="inline-flex h-5.5 shrink-0 items-center whitespace-nowrap rounded-md bg-tint/[0.06] px-2 text-xs font-medium text-text-secondary">{t("AI:")}{' '}{POLICY_LABEL[definition.updatePolicy] || definition.updatePolicy}</span>
         <IconButton ref={menuRef} icon={MoreHorizontal} size="sm" label={`${definition.name} actions`} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(value => !value)} />
         <Menu anchorRef={menuRef} open={menuOpen} onClose={() => setMenuOpen(false)} label={`${definition.name} actions`} className="w-52">
-          <MenuItem icon={Pencil} label="Edit" onSelect={() => { setMenuOpen(false); onEdit(); }} />
+          <MenuItem icon={Pencil} label={t("Edit")} onSelect={() => { setMenuOpen(false); onEdit(); }} />
           <MenuSeparator />
-          <MenuItem icon={Trash2} label="Delete" danger onSelect={() => { setMenuOpen(false); onDelete(); }} />
+          <MenuItem icon={Trash2} label={t("Delete")} danger onSelect={() => { setMenuOpen(false); onDelete(); }} />
         </Menu>
         <IconButton icon={ChevronDown} size="sm" label={open ? `Fold ${definition.name}` : `Unfold ${definition.name}`} aria-expanded={open} onClick={onToggle} className={open ? '[&_svg]:rotate-180' : ''} />
       </div>
@@ -157,36 +160,36 @@ function ResourceRow({ definition, holders, levels, open, onToggle, onEdit, onDe
       {open && (
         <div className="flex flex-col gap-4.5 border-t border-border-subtle p-4">
           <div>
-            <FieldLabel>What it means to the AI</FieldLabel>
-            <p className="mt-1 text-xs leading-relaxed text-text-muted">{definition.description || 'Nothing written yet. Edit the resource to tell the AI what moves it.'}</p>
+            <FieldLabel>{t("What it means to the AI")}</FieldLabel>
+            <p className="mt-1 text-xs leading-relaxed text-text-muted">{definition.description || t("Nothing written yet. Edit the resource to tell the AI what moves it.")}</p>
             {lowest && <p className="mt-1.5 text-xs leading-relaxed text-text-muted">{lowest}</p>}
             {definition.aiChangesMaximum && definition.updatePolicy !== 'manual' && (
-              <p className="mt-1.5 text-xs leading-relaxed text-text-muted">The AI can change the maximum{definition.maximumRule ? `: ${definition.maximumRule}` : '.'}</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-text-muted">{t("The AI can change the maximum")}{definition.maximumRule ? `: ${definition.maximumRule}` : '.'}</p>
             )}
           </div>
 
           <div>
             <div className="mb-1 flex items-baseline gap-2.5">
-              <FieldLabel>{chosen ? 'Who has it' : 'Races and characters'}</FieldLabel>
+              <FieldLabel>{chosen ? t("Who has it") : t("Races and characters")}</FieldLabel>
               <span className="text-xs tabular-nums text-text-subtle">{holders.length}</span>
             </div>
             <Help className="mb-2.5">
               {chosen
                 ? `Only the people, races or species listed here. Everyone else has no ${definition.name}, and the AI is never told about it.`
-                : 'Races and species with their own base or growth, and characters with an adjustment.'}
+                : t("Races and species with their own base or growth, and characters with an adjustment.")}
             </Help>
             {ordered.length > 0 && (
               <div className="divide-y divide-border-subtle overflow-hidden rounded-card border border-border-subtle">
                 {ordered.map(holder => (
                   <div key={`${holder.targetType}:${holder.targetId}`} className="flex items-center gap-3 px-3 py-2">
                     <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${holder.targetType === 'race' ? meta('Races').dot : holder.targetType === 'species' ? meta('Creatures').dot : meta('Characters').dot}`} />
-                    <span className="min-w-0 flex-1 truncate text-[0.8125rem] text-text-primary">{names.get(holder.targetId) || 'Unknown'}<span className="ml-1.5 text-xs text-text-subtle">{TARGET_LABEL[holder.targetType]}</span></span>
+                    <span className="min-w-0 flex-1 truncate text-[0.8125rem] text-text-primary">{names.get(holder.targetId) || t("Unknown")}<span className="ml-1.5 text-xs text-text-subtle">{TARGET_LABEL[holder.targetType]}</span></span>
                     <span className="shrink-0 text-xs tabular-nums text-text-muted">{describeHolder(holder)}</span>
                   </div>
                 ))}
               </div>
             )}
-            <Button variant="ghost" size="sm" icon={chosen ? Plus : Pencil} className="mt-2.5" onClick={onEdit}>{chosen ? `Give ${definition.name}` : 'Edit races and characters'}</Button>
+            <Button variant="ghost" size="sm" icon={chosen ? Plus : Pencil} className="mt-2.5" onClick={onEdit}>{chosen ? `Give ${definition.name}` : t("Edit races and characters")}</Button>
           </div>
         </div>
       )}

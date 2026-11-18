@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, Hourglass } from 'lucide-react';
 import Button from '../../../components/ui/Button';
@@ -25,6 +26,7 @@ function describeMinutes(minutes, minutesPerDay) {
  * from minutes to a year; numbers are edited in the row and saved together.
  */
 export default function TimeCostsSection({ sectionRef, matrix, calendar, onSave, embedded = false, onOpenCalendar }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState(matrix);
   const [openId, setOpenId] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -34,13 +36,13 @@ export default function TimeCostsSection({ sectionRef, matrix, calendar, onSave,
   const yearMinutes = minutesPerDay * 365;
   const scale = minutes => Math.max(0, Math.min(1, Math.log(Math.max(1, minutes)) / Math.log(yearMinutes))) * 100;
   const ticks = useMemo(() => [
-    { label: '1 min', minutes: 1 },
-    { label: '1 hour', minutes: 60 },
-    { label: '1 day', minutes: minutesPerDay },
-    { label: '1 week', minutes: minutesPerDay * 7 },
-    { label: '1 month', minutes: minutesPerDay * 30 },
-    { label: '1 year', minutes: yearMinutes }
-  ], [minutesPerDay, yearMinutes]);
+    { label: t("1 min"), minutes: 1 },
+    { label: t("1 hour"), minutes: 60 },
+    { label: t("1 day"), minutes: minutesPerDay },
+    { label: t("1 week"), minutes: minutesPerDay * 7 },
+    { label: t("1 month"), minutes: minutesPerDay * 30 },
+    { label: t("1 year"), minutes: yearMinutes }
+  ], [minutesPerDay, yearMinutes, t]);
 
   const categories = draft.categories || [];
   const changed = categories.filter(category => !same(category, (matrix.categories || []).find(item => item.id === category.id)));
@@ -56,13 +58,13 @@ export default function TimeCostsSection({ sectionRef, matrix, calendar, onSave,
       sectionRef={sectionRef}
       embedded={embedded}
       icon={Hourglass}
-      title="Time costs"
-      description="How much the clock moves when the story doesn't say. Time written in the story always wins."
+      title={t("Time costs")}
+      description={t("How much the clock moves when the story doesn't say. Time written in the story always wins.")}
     >
       {onOpenCalendar && (
         <div className="mb-5 flex flex-wrap items-center gap-3 rounded-card border border-border-subtle bg-surface-inset px-3.5 py-2.5 text-[0.8125rem] text-text-secondary">
-          <span className="min-w-0 flex-1">A day here has <b className="font-semibold text-text-primary">{Math.round(minutesPerDay / 60)} hours</b>, set by {calendar?.name || 'the calendar'}. Days in a timeskip follow it.</span>
-          <Button variant="ghost" size="sm" onClick={onOpenCalendar}>Open Calendar</Button>
+          <span className="min-w-0 flex-1">{t("A day here has")}{' '}<b className="font-semibold text-text-primary">{Math.round(minutesPerDay / 60)}{' '}{t("hours")}</b>{t(", set by")}{' '}{calendar?.name || t("the calendar")}{t(". Days in a timeskip follow it.")}</span>
+          <Button variant="ghost" size="sm" onClick={onOpenCalendar}>{t("Open Calendar")}</Button>
         </div>
       )}
       {categories.length ? (
@@ -108,17 +110,17 @@ export default function TimeCostsSection({ sectionRef, matrix, calendar, onSave,
                 <div key={category.id} className={`${index ? 'border-t border-border-subtle' : ''} ${open ? 'bg-tint/[0.025]' : ''}`}>
                   <div className="grid grid-cols-[6rem_minmax(0,1fr)_5.5rem_1rem_5.5rem_3rem_2rem] items-center gap-2.5 py-2.5 pl-4 pr-2.5">
                     <span className="text-[0.8125rem] font-semibold text-text-primary">{category.name}</span>
-                    <span className="truncate text-xs text-text-muted">{open ? `${describeMinutes(category.maximumMinutes, minutesPerDay)} at most` : category.guidance || 'No guidance yet'}</span>
+                    <span className="truncate text-xs text-text-muted">{open ? `${describeMinutes(category.maximumMinutes, minutesPerDay)} at most` : category.guidance || t("No guidance yet")}</span>
                     <NumberInput aria-label={`${category.name} shortest`} className={field(dirtyMin)} min={1} value={toUnit(category.minimumMinutes)} onChange={value => update(category.id, { minimumMinutes: fromUnit(value), maximumMinutes: Math.max(category.maximumMinutes, fromUnit(value)) })} />
-                    <span className="text-center text-xs text-text-subtle">to</span>
+                    <span className="text-center text-xs text-text-subtle">{t("to")}</span>
                     <NumberInput aria-label={`${category.name} longest`} className={field(dirtyMax)} min={toUnit(category.minimumMinutes)} value={toUnit(category.maximumMinutes)} onChange={value => update(category.id, { maximumMinutes: Math.max(category.minimumMinutes, fromUnit(value)) })} />
-                    <span className="text-xs text-text-subtle">{days ? 'days' : 'min'}</span>
+                    <span className="text-xs text-text-subtle">{days ? t("days") : t("min")}</span>
                     <IconButton icon={ChevronDown} size="sm" label={open ? `Close ${category.name} guidance` : `Edit ${category.name} guidance`} aria-expanded={open} className={open ? '[&_svg]:rotate-180' : ''} onClick={() => setOpenId(current => current === category.id ? null : category.id)} />
                   </div>
                   {open && (
                     <div className="pb-3.5 pl-4 pr-4 md:pl-[7.625rem]">
                       <label className="block">
-                        <span className="mb-1.5 block text-xs text-text-muted">Which actions take this long</span>
+                        <span className="mb-1.5 block text-xs text-text-muted">{t("Which actions take this long")}</span>
                         <ResizableTextarea storageKey="rules-time-guidance" value={category.guidance || ''} onChange={event => update(category.id, { guidance: event.target.value })} />
                       </label>
                     </div>
@@ -131,14 +133,14 @@ export default function TimeCostsSection({ sectionRef, matrix, calendar, onSave,
           {changed.length > 0 && (
             <div className="flex flex-wrap items-center gap-2.5 rounded-card border border-border-default bg-surface-panel/95 py-3 pl-4 pr-3">
               <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent" />
-              <span className="min-w-0 flex-1 text-[0.8125rem] text-text-secondary">You changed {changed.length} {changed.length === 1 ? 'range' : 'ranges'}. It applies from the next turn after you save.</span>
-              <Button variant="ghost" size="sm" disabled={saving} onClick={() => setDraft(matrix)}>Discard</Button>
-              <Button variant="primary" size="sm" loading={saving} onClick={save}>Save changes</Button>
+              <span className="min-w-0 flex-1 text-[0.8125rem] text-text-secondary">{t("You changed")}{' '}{changed.length} {changed.length === 1 ? t("range") : t("ranges")}{t(". It applies from the next turn after you save.")}</span>
+              <Button variant="ghost" size="sm" disabled={saving} onClick={() => setDraft(matrix)}>{t("Discard")}</Button>
+              <Button variant="primary" size="sm" loading={saving} onClick={save}>{t("Save changes")}</Button>
             </div>
           )}
         </div>
       ) : (
-        <p className="rounded-card border border-dashed border-border-subtle px-4 py-6 text-center text-[0.8125rem] text-text-muted">No time ranges are set.</p>
+        <p className="rounded-card border border-dashed border-border-subtle px-4 py-6 text-center text-[0.8125rem] text-text-muted">{t("No time ranges are set.")}</p>
       )}
     </ConfigSection>
   );

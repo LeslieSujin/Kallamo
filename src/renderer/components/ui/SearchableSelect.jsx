@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, Search, X } from 'lucide-react';
 import Popover from './Popover';
@@ -23,6 +24,7 @@ export default function SearchableSelect({
   onClose,
   className = '',
 }) {
+  const { t } = useI18n();
   const rootRef = useRef(null);
   const inputRef = useRef(null);
   const listboxId = useId();
@@ -113,7 +115,7 @@ export default function SearchableSelect({
               onKeyDown={handleMenuKeyDown}
               placeholder={searchPlaceholder}
               role="combobox"
-              aria-label={ariaLabel || 'Filter options'}
+              aria-label={ariaLabel || t("Filter options")}
               aria-expanded="true"
               aria-controls={listboxId}
               aria-activedescendant={filtered[activeIndex] ? `${listboxId}-${filtered[activeIndex].id}` : undefined}
@@ -152,7 +154,7 @@ export default function SearchableSelect({
         {clearable && selected.length > 0 && !multiple && !(searchInTrigger && isOpen) ? (
           <button
             type="button"
-            aria-label="Clear selection"
+            aria-label={t("Clear selection")}
             onClick={() => onChange('')}
             className="absolute right-8 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-text-subtle hover:bg-surface-hover/55 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
@@ -186,7 +188,7 @@ export default function SearchableSelect({
             onChange={(event) => { setQuery(event.target.value); setActiveIndex(0); }}
             onKeyDown={handleMenuKeyDown}
             placeholder={searchPlaceholder}
-            aria-label="Filter options"
+            aria-label={t("Filter options")}
             aria-controls={listboxId}
             aria-activedescendant={filtered[activeIndex] ? `${listboxId}-${filtered[activeIndex].id}` : undefined}
             className="h-11 w-full bg-transparent pl-10 pr-3 text-sm text-text-secondary outline-none placeholder:text-text-subtle focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"

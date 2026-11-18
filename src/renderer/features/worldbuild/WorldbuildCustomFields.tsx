@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AlertCircle, EyeOff, Lock } from 'lucide-react';
 import type { EntityFieldDefinition, EntityFieldType } from '../../../narrative/contracts';
@@ -135,6 +136,7 @@ export default function WorldbuildCustomFields({ workspaceId, entity, entities, 
 }
 
 function FieldShell({ definition, value, editing = false, full = false, children }: { definition: EntityFieldDefinition; value?: unknown; editing?: boolean; full?: boolean; children: ReactNode }) {
+  const { t } = useI18n();
   const missing = !editing && definition.required && !isFilledValue(value);
   return (
     <div className={`min-w-0 ${full ? 'col-span-full' : ''}`}>
@@ -142,16 +144,17 @@ function FieldShell({ definition, value, editing = false, full = false, children
         <span className="truncate">{labelOf(definition)}</span>
         {editing && <FieldEye field={spoilerKey(definition)} size="sm" />}
         {missing && <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 rounded-full bg-status-warning" />}
-        {editing && definition.required && <span className="text-status-warning">Required</span>}
-        {editing && definition.aiAccess === 'read-only' && <span data-tooltip="The AI reads it but never changes it" className="inline-flex text-text-subtle"><Lock className="h-3 w-3" aria-label="Read only for the AI" /></span>}
-        {editing && definition.aiAccess === 'hidden' && <span data-tooltip="Hidden from the AI" className="inline-flex text-text-subtle"><EyeOff className="h-3 w-3" aria-label="Hidden from the AI" /></span>}
+        {editing && definition.required && <span className="text-status-warning">{t("Required")}</span>}
+        {editing && definition.aiAccess === 'read-only' && <span data-tooltip={t("The AI reads it but never changes it")} className="inline-flex text-text-subtle"><Lock className="h-3 w-3" aria-label={t("Read only for the AI")} /></span>}
+        {editing && definition.aiAccess === 'hidden' && <span data-tooltip={t("Hidden from the AI")} className="inline-flex text-text-subtle"><EyeOff className="h-3 w-3" aria-label={t("Hidden from the AI")} /></span>}
       </div>
-      {missing ? <p className="inline-flex items-center gap-1.5 text-sm text-status-warning"><AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />Needs a value</p> : <SpoilerCover field={spoilerKey(definition)}>{children}</SpoilerCover>}
+      {missing ? <p className="inline-flex items-center gap-1.5 text-sm text-status-warning"><AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />{t("Needs a value")}</p> : <SpoilerCover field={spoilerKey(definition)}>{children}</SpoilerCover>}
     </div>
   );
 }
 
 function FieldInput({ definition, value, onChange, entities }: { definition: EntityFieldDefinition; value: unknown; onChange(value: unknown): void; entities: WorldbuildEntity[] }) {
+  const { t } = useI18n();
   const options = definition.options ?? [];
   const type = definition.valueType;
   if (type === 'boolean') {
@@ -160,16 +163,16 @@ function FieldInput({ definition, value, onChange, entities }: { definition: Ent
         {[false, true].map(option => (
           <button key={String(option)} type="button" role="radio" aria-checked={Boolean(value) === option} onClick={() => onChange(option)}
             className={`min-h-8 rounded-md px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${Boolean(value) === option ? 'bg-surface-hover text-text-primary ring-1 ring-inset ring-border-strong' : 'text-text-muted hover:text-text-primary'}`}>
-            {option ? 'Yes' : 'No'}
+            {option ? t("Yes") : t("No")}
           </button>
         ))}
       </div>
     );
   }
-  if (type === 'single-choice') return <SearchableSelect value={String(value ?? '')} onChange={onChange} options={options.map(option => ({ id: option.id, label: option.label }))} placeholder="Not set" searchPlaceholder="Filter options…" />;
+  if (type === 'single-choice') return <SearchableSelect value={String(value ?? '')} onChange={onChange} options={options.map(option => ({ id: option.id, label: option.label }))} placeholder={t("Not set")} searchPlaceholder={t("Filter options…")} />;
   if (type === 'multiple-choice') {
     const selected = Array.isArray(value) ? value.map(String) : [];
-    return <SearchableSelect multiple values={selected} onChange={onChange} options={options.map(option => ({ id: option.id, label: option.label }))} placeholder="Search and add options" searchPlaceholder="Filter options…" />;
+    return <SearchableSelect multiple values={selected} onChange={onChange} options={options.map(option => ({ id: option.id, label: option.label }))} placeholder={t("Search and add options")} searchPlaceholder={t("Filter options…")} />;
   }
   if (type === 'entity-reference' || type === 'entity-reference-list') {
     const multiple = type === 'entity-reference-list';
@@ -181,9 +184,9 @@ function FieldInput({ definition, value, onChange, entities }: { definition: Ent
     }));
     if (multiple) {
       const selected = Array.isArray(value) ? value.map(String) : [];
-      return <SearchableSelect multiple values={selected} onChange={onChange} options={entityOptions} placeholder="Search and add entities" />;
+      return <SearchableSelect multiple values={selected} onChange={onChange} options={entityOptions} placeholder={t("Search and add entities")} />;
     }
-    return <SearchableSelect value={String(value ?? '')} onChange={onChange} options={entityOptions} placeholder="Search for an entity" />;
+    return <SearchableSelect value={String(value ?? '')} onChange={onChange} options={entityOptions} placeholder={t("Search for an entity")} />;
   }
   if (type === 'long-text') return <SpoilerTextArea aria-label={definition.label} rows={3} value={String(value ?? '')} onChange={event => onChange(event.target.value)} />;
   if (type === 'range') {
@@ -203,11 +206,12 @@ function FieldInput({ definition, value, onChange, entities }: { definition: Ent
 }
 
 function FieldValue({ definition, value, entities, large = false }: { definition: EntityFieldDefinition; value: unknown; entities: WorldbuildEntity[]; large?: boolean }) {
+  const { t } = useI18n();
   const byId = useMemo(() => new Map(entities.map(entity => [entity.id, entity])), [entities]);
   const optionNames = useMemo(() => new Map(definition.options?.map(option => [option.id, option.label]) ?? []), [definition.options]);
-  if (!isFilledValue(value)) return <p className={`${large ? 'mt-0.5 text-lg' : 'text-sm'} text-text-disabled`}>Not set</p>;
+  if (!isFilledValue(value)) return <p className={`${large ? 'mt-0.5 text-lg' : 'text-sm'} text-text-disabled`}>{t("Not set")}</p>;
   const type = definition.valueType;
-  if (type === 'boolean') return <p className="text-sm text-text-primary">{value ? 'Yes' : 'No'}</p>;
+  if (type === 'boolean') return <p className="text-sm text-text-primary">{value ? t("Yes") : t("No")}</p>;
   if (type === 'number' || (large && type === 'short-text')) return <p className={`${large ? 'mt-0.5 text-xl font-semibold' : 'text-sm'} tabular-nums text-text-primary`}>{String(value)}</p>;
   if (type === 'range') {
     const min = definition.constraints?.min ?? 0;
@@ -226,7 +230,7 @@ function FieldValue({ definition, value, entities, large = false }: { definition
     return <div className="flex flex-wrap gap-1.5">{ids.map(id => {
       const entity = byId.get(id);
       const dot = entity ? (TYPES as Record<string, { dot?: string }>)[entity.type]?.dot : null;
-      return <span key={id} className="inline-flex min-h-6 items-center gap-1.5 rounded-full border border-border-subtle bg-surface-hover/35 px-2.5 py-0.5 text-xs font-medium text-text-secondary"><span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot || 'bg-text-subtle'}`} />{entity?.canonicalName ?? 'Unknown entity'}</span>;
+      return <span key={id} className="inline-flex min-h-6 items-center gap-1.5 rounded-full border border-border-subtle bg-surface-hover/35 px-2.5 py-0.5 text-xs font-medium text-text-secondary"><span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot || 'bg-text-subtle'}`} />{entity?.canonicalName ?? t("Unknown entity")}</span>;
     })}</div>;
   }
   if (Array.isArray(value)) return <div className="flex flex-wrap gap-1.5">{value.map(item => <span key={String(item)} className="inline-flex min-h-6 items-center rounded-full border border-border-subtle bg-surface-hover/35 px-2.5 py-0.5 text-xs font-medium text-text-secondary">{optionNames.get(String(item)) ?? String(item)}</span>)}</div>;

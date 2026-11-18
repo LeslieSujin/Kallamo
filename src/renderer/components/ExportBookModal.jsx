@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import Modal from './ui/Modal';
 import Checkbox from './ui/Checkbox';
@@ -44,6 +45,7 @@ function buildTocHtml(heading, align, entries) {
 }
 
 export default function ExportBookModal({ folderTitle, documents, electronAPI, onClose }) {
+  const { t } = useI18n();
   const [format, setFormat] = useState('pdf');
   const [pageNumbers, setPageNumbers] = useState(false);
   const [numberPos, setNumberPos] = useState('center');
@@ -232,14 +234,14 @@ export default function ExportBookModal({ folderTitle, documents, electronAPI, o
 
   if (loading || !pageConfig) {
     return (
-      <Modal onClose={onClose} size="2xl" title="Export folder" subtitle={folderTitle} icon={Book} className="!max-w-5xl">
-        <div className="flex h-64 items-center justify-center text-sm text-text-subtle">Loading chapters…</div>
+      <Modal onClose={onClose} size="2xl" title={t("Export folder")} subtitle={folderTitle} icon={Book} className="!max-w-5xl">
+        <div className="flex h-64 items-center justify-center text-sm text-text-subtle">{t("Loading chapters…")}</div>
       </Modal>
     );
   }
 
   return (
-    <Modal onClose={onClose} size="2xl" title="Export folder" subtitle={folderTitle} icon={Book} className="!max-w-5xl">
+    <Modal onClose={onClose} size="2xl" title={t("Export folder")} subtitle={folderTitle} icon={Book} className="!max-w-5xl">
       <div className="flex min-h-0" style={{ height: '78vh' }}>
         <div ref={previewColRef} className="custom-scrollbar flex min-w-0 flex-1 flex-col items-center overflow-y-auto bg-shade/30 px-4 py-6">
           <style>{previewCss}</style>
@@ -269,7 +271,7 @@ export default function ExportBookModal({ folderTitle, documents, electronAPI, o
 
         <div className="flex w-[22rem] shrink-0 flex-col border-l border-border-subtle">
           <div className="custom-scrollbar flex flex-1 flex-col gap-5 overflow-y-auto p-5">
-            <OptionGroup title="Chapters" trailing={<span className="text-xs tabular-nums text-text-subtle">{activeChapters.length} of {chapters.length}</span>}>
+            <OptionGroup title={t("Chapters")} trailing={<span className="text-xs tabular-nums text-text-subtle">{activeChapters.length}{' '}{t("of")}{' '}{chapters.length}</span>}>
               <div className="custom-scrollbar -mx-1 flex max-h-56 flex-col gap-0.5 overflow-y-auto px-1">
                 {chapters.map((ch, idx) => {
                   const activeIndex = activeChapters.findIndex(a => a.id === ch.id);
@@ -287,35 +289,35 @@ export default function ExportBookModal({ folderTitle, documents, electronAPI, o
                   );
                 })}
               </div>
-              <p className="text-xs leading-relaxed text-text-subtle">Paper and margins come from the first chapter, {firstTitle || 'Untitled'}.</p>
+              <p className="text-xs leading-relaxed text-text-subtle">{t("Paper and margins come from the first chapter,")}{' '}{firstTitle || t("Untitled")}.</p>
             </OptionGroup>
 
             <OptionGroup>
-              <ToggleRow label="Table of contents" checked={includeToc} onChange={setIncludeToc} disabled={activeChapters.length < 2} bold />
+              <ToggleRow label={t("Table of contents")} checked={includeToc} onChange={setIncludeToc} disabled={activeChapters.length < 2} bold />
               {includeToc && activeChapters.length >= 2 && (
                 <>
                   <label className="block">
-                    <span className="mb-1.5 block text-xs font-medium text-text-subtle">Heading</span>
+                    <span className="mb-1.5 block text-xs font-medium text-text-subtle">{t("Heading")}</span>
                     <input
                       value={tocTitle}
                       onChange={(e) => setTocTitle(e.target.value)}
-                      placeholder="Table of Contents"
+                      placeholder={t("Table of Contents")}
                       className="h-9 w-full rounded-control border border-border-default bg-surface-input px-2.5 text-sm text-text-primary focus:border-accent/70 focus:outline-none"
                     />
                   </label>
                   <div>
-                    <span className="mb-1.5 block text-xs font-medium text-text-subtle">Heading position</span>
-                    <SegmentedControl label="Heading position" value={tocPos} onChange={setTocPos} className="w-full [&>button]:flex-1 [&>button]:justify-center"
-                      options={[{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }]} />
+                    <span className="mb-1.5 block text-xs font-medium text-text-subtle">{t("Heading position")}</span>
+                    <SegmentedControl label={t("Heading position")} value={tocPos} onChange={setTocPos} className="w-full [&>button]:flex-1 [&>button]:justify-center"
+                      options={[{ value: 'left', label: t("Left") }, { value: 'center', label: t("Center") }, { value: 'right', label: t("Right") }]} />
                   </div>
                 </>
               )}
-              {activeChapters.length < 2 && <p className="text-xs text-text-subtle">Needs at least two chapters.</p>}
+              {activeChapters.length < 2 && <p className="text-xs text-text-subtle">{t("Needs at least two chapters.")}</p>}
             </OptionGroup>
 
             <OptionGroup>
-              <ToggleRow label="Chapter titles" checked={chapterTitles} onChange={setChapterTitles} />
-              <ToggleRow label="Number chapters" checked={numberChapters} onChange={setNumberChapters} disabled={!chapterTitles && !includeToc} />
+              <ToggleRow label={t("Chapter titles")} checked={chapterTitles} onChange={setChapterTitles} />
+              <ToggleRow label={t("Number chapters")} checked={numberChapters} onChange={setNumberChapters} disabled={!chapterTitles && !includeToc} />
             </OptionGroup>
 
             <OptionGroup>
@@ -326,7 +328,7 @@ export default function ExportBookModal({ folderTitle, documents, electronAPI, o
               />
             </OptionGroup>
 
-            <OptionGroup title="Format" last>
+            <OptionGroup title={t("Format")} last>
               <FormatChoice value={format} onChange={setFormat} />
             </OptionGroup>
           </div>

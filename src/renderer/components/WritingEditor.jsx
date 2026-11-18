@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useEffect, useRef, useState, useReducer } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
@@ -225,6 +226,7 @@ const TEXT_STYLES = [
 ];
 
 function TextStyleControl({ editor, baseFont }) {
+  const { t } = useI18n();
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
   const level = [1, 2, 3].find(l => editor.isActive('heading', { level: l }));
@@ -237,14 +239,14 @@ function TextStyleControl({ editor, baseFont }) {
   };
   return (
     <div ref={ref} className="relative">
-      <button type="button" aria-label="Text style" aria-haspopup="menu" aria-expanded={open} onMouseDown={(e) => { e.preventDefault(); setOpen(o => !o); }} className={`${dropClass(open)} w-[7.25rem]`}>
-        <span className="min-w-0 flex-1 truncate text-left">{current.label}</span><Caret open={open} />
+      <button type="button" aria-label={t("Text style")} aria-haspopup="menu" aria-expanded={open} onMouseDown={(e) => { e.preventDefault(); setOpen(o => !o); }} className={`${dropClass(open)} w-[7.25rem]`}>
+        <span className="min-w-0 flex-1 truncate text-left">{t(current.label)}</span><Caret open={open} />
       </button>
       <Popover anchorRef={ref} open={open} onClose={() => setOpen(false)} matchAnchorWidth={false} scroll={false} className="w-56 !p-1.5">
-        <div role="menu" aria-label="Text style" className="flex flex-col">
+        <div role="menu" aria-label={t("Text style")} className="flex flex-col">
           {TEXT_STYLES.map(s => (
             <ChoiceRow key={s.key} selected={current.key === s.key} onChoose={() => choose(s.key)} style={{ ...s.style, fontFamily: baseFont || undefined }} className={s.key === 1 ? 'min-h-10' : ''}>
-              {s.label}
+              {t(s.label)}
             </ChoiceRow>
           ))}
         </div>
@@ -254,6 +256,7 @@ function TextStyleControl({ editor, baseFont }) {
 }
 
 function FontPicker({ editor, baseFont }) {
+  const { t } = useI18n();
   const fontOptions = useFontOptions();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -278,23 +281,23 @@ function FontPicker({ editor, baseFont }) {
 
   return (
     <div className="relative" ref={ref}>
-      <button type="button" aria-label="Font" aria-haspopup="menu" aria-expanded={open} onMouseDown={(e) => { e.preventDefault(); setOpen(o => !o); }} className={`${dropClass(open)} w-[6.5rem]`}>
+      <button type="button" aria-label={t("Font")} aria-haspopup="menu" aria-expanded={open} onMouseDown={(e) => { e.preventDefault(); setOpen(o => !o); }} className={`${dropClass(open)} w-[6.5rem]`}>
         <span className="min-w-0 flex-1 truncate text-left" style={{ fontFamily: current || undefined }}>{currentLabel}</span><Caret open={open} />
       </button>
       <Popover anchorRef={ref} open={open} onClose={close} matchAnchorWidth={false} scroll={false} className="w-60 !p-0 overflow-hidden">
         <label className="flex items-center gap-2 border-b border-border-subtle px-3 py-2.5 text-text-subtle">
           <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
-          <span className="sr-only">Search fonts</span>
+          <span className="sr-only">{t("Search fonts")}</span>
           <input
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search fonts"
+            placeholder={t("Search fonts")}
             className="w-full bg-transparent text-sm text-text-primary placeholder:text-text-subtle focus:outline-none"
           />
         </label>
-        <div role="menu" aria-label="Fonts" className="custom-scrollbar flex max-h-72 flex-col overflow-y-auto p-1.5">
-          {filtered.length === 0 && <p className="px-2.5 py-2 text-sm text-text-subtle">No matching fonts</p>}
+        <div role="menu" aria-label={t("Fonts")} className="custom-scrollbar flex max-h-72 flex-col overflow-y-auto p-1.5">
+          {filtered.length === 0 && <p className="px-2.5 py-2 text-sm text-text-subtle">{t("No matching fonts")}</p>}
           {filtered.map((f, i) => (
             <ChoiceRow key={`${f.label}-${i}`} selected={f.value === current} onChoose={() => choose(f.value)} style={{ fontFamily: f.value || undefined }}>
               {f.label}
@@ -307,6 +310,7 @@ function FontPicker({ editor, baseFont }) {
 }
 
 function FontSizeControl({ editor, baseSize }) {
+  const { t } = useI18n();
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
@@ -326,12 +330,12 @@ function FontSizeControl({ editor, baseSize }) {
   };
   return (
     <div className="relative" ref={ref}>
-      <button type="button" aria-label="Font size" aria-haspopup="menu" aria-expanded={open} onMouseDown={(e) => { e.preventDefault(); setOpen(o => { const n = !o; setText(n ? String(value) : ''); return n; }); }} className={dropClass(open)}>
+      <button type="button" aria-label={t("Font size")} aria-haspopup="menu" aria-expanded={open} onMouseDown={(e) => { e.preventDefault(); setOpen(o => { const n = !o; setText(n ? String(value) : ''); return n; }); }} className={dropClass(open)}>
         <span className="tabular-nums">{value}</span><span className="text-xs text-text-subtle">pt</span><Caret open={open} />
       </button>
       <Popover anchorRef={ref} open={open} onClose={close} matchAnchorWidth={false} scroll={false} className="w-24 !p-1.5">
         <label>
-          <span className="sr-only">Font size in points</span>
+          <span className="sr-only">{t("Font size in points")}</span>
           {/* Pre-filled + selected on focus, so typing replaces the current value cleanly. */}
           <input
             value={text}
@@ -343,7 +347,7 @@ function FontSizeControl({ editor, baseSize }) {
             className="mb-1 h-8 w-full rounded-md border border-border-default bg-surface-input px-2 text-center text-sm text-text-primary focus:border-accent/70 focus:outline-none"
           />
         </label>
-        <div role="menu" aria-label="Font sizes" className="custom-scrollbar flex max-h-56 flex-col overflow-y-auto">
+        <div role="menu" aria-label={t("Font sizes")} className="custom-scrollbar flex max-h-56 flex-col overflow-y-auto">
           {FONT_SIZES.map(s => (
             <ChoiceRow key={s} selected={value === parseInt(s, 10)} onChoose={() => apply(parseInt(s, 10))} className="justify-center tabular-nums">{s}</ChoiceRow>
           ))}
@@ -375,6 +379,7 @@ function Chip({ selected, onChoose, children }) {
 
 // Line height and the space after paragraphs, both block-level, in one control.
 function SpacingControl({ editor, baseLineHeight, baseSpacing }) {
+  const { t } = useI18n();
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
   const lineHeight = parseFloat(blockAttr(editor, 'lineHeight') || baseLineHeight || 1.6);
@@ -382,20 +387,20 @@ function SpacingControl({ editor, baseLineHeight, baseSpacing }) {
   const spacing = pxToPt(spacingAttr ? parseInt(spacingAttr, 10) : (baseSpacing ?? 12));
   return (
     <div className="relative" ref={ref}>
-      <button type="button" aria-label="Spacing" aria-haspopup="dialog" aria-expanded={open} onMouseDown={(e) => { e.preventDefault(); setOpen(o => !o); }} className={dropClass(open)}>
+      <button type="button" aria-label={t("Spacing")} aria-haspopup="dialog" aria-expanded={open} onMouseDown={(e) => { e.preventDefault(); setOpen(o => !o); }} className={dropClass(open)}>
         <AlignVerticalSpaceAround className="h-4 w-4 text-text-subtle" aria-hidden="true" /><span className="tabular-nums">{lineHeight}</span><Caret open={open} />
       </button>
       <Popover anchorRef={ref} open={open} onClose={() => setOpen(false)} matchAnchorWidth={false} scroll={false} className="w-64 !p-3" role="dialog">
-        <p className="mb-2 text-xs font-semibold text-text-secondary">Line spacing</p>
-        <div role="radiogroup" aria-label="Line spacing" className="flex flex-wrap gap-1.5">
+        <p className="mb-2 text-xs font-semibold text-text-secondary">{t("Line spacing")}</p>
+        <div role="radiogroup" aria-label={t("Line spacing")} className="flex flex-wrap gap-1.5">
           {LINE_HEIGHTS.map(v => <Chip key={v} selected={lineHeight === parseFloat(v)} onChoose={() => editor.chain().focus().setLineHeight(v).run()}>{v}</Chip>)}
         </div>
         <div className="my-3 h-px bg-border-subtle" />
-        <p className="mb-2 text-xs font-semibold text-text-secondary">Space after paragraphs</p>
-        <div role="radiogroup" aria-label="Space after paragraphs" className="flex flex-wrap gap-1.5">
+        <p className="mb-2 text-xs font-semibold text-text-secondary">{t("Space after paragraphs")}</p>
+        <div role="radiogroup" aria-label={t("Space after paragraphs")} className="flex flex-wrap gap-1.5">
           {PARAGRAPH_SPACINGS.map(v => <Chip key={v} selected={spacing === parseInt(v, 10)} onChoose={() => editor.chain().focus().setParagraphSpacing(`${ptToPx(parseInt(v, 10))}px`).run()}>{v}</Chip>)}
         </div>
-        <p className="mt-2.5 text-xs text-text-subtle">Points. Applies to the paragraph at the cursor.</p>
+        <p className="mt-2.5 text-xs text-text-subtle">{t("Points. Applies to the paragraph at the cursor.")}</p>
       </Popover>
     </div>
   );
@@ -409,6 +414,7 @@ const ALIGNMENTS = [
 ];
 
 function AlignControl({ editor }) {
+  const { t } = useI18n();
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
   const active = ALIGNMENTS.find(a => editor.isActive({ textAlign: a.value })) || ALIGNMENTS[0];
@@ -420,10 +426,10 @@ function AlignControl({ editor }) {
         </button>
       </Tooltip>
       <Popover anchorRef={ref} open={open} onClose={() => setOpen(false)} matchAnchorWidth={false} scroll={false} className="w-44 !p-1.5">
-        <div role="menu" aria-label="Alignment" className="flex flex-col">
+        <div role="menu" aria-label={t("Alignment")} className="flex flex-col">
           {ALIGNMENTS.map(a => (
             <ChoiceRow key={a.value} selected={active.value === a.value} onChoose={() => { editor.chain().focus().setTextAlign(a.value).run(); setOpen(false); }}>
-              <span className="flex items-center gap-2.5"><a.icon className="h-4 w-4 text-text-muted" aria-hidden="true" />{a.label}</span>
+              <span className="flex items-center gap-2.5"><a.icon className="h-4 w-4 text-text-muted" aria-hidden="true" />{t(a.label)}</span>
             </ChoiceRow>
           ))}
         </div>
@@ -448,6 +454,7 @@ function Swatch({ color, label, selected, onPick, size = 'h-6 w-6' }) {
 }
 
 function ColorPopover({ editor }) {
+  const { t } = useI18n();
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
@@ -463,35 +470,34 @@ function ColorPopover({ editor }) {
 
   return (
     <div className="relative" ref={ref}>
-      <ToolbarButton label="Text colour" active={open} onClick={() => setOpen(o => !o)}>
+      <ToolbarButton label={t("Text colour")} active={open} onClick={() => setOpen(o => !o)}>
         <TextColorGlyph className="h-4 w-4" color={current || undefined} />
       </ToolbarButton>
       <Popover anchorRef={ref} open={open} onClose={close} matchAnchorWidth={false} scroll={false} className="w-60 !p-3" role="dialog">
         <div className="grid grid-cols-6 justify-items-center gap-2">
-          {TEXT_SWATCHES.map(s => <Swatch key={s.color} color={s.color} label={s.label} selected={current === s.color} onPick={() => apply(s.color)} />)}
+          {TEXT_SWATCHES.map(s => <Swatch key={s.color} color={s.color} label={t(s.label)} selected={current === s.color} onPick={() => apply(s.color)} />)}
         </div>
         {recent.length > 0 && (
           <div className="mt-3 flex items-center gap-2">
-            <span className="text-xs font-semibold text-text-secondary">Recent</span>
+            <span className="text-xs font-semibold text-text-secondary">{t("Recent")}</span>
             <span className="flex-1" />
             {recent.map(c => <Swatch key={c} color={c} label={c.toUpperCase()} selected={current === c.toLowerCase()} onPick={() => apply(c)} size="h-5 w-5" />)}
           </div>
         )}
         <div className="mt-3 flex items-center border-t border-border-subtle pt-2.5">
-          <span className="text-xs font-semibold text-text-secondary">Custom</span>
+          <span className="text-xs font-semibold text-text-secondary">{t("Custom")}</span>
           <span className="flex-1" />
           {!showPicker && (
             <button type="button" onMouseDown={(e) => { e.preventDefault(); openPicker(); }} className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary">
-              <Plus className="h-3.5 w-3.5" aria-hidden="true" /> Pick a colour
-            </button>
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />{t("Pick a colour")}</button>
           )}
         </div>
         {showPicker && (
           <div className="mt-2.5">
             <ColorPicker value={draft} onChange={setDraft} />
             <div className="mt-3 flex justify-end gap-2">
-              <Button variant="subtle" size="sm" onMouseDown={(e) => { e.preventDefault(); setShowPicker(false); }}>Cancel</Button>
-              <Button variant="primary" size="sm" onMouseDown={(e) => { e.preventDefault(); applyPicker(); }}>Apply</Button>
+              <Button variant="subtle" size="sm" onMouseDown={(e) => { e.preventDefault(); setShowPicker(false); }}>{t("Cancel")}</Button>
+              <Button variant="primary" size="sm" onMouseDown={(e) => { e.preventDefault(); applyPicker(); }}>{t("Apply")}</Button>
             </div>
           </div>
         )}
@@ -510,10 +516,11 @@ function insertSceneBreak(editor) {
 }
 
 export function Toolbar({ editor, pageConfig }) {
+  const { t } = useI18n();
   useToolbarTick(editor);
   if (!editor) return null;
   return (
-    <div role="toolbar" aria-label="Formatting" className="wd-toolbar flex min-w-0 flex-nowrap items-center gap-0.5 overflow-x-auto">
+    <div role="toolbar" aria-label={t("Formatting")} className="wd-toolbar flex min-w-0 flex-nowrap items-center gap-0.5 overflow-x-auto">
       <TextStyleControl editor={editor} baseFont={pageConfig?.defaultFont} />
       <Divider />
       <FontPicker editor={editor} baseFont={pageConfig?.defaultFont} />
@@ -522,20 +529,20 @@ export function Toolbar({ editor, pageConfig }) {
       <span className="w-1" />
       <SpacingControl editor={editor} baseLineHeight={pageConfig?.lineHeight} baseSpacing={pageConfig?.paragraphSpacing} />
       <Divider />
-      <ToolbarButton active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} label="Bold"><Bold className="h-4 w-4" /></ToolbarButton>
-      <ToolbarButton active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()} label="Italic"><Italic className="h-4 w-4" /></ToolbarButton>
-      <ToolbarButton active={editor.isActive('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()} label="Underline"><Underline className="h-4 w-4" /></ToolbarButton>
-      <ToolbarButton active={editor.isActive('strike')} onClick={() => editor.chain().focus().toggleStrike().run()} label="Strikethrough"><Strikethrough className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()} label={t("Bold")}><Bold className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()} label={t("Italic")}><Italic className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton active={editor.isActive('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()} label={t("Underline")}><Underline className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton active={editor.isActive('strike')} onClick={() => editor.chain().focus().toggleStrike().run()} label={t("Strikethrough")}><Strikethrough className="h-4 w-4" /></ToolbarButton>
       <ColorPopover editor={editor} />
       <Divider />
       <AlignControl editor={editor} />
       <Divider />
-      <ToolbarButton active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} label="Bullet list"><List className="h-4 w-4" /></ToolbarButton>
-      <ToolbarButton active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} label="Numbered list"><ListOrdered className="h-4 w-4" /></ToolbarButton>
-      <ToolbarButton active={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} label="Quote"><Quote className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()} label={t("Bullet list")}><List className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()} label={t("Numbered list")}><ListOrdered className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton active={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()} label={t("Quote")}><Quote className="h-4 w-4" /></ToolbarButton>
       <Divider />
-      <ToolbarButton onClick={() => insertSceneBreak(editor)} label="Scene break"><Asterisk className="h-4 w-4" /></ToolbarButton>
-      <ToolbarButton active={editor.isActive('table')} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} label="Insert table"><TableIcon className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton onClick={() => insertSceneBreak(editor)} label={t("Scene break")}><Asterisk className="h-4 w-4" /></ToolbarButton>
+      <ToolbarButton active={editor.isActive('table')} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} label={t("Insert table")}><TableIcon className="h-4 w-4" /></ToolbarButton>
     </div>
   );
 }
@@ -548,6 +555,7 @@ const CELL_SWATCHES = [
 // Cell background color: swatches + custom picker + clear. Font color stays on
 // the main toolbar; this only fills the selected cell(s).
 function CellColorControl({ editor }) {
+  const { t } = useI18n();
   const [showPicker, setShowPicker] = useState(false);
   const [draft, setDraft] = useState('#fde68a');
   const ref = useRef(null);
@@ -563,17 +571,17 @@ function CellColorControl({ editor }) {
         </Tooltip>
       ))}
       <Tooltip content="Custom fill">
-        <button type="button" aria-label="Custom fill"
+        <button type="button" aria-label={t("Custom fill")}
           onMouseDown={(e) => { e.preventDefault(); setShowPicker(s => !s); }}
           className={`h-[1.125rem] w-[1.125rem] cursor-pointer rounded border ${showPicker ? 'border-text-primary' : 'border-border-strong'}`}
           style={{ background: 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)' }} />
       </Tooltip>
-      <button type="button" onMouseDown={(e) => { e.preventDefault(); apply(null); }} className="rounded-md px-1.5 py-0.5 text-xs font-semibold text-text-muted hover:bg-surface-hover hover:text-text-primary">No fill</button>
+      <button type="button" onMouseDown={(e) => { e.preventDefault(); apply(null); }} className="rounded-md px-1.5 py-0.5 text-xs font-semibold text-text-muted hover:bg-surface-hover hover:text-text-primary">{t("No fill")}</button>
       <Popover anchorRef={ref} open={showPicker} onClose={() => setShowPicker(false)} matchAnchorWidth={false} scroll={false} className="w-56 !p-3">
         <ColorPicker value={draft} onChange={setDraft} />
         <div className="mt-3 flex justify-end gap-2">
-          <Button variant="subtle" size="sm" onMouseDown={(e) => { e.preventDefault(); setShowPicker(false); }}>Cancel</Button>
-          <Button variant="primary" size="sm" onMouseDown={(e) => { e.preventDefault(); apply(draft); setShowPicker(false); }}>Apply</Button>
+          <Button variant="subtle" size="sm" onMouseDown={(e) => { e.preventDefault(); setShowPicker(false); }}>{t("Cancel")}</Button>
+          <Button variant="primary" size="sm" onMouseDown={(e) => { e.preventDefault(); apply(draft); setShowPicker(false); }}>{t("Apply")}</Button>
         </div>
       </Popover>
     </div>
@@ -583,6 +591,7 @@ function CellColorControl({ editor }) {
 const GroupLabel = ({ children }) => <span className="px-1 text-xs font-semibold text-text-subtle">{children}</span>;
 
 function TableBubble({ editor }) {
+  const { t } = useI18n();
   useToolbarTick(editor);
   if (!editor) return null;
   return (
@@ -593,32 +602,32 @@ function TableBubble({ editor }) {
       updateDelay={0}
       className="flex flex-wrap items-center gap-0.5 rounded-card border border-border-default bg-surface-panel px-2 py-1.5 shadow-overlay"
     >
-      <div role="toolbar" aria-label="Table" className="flex flex-wrap items-center gap-0.5">
-        <GroupLabel>Rows</GroupLabel>
-        <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} label="Row above"><ArrowUpToLine className="h-4 w-4" /></ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} label="Row below"><ArrowDownToLine className="h-4 w-4" /></ToolbarButton>
-        <ToolbarButton danger onClick={() => editor.chain().focus().deleteRow().run()} label="Delete row"><Trash2 className="h-4 w-4" /></ToolbarButton>
+      <div role="toolbar" aria-label={t("Table")} className="flex flex-wrap items-center gap-0.5">
+        <GroupLabel>{t("Rows")}</GroupLabel>
+        <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} label={t("Row above")}><ArrowUpToLine className="h-4 w-4" /></ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} label={t("Row below")}><ArrowDownToLine className="h-4 w-4" /></ToolbarButton>
+        <ToolbarButton danger onClick={() => editor.chain().focus().deleteRow().run()} label={t("Delete row")}><Trash2 className="h-4 w-4" /></ToolbarButton>
         <Divider />
-        <GroupLabel>Columns</GroupLabel>
-        <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} label="Column left"><ArrowLeftToLine className="h-4 w-4" /></ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} label="Column right"><ArrowRightToLine className="h-4 w-4" /></ToolbarButton>
-        <ToolbarButton danger onClick={() => editor.chain().focus().deleteColumn().run()} label="Delete column"><Trash2 className="h-4 w-4" /></ToolbarButton>
+        <GroupLabel>{t("Columns")}</GroupLabel>
+        <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} label={t("Column left")}><ArrowLeftToLine className="h-4 w-4" /></ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} label={t("Column right")}><ArrowRightToLine className="h-4 w-4" /></ToolbarButton>
+        <ToolbarButton danger onClick={() => editor.chain().focus().deleteColumn().run()} label={t("Delete column")}><Trash2 className="h-4 w-4" /></ToolbarButton>
         <Divider />
-        <GroupLabel>Cells</GroupLabel>
-        <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderRow().run()} label="Header row"><Rows3 className="h-4 w-4" /></ToolbarButton>
-        <ToolbarButton onClick={() => editor.chain().focus().mergeOrSplit().run()} label="Merge or split cells"><Combine className="h-4 w-4" /></ToolbarButton>
+        <GroupLabel>{t("Cells")}</GroupLabel>
+        <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderRow().run()} label={t("Header row")}><Rows3 className="h-4 w-4" /></ToolbarButton>
+        <ToolbarButton onClick={() => editor.chain().focus().mergeOrSplit().run()} label={t("Merge or split cells")}><Combine className="h-4 w-4" /></ToolbarButton>
         <span className="w-1.5" />
         <CellColorControl editor={editor} />
         <Divider />
-        <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().deleteTable().run(); }} className="rounded-md px-2 py-1 text-xs font-semibold text-status-danger hover:bg-status-danger/10">Delete table</button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().deleteTable().run(); }} className="rounded-md px-2 py-1 text-xs font-semibold text-status-danger hover:bg-status-danger/10">{t("Delete table")}</button>
       </div>
     </BubbleMenu>
   );
 }
 
 function countWords(text) {
-  const t = (text || '').trim();
-  return t ? t.split(/\s+/).length : 0;
+  const localValue = (text || '').trim();
+  return localValue ? localValue.split(/\s+/).length : 0;
 }
 
 // Colour carries the state; the accent stays for interaction only.
@@ -682,6 +691,7 @@ export default function WritingEditor({
   chaptersHidden = false, onToggleChapters, rightPanel = '', onTogglePanel, notesCount = 0, directivesCount = 0, analysesCount = 0,
   indexingElsewhere = false, indexingProgress = null, onIndexingChange, inWorld = false, onInWorld,
 }) {
+  const { t } = useI18n();
   const { showToast, settings } = useApp();
   const tokenDebug = Boolean(settings?.advanced?.tokenDebug);
   const ragDebug = Boolean(settings?.advanced?.ragDebug);
@@ -1192,7 +1202,7 @@ export default function WritingEditor({
 
       {/* Chapter header, always visible (incl. bubble mode) so Export and Page setup never disappear. */}
       <div className="@container ws-clear glass-panel flex h-[3.25rem] shrink-0 items-center gap-1 border-b border-border-subtle pl-3 pr-3">
-        <IconButton icon={chaptersHidden ? PanelLeftOpen : PanelLeftClose} label={chaptersHidden ? 'Show chapters' : 'Hide chapters'} size="sm" tooltipSide="bottom" onClick={onToggleChapters} />
+        <IconButton icon={chaptersHidden ? PanelLeftOpen : PanelLeftClose} label={chaptersHidden ? t("Show chapters") : t("Hide chapters")} size="sm" tooltipSide="bottom" onClick={onToggleChapters} />
         {folderName && (
           <>
             <span className="ml-1 max-w-[10rem] shrink truncate text-sm text-text-subtle">{folderName}</span>
@@ -1200,14 +1210,14 @@ export default function WritingEditor({
           </>
         )}
         <label className="ml-1 min-w-0 flex-1">
-          <span className="sr-only">Chapter title</span>
+          <span className="sr-only">{t("Chapter title")}</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onBlur={() => onRename?.(title)}
             onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
             className="w-full min-w-0 truncate rounded-md bg-transparent px-1 py-1 text-base font-bold text-text-primary focus:bg-tint/[0.04] focus:outline-none"
-            placeholder="Untitled"
+            placeholder={t("Untitled")}
           />
         </label>
 
@@ -1215,8 +1225,7 @@ export default function WritingEditor({
           // Written inside the story: read only when its item is read, never through story memory.
           <button type="button" onClick={onInWorld}
             className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-full border border-border-default bg-tint/[0.04] px-2.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-tint/[0.08] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-            <ScrollText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />In-world text
-          </button>
+            <ScrollText className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{t("In-world text")}</button>
         ) : (<>
         <button
           type="button"
@@ -1229,36 +1238,36 @@ export default function WritingEditor({
         >
           <pill.Icon animated={busy} className="h-3.5 w-3.5 shrink-0" />
           {pill.label}
-          {busy && progress && <span className="tabular-nums opacity-80">{progress.done} of {progress.total}</span>}
+          {busy && progress && <span className="tabular-nums opacity-80">{progress.done}{' '}{t("of")}{' '}{progress.total}</span>}
           {!busy && <ChevronDown className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />}
         </button>
-        <Menu anchorRef={vecBtnRef} open={vecMenuOpen} onClose={() => setVecMenuOpen(false)} label="AI memory" className="w-72">
+        <Menu anchorRef={vecBtnRef} open={vecMenuOpen} onClose={() => setVecMenuOpen(false)} label={t("AI memory")} className="w-72">
           {vecStatus === 'error'
-            ? <p className="px-2.5 pb-2 pt-1 text-xs leading-snug text-status-danger">The last update failed{vecError ? `: ${vecError}` : '.'}</p>
+            ? <p className="px-2.5 pb-2 pt-1 text-xs leading-snug text-status-danger">{t("The last update failed")}{vecError ? `: ${vecError}` : '.'}</p>
             : <MenuNote>{MEMORY_NOTES[vecStatus]}</MenuNote>}
           {needsSync ? (
             <div className="px-1 pb-2 pt-1">
               <Button fullWidth role="menuitem" onClick={runVectorize} icon={vecStatus === 'error' ? null : IndexOutdatedGlyph}>
-                {vecStatus === 'error' ? 'Try again' : "Update the AI's memory"}
+                {vecStatus === 'error' ? t("Try again") : t("Update the AI's memory")}
               </Button>
-              {vecStatus !== 'error' && <p className="mt-1.5 px-1.5 text-xs leading-snug text-text-muted">Reads the paragraphs you added or changed. Do this after writing.</p>}
+              {vecStatus !== 'error' && <p className="mt-1.5 px-1.5 text-xs leading-snug text-text-muted">{t("Reads the paragraphs you added or changed. Do this after writing.")}</p>}
             </div>
           ) : (
-            <MenuItem label="Update the AI's memory" description="Reads the paragraphs you added or changed. Do this after writing." onSelect={runVectorize} />
+            <MenuItem label={t("Update the AI's memory")} description={t("Reads the paragraphs you added or changed. Do this after writing.")} onSelect={runVectorize} />
           )}
           <MenuSeparator />
-          <MenuItem label="Refresh entity tags" description="Re-tags what the AI already has, without reading it again. Use after changing your Worldbuild entities." onSelect={runRetag} />
+          <MenuItem label={t("Refresh entity tags")} description={t("Re-tags what the AI already has, without reading it again. Use after changing your Worldbuild entities.")} onSelect={runRetag} />
         </Menu>
         </>)}
 
         <Divider />
-        <IconButton icon={Search} label="Find and replace (Ctrl F)" size="sm" tooltipSide="bottom" aria-pressed={showFind} className={showFind ? '!bg-tint/[0.12] !text-text-primary' : ''} onClick={() => setShowFind(v => !v)} />
-        <IconButton icon={FileCog} label="Page setup" size="sm" tooltipSide="bottom" onClick={() => setShowPageSetup(true)} />
-        <IconButton icon={Download} label="Export" size="sm" tooltipSide="bottom" onClick={() => setShowExport(true)} />
+        <IconButton icon={Search} label={t("Find and replace (Ctrl F)")} size="sm" tooltipSide="bottom" aria-pressed={showFind} className={showFind ? '!bg-tint/[0.12] !text-text-primary' : ''} onClick={() => setShowFind(v => !v)} />
+        <IconButton icon={FileCog} label={t("Page setup")} size="sm" tooltipSide="bottom" onClick={() => setShowPageSetup(true)} />
+        <IconButton icon={Download} label={t("Export")} size="sm" tooltipSide="bottom" onClick={() => setShowExport(true)} />
         <Divider />
-        <PanelToggle icon={NoteGlyph} label="Notes" count={notesCount} active={rightPanel === 'notes'} onClick={() => onTogglePanel?.('notes')} />
-        <PanelToggle icon={AiGlyph} label="Analyses" count={analysesCount} active={rightPanel === 'analyses'} onClick={() => onTogglePanel?.('analyses')} />
-        <PanelToggle icon={Pin} label="Directives" count={directivesCount} active={rightPanel === 'directives'} onClick={() => onTogglePanel?.('directives')} />
+        <PanelToggle icon={NoteGlyph} label={t("Notes")} count={notesCount} active={rightPanel === 'notes'} onClick={() => onTogglePanel?.('notes')} />
+        <PanelToggle icon={AiGlyph} label={t("Analyses")} count={analysesCount} active={rightPanel === 'analyses'} onClick={() => onTogglePanel?.('analyses')} />
+        <PanelToggle icon={Pin} label={t("Directives")} count={directivesCount} active={rightPanel === 'directives'} onClick={() => onTogglePanel?.('directives')} />
       </div>
 
       {toolbarMode === 'fixed' && (
@@ -1302,8 +1311,7 @@ export default function WritingEditor({
             onClick={openInvoke}
             className="inline-flex h-8 items-center gap-1.5 rounded-md bg-accent px-3 text-xs font-semibold text-on-accent transition-[filter] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            <AiGlyph className="h-4 w-4" /> Invoke AI
-          </button>
+            <AiGlyph className="h-4 w-4" />{t("Invoke AI")}</button>
           <button
             type="button"
             ref={wbBtnRef}
@@ -1312,8 +1320,7 @@ export default function WritingEditor({
             onClick={() => (wbOpen ? setWbOpen(false) : openWorldbuildMenu())}
             className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${wbOpen ? 'bg-tint/[0.12] text-text-primary' : 'bg-tint/[0.06] text-text-secondary hover:bg-tint/10 hover:text-text-primary'}`}
           >
-            <WorldbuildGlyph className="h-4 w-4" /> Link to world
-            <ChevronDown aria-hidden="true" className={`h-3.5 w-3.5 text-text-subtle transition-transform ${wbOpen ? 'rotate-180' : ''}`} />
+            <WorldbuildGlyph className="h-4 w-4" />{t("Link to world")}<ChevronDown aria-hidden="true" className={`h-3.5 w-3.5 text-text-subtle transition-transform ${wbOpen ? 'rotate-180' : ''}`} />
           </button>
         </BubbleMenu>
       )}
@@ -1332,7 +1339,7 @@ export default function WritingEditor({
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-semibold text-text-primary">{wbData.entity.canonicalName || wbData.text}</span>
                     <span className={`text-xs ${wbData.entity.missing ? 'text-status-warning' : 'text-text-subtle'}`}>
-                      {wbData.entity.missing ? 'No longer in Worldbuild' : [m.label, size].filter(Boolean).join(' · ')}
+                      {wbData.entity.missing ? t("No longer in Worldbuild") : [m.label, size].filter(Boolean).join(' · ')}
                     </span>
                   </span>
                 </div>
@@ -1340,49 +1347,49 @@ export default function WritingEditor({
             })()}
             <MenuSeparator />
             {wbData.entity && !wbData.entity.missing && (
-              <MenuItem icon={ExternalLink} label="Open in Worldbuild" onSelect={() => { setWbOpen(false); onOpenEntity?.(wbData.entity.id); }} />
+              <MenuItem icon={ExternalLink} label={t("Open in Worldbuild")} onSelect={() => { setWbOpen(false); onOpenEntity?.(wbData.entity.id); }} />
             )}
-            <MenuItem icon={Unlink} label="Unlink" onSelect={unlinkEntity} />
+            <MenuItem icon={Unlink} label={t("Unlink")} onSelect={unlinkEntity} />
           </div>
         ) : (
           <div className="flex flex-col">
             <div className="flex min-w-0 items-baseline gap-2 px-2 pb-2 pt-1.5">
               <span className="truncate text-sm font-semibold text-text-primary">“{wbData.text}”</span>
-              <span className="shrink-0 text-xs text-text-subtle">is not linked yet</span>
+              <span className="shrink-0 text-xs text-text-subtle">{t("is not linked yet")}</span>
             </div>
             <label className="mx-1 mb-1.5 flex h-9 items-center gap-2 rounded-md border border-border-default bg-surface-input px-2.5 text-text-subtle focus-within:border-accent/70">
               <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <span className="sr-only">Find an entity</span>
-              <input autoFocus value={wbQuery} onChange={(e) => setWbQuery(e.target.value)} placeholder="Find an entity" className="min-w-0 flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-subtle focus:outline-none" />
+              <span className="sr-only">{t("Find an entity")}</span>
+              <input autoFocus value={wbQuery} onChange={(e) => setWbQuery(e.target.value)} placeholder={t("Find an entity")} className="min-w-0 flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-subtle focus:outline-none" />
             </label>
-            <p className="px-2.5 pb-1 pt-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">Link to</p>
-            <div role="menu" aria-label="Link to" className="custom-scrollbar flex max-h-44 flex-col overflow-y-auto">
+            <p className="px-2.5 pb-1 pt-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">{t("Link to")}</p>
+            <div role="menu" aria-label={t("Link to")} className="custom-scrollbar flex max-h-44 flex-col overflow-y-auto">
               {wbMatches.map(e => {
                 const m = entityTypeMeta(e.type);
                 return (
                   <button key={e.id} type="button" role="menuitem" onClick={() => linkToEntity(e)} className="flex min-h-8 items-center gap-2.5 rounded-lg px-2.5 text-left text-sm text-text-primary hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none">
                     <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${m.dot}`} />
                     <span className="min-w-0 flex-1 truncate">{e.canonicalName}</span>
-                    <span className="shrink-0 text-xs text-text-subtle">{m.label}</span>
+                    <span className="shrink-0 text-xs text-text-subtle">{t(m.label)}</span>
                   </button>
                 );
               })}
-              {!wbMatches.length && <p className="px-2.5 py-1.5 text-xs text-text-subtle">{wbEntities.length ? 'No entity matches.' : 'No entities yet.'}</p>}
+              {!wbMatches.length && <p className="px-2.5 py-1.5 text-xs text-text-subtle">{wbEntities.length ? t("No entity matches.") : t("No entities yet.")}</p>}
             </div>
             <MenuSeparator />
-            <p className="px-2.5 pb-1.5 pt-0.5 text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">Or create as</p>
+            <p className="px-2.5 pb-1.5 pt-0.5 text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">{t("Or create as")}</p>
             <div className="grid grid-cols-2 gap-1 px-1 pb-1">
-              {TYPE_ORDER.map(t => {
-                const m = entityTypeMeta(t);
+              {TYPE_ORDER.map(localValue => {
+                const m = entityTypeMeta(localValue);
                 return (
-                  <button key={t} type="button" onClick={() => createEntityOfType(t)} className="flex h-8 min-w-0 items-center gap-2 rounded-md border border-border-subtle bg-tint/[0.03] px-2.5 text-left text-xs text-text-secondary transition-colors hover:bg-tint/[0.08] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
+                  <button key={localValue} type="button" onClick={() => createEntityOfType(localValue)} className="flex h-8 min-w-0 items-center gap-2 rounded-md border border-border-subtle bg-tint/[0.03] px-2.5 text-left text-xs text-text-secondary transition-colors hover:bg-tint/[0.08] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
                     <span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${m.dot}`} />
-                    <span className="truncate">{m.label}</span>
+                    <span className="truncate">{t(m.label)}</span>
                   </button>
                 );
               })}
             </div>
-            <p className="px-2 pb-1 pt-1.5 text-xs text-text-subtle">Linking also teaches the tagger this spelling.</p>
+            <p className="px-2 pb-1 pt-1.5 text-xs text-text-subtle">{t("Linking also teaches the tagger this spelling.")}</p>
           </div>
         ))}
       </Popover>
@@ -1392,7 +1399,7 @@ export default function WritingEditor({
           <div role="tooltip" className="flex items-center gap-2 whitespace-nowrap rounded-lg border border-border-default bg-surface-panel px-2.5 py-1.5 shadow-overlay">
             <span aria-hidden="true" className={`h-2 w-2 rounded-full ${entityTypeMeta(entityHover.type).dot}`} />
             <span className="text-sm font-semibold text-text-primary">{entityHover.name}</span>
-            <span className="text-xs text-text-subtle">{entityTypeMeta(entityHover.type).label}</span>
+            <span className="text-xs text-text-subtle">{t(entityTypeMeta(entityHover.type).label)}</span>
           </div>
         </div>
       )}
@@ -1424,15 +1431,13 @@ export default function WritingEditor({
           <div className="pointer-events-none sticky bottom-4 z-20 mt-4 flex flex-col items-center gap-2">
             {pending.status === 'flagged' && !stale && (
               <div role="alert" className="pointer-events-auto flex max-w-md items-center gap-2 rounded-card border border-status-warning/30 bg-surface-panel/95 px-3.5 py-2.5 text-xs leading-relaxed text-status-warning shadow-overlay">
-                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
-                The reply was cut off or malformed. Read it closely before accepting.
-              </div>
+                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />{t("The reply was cut off or malformed. Read it closely before accepting.")}</div>
             )}
-            <div role="group" aria-label="Review suggestion" className="pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border-default bg-surface-panel/95 py-1 pl-3 pr-1 shadow-overlay">
+            <div role="group" aria-label={t("Review suggestion")} className="pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border-default bg-surface-panel/95 py-1 pl-3 pr-1 shadow-overlay">
               {stale ? (
                 <>
                   <CircleAlert className="h-4 w-4 text-status-danger" aria-hidden="true" />
-                  <span className="text-xs text-text-secondary">This passage changed, so the suggestion no longer fits.</span>
+                  <span className="text-xs text-text-secondary">{t("This passage changed, so the suggestion no longer fits.")}</span>
                 </>
               ) : (
                 <>
@@ -1443,18 +1448,16 @@ export default function WritingEditor({
                   <span className="text-xs tabular-nums">
                     <span className="text-status-success">+{delta.added}</span>
                     {pending.channel !== 'insertion' && <span className="ml-1.5 text-status-danger">−{delta.removed}</span>}
-                    <span className="ml-1 text-text-subtle">words</span>
+                    <span className="ml-1 text-text-subtle">{t("words")}</span>
                   </span>
                 </>
               )}
               <span aria-hidden="true" className="mx-1 h-4 w-px bg-border-default" />
               {!stale && <WritingDiagnostics debug={pending.debug} tokenDebug={tokenDebug} ragDebug={ragDebug} align="left" />}
               <button type="button" onClick={rejectSuggestion} className="inline-flex h-8 items-center gap-1 rounded-full px-3 text-xs font-semibold text-text-secondary transition-colors hover:bg-tint/[0.08] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                <X className="h-3.5 w-3.5" aria-hidden="true" /> Reject
-              </button>
+                <X className="h-3.5 w-3.5" aria-hidden="true" />{t("Reject")}</button>
               <button type="button" onClick={acceptSuggestion} disabled={stale} className="inline-flex h-8 items-center gap-1 rounded-full bg-accent px-3 text-xs font-semibold text-on-accent transition-[filter] hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                <Check className="h-3.5 w-3.5" aria-hidden="true" /> Accept
-              </button>
+                <Check className="h-3.5 w-3.5" aria-hidden="true" />{t("Accept")}</button>
             </div>
           </div>
         )}
@@ -1466,8 +1469,8 @@ export default function WritingEditor({
           <div role="status" className="flex w-[24rem] max-w-full items-start gap-3 rounded-card border border-border-default bg-surface-panel px-4 py-4 shadow-overlay">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/[0.12] text-accent"><AiGlyph animated className="h-5 w-5" /></span>
             <span className="flex min-w-0 flex-col gap-1">
-              <span className="text-sm font-semibold leading-snug text-text-primary">{profileName(inFlightProfileId)} is working on your selection</span>
-              <span className="text-xs leading-relaxed text-text-muted">This chapter is locked until the result comes back. You can keep writing in other chapters.</span>
+              <span className="text-sm font-semibold leading-snug text-text-primary">{profileName(inFlightProfileId)}{' '}{t("is working on your selection")}</span>
+              <span className="text-xs leading-relaxed text-text-muted">{t("This chapter is locked until the result comes back. You can keep writing in other chapters.")}</span>
             </span>
           </div>
         </div>
@@ -1475,9 +1478,9 @@ export default function WritingEditor({
 
       {/* Status bar: counts, then the chapter's word goal. */}
       <div className="ws-status glass-panel flex h-[2.125rem] shrink-0 items-center gap-4 border-t border-border-subtle px-4 text-xs text-text-subtle">
-        <span className="tabular-nums"><b className="font-semibold text-text-secondary">{counts.words.toLocaleString()}</b> words</span>
-        <span className="tabular-nums">{counts.chars.toLocaleString()} characters</span>
-        {counts.words > 0 && <span className="tabular-nums">About {estimatePagesFromWords(counts.words, pageConfig)} {estimatePagesFromWords(counts.words, pageConfig) === 1 ? 'page' : 'pages'}</span>}
+        <span className="tabular-nums"><b className="font-semibold text-text-secondary">{counts.words.toLocaleString()}</b>{' '}{t("words")}</span>
+        <span className="tabular-nums">{counts.chars.toLocaleString()}{' '}{t("characters")}</span>
+        {counts.words > 0 && <span className="tabular-nums">{t("About")}{' '}{estimatePagesFromWords(counts.words, pageConfig)} {estimatePagesFromWords(counts.words, pageConfig) === 1 ? t("page") : t("pages")}</span>}
         <span className="flex-1" />
         <button
           type="button"
@@ -1490,17 +1493,17 @@ export default function WritingEditor({
           <Target className="h-3.5 w-3.5" aria-hidden="true" />
           {goal > 0 ? (
             <>
-              <span className="tabular-nums">{counts.words.toLocaleString()} of {goal.toLocaleString()}</span>
+              <span className="tabular-nums">{counts.words.toLocaleString()}{' '}{t("of")}{' '}{goal.toLocaleString()}</span>
               <span aria-hidden="true" className="block h-1 w-24 overflow-hidden rounded-full bg-tint/10">
                 <span className={`block h-full rounded-full ${goalPct >= 100 ? 'bg-status-success' : 'bg-text-secondary'}`} style={{ width: `${goalPct}%` }} />
               </span>
               <span className="tabular-nums text-text-secondary">{goalPct}%</span>
             </>
-          ) : 'Set a word goal'}
+          ) : t("Set a word goal")}
         </button>
         <Popover anchorRef={goalRef} open={goalOpen} onClose={() => setGoalOpen(false)} matchAnchorWidth={false} align="right" scroll={false} className="w-60 !p-3" role="dialog">
           <label className="block">
-            <span className="mb-1.5 block text-xs font-semibold text-text-secondary">Word goal for this chapter</span>
+            <span className="mb-1.5 block text-xs font-semibold text-text-secondary">{t("Word goal for this chapter")}</span>
             <input
               autoFocus
               type="number"
@@ -1513,8 +1516,8 @@ export default function WritingEditor({
             />
           </label>
           <div className="mt-3 flex justify-end gap-2">
-            {goal > 0 && <Button variant="subtle" size="sm" onClick={() => saveGoal(0)}>Remove goal</Button>}
-            <Button size="sm" onClick={() => saveGoal(goalDraft)}>Save</Button>
+            {goal > 0 && <Button variant="subtle" size="sm" onClick={() => saveGoal(0)}>{t("Remove goal")}</Button>}
+            <Button size="sm" onClick={() => saveGoal(goalDraft)}>{t("Save")}</Button>
           </div>
         </Popover>
       </div>

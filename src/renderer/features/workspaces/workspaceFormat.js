@@ -11,8 +11,23 @@ export function leadImage(chat, { skipScene = false } = {}) {
   return cover ? { src: cover, position: 'center 40%' } : null;
 }
 
-export function timeAgo(timestamp, now = Date.now()) {
+export function timeAgo(timestamp, now = Date.now(), locale = 'en-US') {
   if (!timestamp) return '';
+  if (locale !== 'en-US') {
+    const minutes = Math.max(0, Math.round((now - timestamp) / 60000));
+    const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+    if (minutes < 1) return formatter.format(0, 'second');
+    if (minutes < 60) return formatter.format(-minutes, 'minute');
+    const hours = Math.round(minutes / 60);
+    if (hours < 24) return formatter.format(-hours, 'hour');
+    const days = Math.round(hours / 24);
+    if (days < 7) return formatter.format(-days, 'day');
+    const weeks = Math.round(days / 7);
+    if (weeks < 5) return formatter.format(-weeks, 'week');
+    const months = Math.round(days / 30);
+    if (months < 12) return formatter.format(-months, 'month');
+    return formatter.format(-Math.round(days / 365), 'year');
+  }
   const minutes = Math.round((now - timestamp) / 60000);
   if (minutes < 1) return 'Just now';
   if (minutes < 60) return `${minutes} min ago`;

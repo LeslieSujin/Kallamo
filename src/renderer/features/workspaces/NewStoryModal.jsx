@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, BookOpen, Check, Clock, Globe, MapPin, MessageSquare, RotateCcw, Route, Users } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -25,6 +26,7 @@ const GUIDED_POINTS = [
 
 // Starts a new workspace from this one's world. A guided story starts again from its first page.
 export default function NewStoryModal({ chat, onClose, onStarted }) {
+  const { t } = useI18n();
   const { electronAPI, showToast } = useApp();
   const [preview, setPreview] = useState(null);
   const [world, setWorld] = useState(null);
@@ -70,7 +72,7 @@ export default function NewStoryModal({ chat, onClose, onStarted }) {
   const footer = (label, icon, trailing) => (
     <div className="flex items-center justify-end gap-2 border-t border-border-subtle px-5 py-3.5">
       {starting && <span role="status" className="mr-auto truncate text-xs text-text-muted">{STEPS[step] || STEPS.world}</span>}
-      <Button variant="subtle" onClick={close} disabled={starting}>Cancel</Button>
+      <Button variant="subtle" onClick={close} disabled={starting}>{t("Cancel")}</Button>
       <Button icon={icon} loading={starting} onClick={start} disabled={!preview.guided && !title.trim()}>
         {label}{trailing}
       </Button>
@@ -94,12 +96,10 @@ export default function NewStoryModal({ chat, onClose, onStarted }) {
         </div>
         <div className="flex flex-col gap-3.5 px-8 pb-6 pt-2">
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-semibold text-text-muted">New story in this world</span>
-            <h2 className="text-xl font-extrabold tracking-[-0.015em] text-text-primary">Start {chat.title} again</h2>
+            <span className="text-xs font-semibold text-text-muted">{t("New story in this world")}</span>
+            <h2 className="text-xl font-extrabold tracking-[-0.015em] text-text-primary">{t("Start")}{' '}{chat.title}{' '}{t("again")}</h2>
           </div>
-          <p className="text-sm leading-relaxed text-text-secondary">
-            A fresh copy of the world, as it was on your first visit. Your current story stays as it is, with everything that happened in it.
-          </p>
+          <p className="text-sm leading-relaxed text-text-secondary">{t("A fresh copy of the world, as it was on your first visit. Your current story stays as it is, with everything that happened in it.")}</p>
           <ul className="flex flex-col gap-2.5">
             {GUIDED_POINTS.map(({ icon: Icon, title: pointTitle, text }) => (
               <li key={pointTitle} className="flex items-start gap-3 rounded-card border border-tint/[0.09] bg-tint/[0.03] px-4 py-3.5">
@@ -128,8 +128,8 @@ export default function NewStoryModal({ chat, onClose, onStarted }) {
       <div className="flex gap-4 px-5 pt-5">
         <ToneTile icon={BookOpen} color="var(--app-accent)" />
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-text-primary">New story in this world</h2>
-          <p className="mt-1 text-sm leading-relaxed text-text-muted">Opens a new workspace with the same world. This story stays as it is.</p>
+          <h2 className="text-base font-semibold text-text-primary">{t("New story in this world")}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-text-muted">{t("Opens a new workspace with the same world. This story stays as it is.")}</p>
         </div>
       </div>
       <div className="space-y-3.5 px-5 pb-5 pt-4">
@@ -141,10 +141,10 @@ export default function NewStoryModal({ chat, onClose, onStarted }) {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2.5">
-          <StoryList label="Comes along" items={COMES_ALONG} icon={Check} iconClassName="text-status-success" />
-          <StoryList label="Starts fresh" items={STARTS_FRESH} icon={RotateCcw} iconClassName="text-accent" />
+          <StoryList label={t("Comes along")} items={COMES_ALONG} icon={Check} iconClassName="text-status-success" />
+          <StoryList label={t("Starts fresh")} items={STARTS_FRESH} icon={RotateCcw} iconClassName="text-accent" />
         </div>
-        <TextInput label="Name" value={title} onChange={event => setTitle(event.target.value)} maxLength={120} />
+        <TextInput label={t("Name")} value={title} onChange={event => setTitle(event.target.value)} maxLength={120} />
       </div>
       {footer('Start new story', BookOpen)}
     </Modal>

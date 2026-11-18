@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import Badge from './Badge';
 
@@ -14,6 +15,7 @@ export function formatTokens(n) {
  * red (very large / over `max` when a context window is provided).
  */
 export default function TokenBadge({ tokens = 0, max = 0, className = '', severity = 'auto' }) {
+  const { t } = useI18n();
   let tone = 'gray';
   if (severity === 'neutral') {
     tone = 'gray';
@@ -29,7 +31,7 @@ export default function TokenBadge({ tokens = 0, max = 0, className = '', severi
 
   return (
     <span title={`~${tokens.toLocaleString()} tokens`} className={`inline-flex ${className}`}>
-      <Badge tone={tone}>~{formatTokens(tokens)} tok</Badge>
+      <Badge tone={tone}>~{formatTokens(tokens)}{' '}{t("tok")}</Badge>
     </span>
   );
 }

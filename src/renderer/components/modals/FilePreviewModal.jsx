@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState, useEffect } from 'react';
 import { FileCode, FileText, Film, Image as ImageIcon, Loader2, Music } from 'lucide-react';
 import Modal from '../ui/Modal';
@@ -6,6 +7,7 @@ import hljs from '../../utils/highlight';
 import 'highlight.js/styles/github-dark.css'; // dark code theme
 
 export default function FilePreviewModal({ file, onClose }) {
+  const { t } = useI18n();
   const [textContent, setTextContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -48,7 +50,7 @@ export default function FilePreviewModal({ file, onClose }) {
       return (
         <div className="flex flex-col items-center justify-center gap-3 py-12">
           <Loader2 className="h-6 w-6 animate-spin text-accent" aria-hidden="true" />
-          <span className="caption">Reading the file…</span>
+          <span className="caption">{t("Reading the file…")}</span>
         </div>
       );
     }
@@ -125,7 +127,7 @@ export default function FilePreviewModal({ file, onClose }) {
     return (
       <div className="flex max-w-sm flex-col items-center gap-3 py-10 text-center">
         <ToneTile icon={FileText} color="var(--theme-text-muted)" />
-        <p className="text-sm text-text-secondary">There is no preview for .{ext} files.</p>
+        <p className="text-sm text-text-secondary">{t("There is no preview for .")}{ext}{' '}{t("files.")}</p>
       </div>
     );
   };

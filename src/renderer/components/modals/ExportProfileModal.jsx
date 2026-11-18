@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState } from 'react';
 import { Download } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -16,6 +17,7 @@ const listOf = value => {
 export const profileFileName = name => `${String(name || '').replace(/[^a-z0-9]/gi, '_').toLowerCase()}_profile.klp`;
 
 export default function ExportProfileModal({ profile, onClose, onExport }) {
+  const { t } = useI18n();
   const { apiProfiles } = useApp();
   const [exportKb, setExportKb] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -50,7 +52,7 @@ export default function ExportProfileModal({ profile, onClose, onExport }) {
   if (exporting) {
     return (
       <ImportProgressModal
-        title="Exporting an AI profile"
+        title={t("Exporting an AI profile")}
         subtitle={profileFileName(profile?.name)}
         progress={progress}
         statusText={statusText}
@@ -62,20 +64,20 @@ export default function ExportProfileModal({ profile, onClose, onExport }) {
 
   const knowledge = { key: 'kb', label: files ? `Knowledge base, ${files} ${files === 1 ? 'file' : 'files'}` : 'Knowledge base' };
   const inside = [
-    { key: 'rules', label: 'Rules, description and colour' },
-    { key: 'params', label: 'Temperature and reply length' },
-    { key: 'vars', label: 'Variables, written out with their current text' },
+    { key: 'rules', label: t("Rules, description and colour") },
+    { key: 'params', label: t("Temperature and reply length") },
+    { key: 'vars', label: t("Variables, written out with their current text") },
     ...(exportKb ? [knowledge] : []),
   ];
   const stays = [
     { key: 'connection', label: connection ? `The connection, ${connection}` : 'The connection' },
-    { key: 'model', label: profile?.model ? <>The model, <span className="font-mono text-xs">{profile.model}</span></> : 'The model' },
-    { key: 'where', label: 'Where it is turned on' },
+    { key: 'model', label: profile?.model ? <>{t("The model,")}{' '}<span className="font-mono text-xs">{profile.model}</span></> : 'The model' },
+    { key: 'where', label: t("Where it is turned on") },
     ...(exportKb ? [] : [knowledge]),
   ];
 
   return (
-    <Modal onClose={onClose} size="lg" title="Export AI profile" icon={Download} iconClassName="text-text-muted" className="!max-w-[38rem]">
+    <Modal onClose={onClose} size="lg" title={t("Export AI profile")} icon={Download} iconClassName="text-text-muted" className="!max-w-[38rem]">
       <div className="flex items-center gap-3.5 px-5 pt-5">
         {avatar}
         <div className="min-w-0 flex-1">
@@ -89,14 +91,14 @@ export default function ExportProfileModal({ profile, onClose, onExport }) {
           checked={exportKb}
           onChange={setExportKb}
           disabled={!files}
-          title="Include the knowledge base"
-          description={files ? 'Whoever imports it can search these files right away.' : 'This profile has no knowledge files yet.'}
+          title={t("Include the knowledge base")}
+          description={files ? t("Whoever imports it can search these files right away.") : t("This profile has no knowledge files yet.")}
         />
       </div>
       <div className="flex items-center gap-2 border-t border-border-subtle px-5 py-3.5">
         <FileName name={profileFileName(profile?.name)} />
-        <Button variant="subtle" onClick={onClose}>Cancel</Button>
-        <Button icon={Download} onClick={handleConfirmExport}>Export</Button>
+        <Button variant="subtle" onClick={onClose}>{t("Cancel")}</Button>
+        <Button icon={Download} onClick={handleConfirmExport}>{t("Export")}</Button>
       </div>
     </Modal>
   );

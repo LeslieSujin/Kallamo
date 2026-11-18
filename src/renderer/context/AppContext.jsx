@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { createContext, useCallback, useContext, useState, useEffect, useRef } from 'react';
 import { useChatSession } from '../features/chat/useChatSession';
 import { isGenerationEventForWorkspace, isRetryableGenerationError } from '../features/chat/generation-target';
@@ -51,6 +52,7 @@ const applyDialogueColor = (iface = {}) => {
 };
 
 export const AppProvider = ({ children }) => {
+  const { t } = useI18n();
   const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'library', 'chat'
   const [activeWorkspaceView, setActiveWorkspaceView] = useState('chat');
   const [chats, setChats] = useState([]);
@@ -269,7 +271,7 @@ export const AppProvider = ({ children }) => {
             "Local AI Engine couldn't be downloaded automatically. Open Settings to check and install it manually.",
             "error",
             12000,
-            { label: "Open Settings", onClick: () => openSettings('engine', 'embedding') }
+            { label: t("Open Settings"), onClick: () => openSettings('engine', 'embedding') }
           );
         } else {
           showToast(`Engine installation failed: ${data.error}`, "error");
@@ -289,7 +291,7 @@ export const AppProvider = ({ children }) => {
         `Entity tagging failed: ${reason}. Your text and vector retrieval were preserved, but World Index tags were skipped.`,
         'error',
         10000,
-        { label: "Open Settings", onClick: () => openSettings('engine', 'tagger') }
+        { label: t("Open Settings"), onClick: () => openSettings('engine', 'tagger') }
       );
     }) : () => { };
 

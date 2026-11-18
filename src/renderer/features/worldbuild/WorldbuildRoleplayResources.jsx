@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Activity, Check, History, Pencil, Plus, RotateCcw } from 'lucide-react';
 import Button from '../../components/ui/Button';
@@ -31,6 +32,7 @@ function SheetNumber({ value, onChange, className, ariaLabel, min, max, integer 
 
 /** What the AI wants to change waits here and in Narrative State, and can be approved without editing. */
 export default function WorldbuildRoleplayResources({ workspaceId, entity, entities = [], api, showToast, onOpen }) {
+  const { t } = useI18n();
   const [resources, setResources] = useState([]);
   const [progress, setProgress] = useState(null);
   const [pending, setPending] = useState([]);
@@ -144,13 +146,13 @@ export default function WorldbuildRoleplayResources({ workspaceId, entity, entit
     <section className="ws-card overflow-hidden rounded-card border border-border-default bg-surface-panel-muted/60 backdrop-blur-md">
       <header className="flex min-h-11 items-center gap-2.5 border-b border-border-subtle pl-4 pr-2">
         <Activity className="h-4 w-4 shrink-0 text-text-muted" aria-hidden="true" />
-        <h2 className="text-sm font-semibold text-text-primary">Roleplay state</h2>
-        {editing ? <span className="text-xs text-text-subtle">Editing</span> : throughLabel && <span className="hidden truncate text-xs text-text-subtle sm:inline">{throughLabel}</span>}
+        <h2 className="text-sm font-semibold text-text-primary">{t("Roleplay state")}</h2>
+        {editing ? <span className="text-xs text-text-subtle">{t("Editing")}</span> : throughLabel && <span className="hidden truncate text-xs text-text-subtle sm:inline">{throughLabel}</span>}
         <span className="flex-1" />
         {!editing && (
           <>
-            <button type="button" onClick={openHistory} className={headerButton}><History className="h-3.5 w-3.5" aria-hidden="true" />History</button>
-            <button type="button" onClick={startEdit} aria-label="Edit Roleplay state" className={headerButton}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />Edit</button>
+            <button type="button" onClick={openHistory} className={headerButton}><History className="h-3.5 w-3.5" aria-hidden="true" />{t("History")}</button>
+            <button type="button" onClick={startEdit} aria-label={t("Edit Roleplay state")} className={headerButton}><Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t("Edit")}</button>
           </>
         )}
       </header>
@@ -159,21 +161,21 @@ export default function WorldbuildRoleplayResources({ workspaceId, entity, entit
         {levels && (
           <div className="flex items-center gap-4 rounded-card border border-entity-event/25 bg-entity-event/[0.07] p-3.5">
             <div className="flex w-14 flex-col items-center gap-1">
-              <span className="text-xs font-semibold text-entity-event">Level</span>
+              <span className="text-xs font-semibold text-entity-event">{t("Level")}</span>
               {editing
-                ? <SheetNumber ariaLabel="Level" value={draft.level} min={1} className="h-9 w-14 !text-center text-xl font-bold" onChange={value => setDraft(current => ({ ...current, level: value }))} />
+                ? <SheetNumber ariaLabel={t("Level")} value={draft.level} min={1} className="h-9 w-14 !text-center text-xl font-bold" onChange={value => setDraft(current => ({ ...current, level: value }))} />
                 : <span className="text-2xl font-bold tabular-nums text-text-primary">{progress.level}</span>}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 text-[0.8125rem]">
-                <span className="flex-1 font-semibold text-text-secondary">XP</span>
+                <span className="flex-1 font-semibold text-text-secondary">{t("XP")}</span>
                 {editing
-                  ? <SheetNumber ariaLabel="XP" value={draft.xp} min={0} className="h-8 w-20 text-[0.8125rem]" onChange={value => setDraft(current => ({ ...current, xp: value }))} />
+                  ? <SheetNumber ariaLabel={t("XP")} value={draft.xp} min={0} className="h-8 w-20 text-[0.8125rem]" onChange={value => setDraft(current => ({ ...current, xp: value }))} />
                   : <span className="tabular-nums text-text-primary">{format(progress.xp)}</span>}
                 <span className="text-xs tabular-nums text-text-subtle">/ {progress.goal ? format(progress.goal) : '—'}</span>
               </div>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-hover/70"><div className="h-full rounded-full" style={{ width: `${progress.goal ? percent(progress.xp, 0, progress.goal) : 100}%`, backgroundColor: PROGRESS_COLOR }} /></div>
-              <span className="mt-1 block text-xs tabular-nums text-text-subtle">{progress.goal ? `${format(Math.max(0, progress.goal - progress.xp))} to level ${progress.level + 1}` : 'Highest level'}</span>
+              <span className="mt-1 block text-xs tabular-nums text-text-subtle">{progress.goal ? `${format(Math.max(0, progress.goal - progress.xp))} to level ${progress.level + 1}` : t("Highest level")}</span>
             </div>
           </div>
         )}
@@ -192,7 +194,7 @@ export default function WorldbuildRoleplayResources({ workspaceId, entity, entit
                   </div>
                   <span className="text-xs text-text-subtle">
                     {attribute.bonus
-                      ? <>Base {attribute.base}, {attribute.bonus > 0 ? '+' : '−'}{Math.abs(attribute.bonus)} from {attribute.bonusFromId
+                      ? <>{t("Base")}{' '}{attribute.base}, {attribute.bonus > 0 ? '+' : '−'}{Math.abs(attribute.bonus)}{' '}{t("from")}{' '}{attribute.bonusFromId
                         ? <button type="button" onClick={() => onOpen?.(attribute.bonusFromId)} className="font-medium text-text-secondary hover:text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{attribute.bonusFromName}</button>
                         : attribute.bonusFromName}</>
                       : `Base ${attribute.base}`}
@@ -229,14 +231,12 @@ export default function WorldbuildRoleplayResources({ workspaceId, entity, entit
                   <div className="flex min-h-5 flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-text-subtle">
                     {editing ? (
                       <>
-                        <label className="flex items-center gap-2">
-                          Adjustment
-                          <NumberInput aria-label={`${resource.name} adjustment`} nullable placeholder="+0" integer={false} className={`${numberField} h-7 w-20 text-xs`} value={draft.adjustments[resource.definitionId] === '' ? null : draft.adjustments[resource.definitionId]} onChange={value => setPart('adjustments', resource.definitionId, value ?? '')} />
+                        <label className="flex items-center gap-2">{t("Adjustment")}<NumberInput aria-label={`${resource.name} adjustment`} nullable placeholder="+0" integer={false} className={`${numberField} h-7 w-20 text-xs`} value={draft.adjustments[resource.definitionId] === '' ? null : draft.adjustments[resource.definitionId]} onChange={value => setPart('adjustments', resource.definitionId, value ?? '')} />
                         </label>
                         {adjustment !== parts.adjustment && (
                           <ReasonInput className="order-last mt-1 w-full" label={`Why ${resource.name} changed`} value={draft.reasons[resource.definitionId]} onChange={value => setPart('reasons', resource.definitionId, value)} />
                         )}
-                        <button type="button" disabled={current >= maximum} onClick={() => setPart('resources', resource.definitionId, maximum)} className="ml-auto inline-flex min-h-5 items-center gap-1 rounded-md px-1.5 -mr-1.5 text-xs font-semibold text-text-muted transition-colors hover:bg-surface-hover/60 hover:text-text-primary disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><RotateCcw className="h-3 w-3" aria-hidden="true" />Refill</button>
+                        <button type="button" disabled={current >= maximum} onClick={() => setPart('resources', resource.definitionId, maximum)} className="ml-auto inline-flex min-h-5 items-center gap-1 rounded-md px-1.5 -mr-1.5 text-xs font-semibold text-text-muted transition-colors hover:bg-surface-hover/60 hover:text-text-primary disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><RotateCcw className="h-3 w-3" aria-hidden="true" />{t("Refill")}</button>
                       </>
                     ) : (
                       <MaximumParts resource={resource} levels={progress?.mode === 'levels'} entities={entities} onOpen={onOpen} workspaceId={workspaceId} entityId={entity.id} api={api} />
@@ -250,9 +250,9 @@ export default function WorldbuildRoleplayResources({ workspaceId, entity, entit
 
         {editing && (
           <div className="flex items-center justify-end gap-2">
-            <span className="mr-auto text-xs text-text-subtle">{resources.length ? 'The maximum follows the level, the race and the adjustment.' : 'The number you type is the number kept.'}</span>
-            <Button variant="ghost" size="sm" disabled={saving} onClick={() => setDraft(null)}>Cancel</Button>
-            <Button size="sm" icon={Check} loading={saving} onClick={save}>Save</Button>
+            <span className="mr-auto text-xs text-text-subtle">{resources.length ? t("The maximum follows the level, the race and the adjustment.") : t("The number you type is the number kept.")}</span>
+            <Button variant="ghost" size="sm" disabled={saving} onClick={() => setDraft(null)}>{t("Cancel")}</Button>
+            <Button size="sm" icon={Check} loading={saving} onClick={save}>{t("Save")}</Button>
           </div>
         )}
 
@@ -263,15 +263,15 @@ export default function WorldbuildRoleplayResources({ workspaceId, entity, entit
                 <div className="min-w-0 flex-1">
                   <span className="flex items-center gap-2 text-[0.8125rem] font-semibold text-text-primary">
                     {describePending(change)}
-                    {change.area === 'resource' && change.maximumDelta ? <span className="rounded-full bg-status-warning/12 px-2 py-0.5 text-xs font-semibold text-status-warning">Lasting</span> : null}
+                    {change.area === 'resource' && change.maximumDelta ? <span className="rounded-full bg-status-warning/12 px-2 py-0.5 text-xs font-semibold text-status-warning">{t("Lasting")}</span> : null}
                   </span>
                   {change.reason && <span className="block text-xs leading-relaxed text-text-muted">{change.reason}</span>}
                 </div>
-                <Button variant="subtle" size="sm" onClick={() => resolve(change, 'rejected')}>Reject</Button>
-                <Button variant="ghost" size="sm" icon={Check} onClick={() => resolve(change, 'approved')}>Approve</Button>
+                <Button variant="subtle" size="sm" onClick={() => resolve(change, 'rejected')}>{t("Reject")}</Button>
+                <Button variant="ghost" size="sm" icon={Check} onClick={() => resolve(change, 'approved')}>{t("Approve")}</Button>
               </div>
             ))}
-            <p className="text-xs text-text-subtle">The same change waits in Narrative State. With Automatic it applies at once and shows in History.</p>
+            <p className="text-xs text-text-subtle">{t("The same change waits in Narrative State. With Automatic it applies at once and shows in History.")}</p>
           </div>
         )}
       </div>
@@ -289,6 +289,7 @@ export default function WorldbuildRoleplayResources({ workspaceId, entity, entit
 
 // Where a maximum comes from, in one line; the adjustments open into the whole sum.
 function MaximumParts({ resource, levels, entities, onOpen, workspaceId, entityId, api }) {
+  const { t } = useI18n();
   const parts = resource.parts;
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -310,24 +311,23 @@ function MaximumParts({ resource, levels, entities, onOpen, workspaceId, entityI
   );
   return (
     <>
-      {parts.baseFromGroup && groupChip ? <>{groupChip}<span className="tabular-nums">{format(parts.base)}</span></> : <span className="tabular-nums">{format(parts.base)} base</span>}
-      {levels && parts.levelBonus !== 0 && <span className="tabular-nums">· {signed(parts.levelBonus)} levels</span>}
+      {parts.baseFromGroup && groupChip ? <>{groupChip}<span className="tabular-nums">{format(parts.base)}</span></> : <span className="tabular-nums">{format(parts.base)}{' '}{t("base")}</span>}
+      {levels && parts.levelBonus !== 0 && <span className="tabular-nums">· {signed(parts.levelBonus)}{' '}{t("levels")}</span>}
       {parts.adjustment !== 0 && (
         <>
           <span aria-hidden="true">·</span>
           <button ref={anchorRef} type="button" aria-expanded={open} onClick={toggle} className="rounded-sm font-semibold tabular-nums text-text-secondary underline decoration-dotted underline-offset-2 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-            {signed(parts.adjustment)} adjusted
-          </button>
+            {signed(parts.adjustment)}{t("adjusted")}</button>
           <Popover anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} matchAnchorWidth={false} maxHeight={320} className="w-80 border-border-default bg-surface-panel-muted p-3.5 shadow-black/60">
             <div className="flex flex-col gap-1.5 text-[0.8125rem]">
-              <Row label={parts.baseFromGroup && group ? `Base, from ${group.canonicalName}` : 'Base'} value={format(parts.base)} />
-              {levels && parts.level > 1 && parts.growth !== 0 && <Row label={<>Level {parts.level} <span className="text-text-subtle">· {signed(parts.growth)} for each of {parts.level - 1}</span></>} value={signed(parts.levelBonus)} />}
-              <Row label="Adjustments" value={signed(parts.adjustment)} />
+              <Row label={parts.baseFromGroup && group ? `Base, from ${group.canonicalName}` : t("Base")} value={format(parts.base)} />
+              {levels && parts.level > 1 && parts.growth !== 0 && <Row label={<>{t("Level")}{' '}{parts.level} <span className="text-text-subtle">· {signed(parts.growth)}{' '}{t("for each of")}{' '}{parts.level - 1}</span></>} value={signed(parts.levelBonus)} />}
+              <Row label={t("Adjustments")} value={signed(parts.adjustment)} />
               {(entries || []).map(entry => (
-                <Row key={entry.id} indent tooltip={entry.reason} label={<>{entry.reason || (entry.source === 'manual' ? 'Changed by hand' : 'Changed')}{entry.turnNumber ? <span className="text-text-subtle"> · turn {entry.turnNumber}</span> : null}</>} value={signed(entry.maximumDelta)} />
+                <Row key={entry.id} indent tooltip={entry.reason} label={<>{entry.reason || (entry.source === 'manual' ? 'Changed by hand' : 'Changed')}{entry.turnNumber ? <span className="text-text-subtle">{' '}{t("· turn")}{' '}{entry.turnNumber}</span> : null}</>} value={signed(entry.maximumDelta)} />
               ))}
               <div className="my-0.5 border-t border-border-subtle" />
-              <Row strong label="Maximum" value={format(resource.maximum)} />
+              <Row strong label={t("Maximum")} value={format(resource.maximum)} />
             </div>
           </Popover>
         </>
@@ -360,6 +360,7 @@ function describePending(change) {
 // A race, or a species of creature, can give its members their own base and growth for each
 // resource, and attribute bonuses. Changing them moves every member; their adjustments stay.
 export function RaceRoleplayDefaults({ workspaceId, race, api, showToast }) {
+  const { t } = useI18n();
   const targetType = race.type === 'Races' ? 'race' : 'species';
   const [definitions, setDefinitions] = useState([]);
   const [values, setValues] = useState({});
@@ -441,15 +442,15 @@ export function RaceRoleplayDefaults({ workspaceId, race, api, showToast }) {
     <section className="ws-card overflow-hidden rounded-card border border-border-default bg-surface-panel-muted/60 backdrop-blur-md">
       <header className="flex min-h-11 items-center gap-2.5 border-b border-border-subtle pl-4 pr-2">
         <Activity className="h-4 w-4 shrink-0 text-text-muted" aria-hidden="true" />
-        <h2 className="text-sm font-semibold text-text-primary">Roleplay state</h2>
-        {editing && <span className="text-xs text-text-subtle">Editing</span>}
+        <h2 className="text-sm font-semibold text-text-primary">{t("Roleplay state")}</h2>
+        {editing && <span className="text-xs text-text-subtle">{t("Editing")}</span>}
         <span className="flex-1" />
-        {!editing && <button type="button" onClick={startEdit} className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-muted transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{ownValues ? <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> : <Plus className="h-3.5 w-3.5" aria-hidden="true" />}{ownValues ? 'Edit' : 'Set values'}</button>}
+        {!editing && <button type="button" onClick={startEdit} className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-muted transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{ownValues ? <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> : <Plus className="h-3.5 w-3.5" aria-hidden="true" />}{ownValues ? t("Edit") : t("Set values")}</button>}
       </header>
       <div className="flex flex-col gap-4 p-4">
         {definitions.length > 0 && (
           <div>
-            <span className="text-[0.8125rem] font-semibold text-text-muted">Resources</span>
+            <span className="text-[0.8125rem] font-semibold text-text-muted">{t("Resources")}</span>
             {editing ? (
               <div className="mt-2 grid gap-2.5 sm:grid-cols-3">{definitions.map(definition => {
                 const entry = draft[definition.id] || {};
@@ -459,19 +460,15 @@ export function RaceRoleplayDefaults({ workspaceId, race, api, showToast }) {
                     <div className="flex items-center gap-2">
                       <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-[0.1875rem]" style={{ backgroundColor: definition.color }} />
                       <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-primary">{definition.name}</span>
-                      <span className="text-xs text-text-subtle">{chosen ? 'Chosen' : 'Everyone'}</span>
+                      <span className="text-xs text-text-subtle">{chosen ? t("Chosen") : t("Everyone")}</span>
                     </div>
-                    {chosen && <Checkbox checked={Boolean(entry.has)} onChange={() => setEntry(definition.id, { has: !entry.has })} label="Members have it" />}
+                    {chosen && <Checkbox checked={Boolean(entry.has)} onChange={() => setEntry(definition.id, { has: !entry.has })} label={t("Members have it")} />}
                     {(!chosen || entry.has) && (
                       <div className={`grid gap-2 ${levels ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                        <label className="flex flex-col gap-1 text-xs text-text-muted">
-                          Base
-                          <NumberInput aria-label={`${definition.name} base`} nullable integer={false} className={field} placeholder={format(definition.maximum)} value={entry.base === '' ? null : entry.base} onChange={value => setEntry(definition.id, { base: value ?? '' })} />
+                        <label className="flex flex-col gap-1 text-xs text-text-muted">{t("Base")}<NumberInput aria-label={`${definition.name} base`} nullable integer={false} className={field} placeholder={format(definition.maximum)} value={entry.base === '' ? null : entry.base} onChange={value => setEntry(definition.id, { base: value ?? '' })} />
                         </label>
                         {levels && (
-                          <label className="flex flex-col gap-1 text-xs text-text-muted">
-                            Per level
-                            <NumberInput aria-label={`${definition.name} growth per level`} nullable integer={false} className={field} placeholder={signed(definition.growthPerLevel || 0)} value={entry.growth === '' ? null : entry.growth} onChange={value => setEntry(definition.id, { growth: value ?? '' })} />
+                          <label className="flex flex-col gap-1 text-xs text-text-muted">{t("Per level")}<NumberInput aria-label={`${definition.name} growth per level`} nullable integer={false} className={field} placeholder={signed(definition.growthPerLevel || 0)} value={entry.growth === '' ? null : entry.growth} onChange={value => setEntry(definition.id, { growth: value ?? '' })} />
                           </label>
                         )}
                       </div>
@@ -495,10 +492,10 @@ export function RaceRoleplayDefaults({ workspaceId, race, api, showToast }) {
                     <span className="min-w-0 flex-1 text-[0.8125rem]">
                       {has(definition) ? (
                         <>
-                          <span className={`tabular-nums ${own(value?.base != null)}`}>{format(base)}</span><span className="text-text-subtle"> base</span>
-                          {levels && (growth !== 0 || value?.growth != null) && <><span className="text-text-subtle"> · </span><span className={`tabular-nums ${own(value?.growth != null)}`}>{signed(growth)}</span><span className="text-text-subtle"> per level</span></>}
+                          <span className={`tabular-nums ${own(value?.base != null)}`}>{format(base)}</span><span className="text-text-subtle">{' '}{t("base")}</span>
+                          {levels && (growth !== 0 || value?.growth != null) && <><span className="text-text-subtle"> · </span><span className={`tabular-nums ${own(value?.growth != null)}`}>{signed(growth)}</span><span className="text-text-subtle">{' '}{t("per level")}</span></>}
                         </>
-                      ) : <span className="text-text-subtle">Members don't have it</span>}
+                      ) : <span className="text-text-subtle">{t("Members don't have it")}</span>}
                     </span>
                     {has(definition) && <span className="shrink-0 text-xs text-text-subtle">{note}</span>}
                   </div>
@@ -509,7 +506,7 @@ export function RaceRoleplayDefaults({ workspaceId, race, api, showToast }) {
         )}
         {showTraits && (
           <div>
-            <span className="text-[0.8125rem] font-semibold text-text-muted">Attribute bonuses</span>
+            <span className="text-[0.8125rem] font-semibold text-text-muted">{t("Attribute bonuses")}</span>
             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">{traits.map(trait => {
               const value = traitValues[trait.id];
               return editing ? (
@@ -530,16 +527,16 @@ export function RaceRoleplayDefaults({ workspaceId, race, api, showToast }) {
         )}
         {editing ? (
           <>
-            <p className="caption">Leave a field empty to use the resource's own value, shown in grey.</p>
+            <p className="caption">{t("Leave a field empty to use the resource's own value, shown in grey.")}</p>
             <div className="flex justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setEditing(false)} disabled={saving}>Cancel</Button>
-              <Button size="sm" icon={Check} loading={saving} onClick={save}>Save</Button>
+              <Button variant="ghost" size="sm" onClick={() => setEditing(false)} disabled={saving}>{t("Cancel")}</Button>
+              <Button size="sm" icon={Check} loading={saving} onClick={save}>{t("Save")}</Button>
             </div>
           </>
         ) : (
           <p className="caption">
-            {levels ? 'Every member’s maximum follows these, at their own level.' : 'Every member’s maximum follows these.'}
-            {members ? ` Changing them changes it for all ${members} ${members === 1 ? 'member' : 'members'}; their own adjustments stay.` : ' Their own adjustments stay.'}
+            {levels ? t("Every member’s maximum follows these, at their own level.") : t("Every member’s maximum follows these.")}
+            {members ? ` Changing them changes it for all ${members} ${members === 1 ? 'member' : 'members'}; their own adjustments stay.` : t(" Their own adjustments stay.")}
           </p>
         )}
       </div>

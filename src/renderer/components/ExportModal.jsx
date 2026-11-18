@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import Modal from './ui/Modal';
 import { Download } from 'lucide-react';
@@ -26,6 +27,7 @@ function paginateBlocks(container, pageContentHeight) {
 }
 
 export default function ExportModal({ editor, pageConfig, title, electronAPI, onClose }) {
+  const { t } = useI18n();
   const [format, setFormat] = useState('pdf');
   const paginate = true;
   const [pageNumbers, setPageNumbers] = useState(false);
@@ -118,7 +120,7 @@ export default function ExportModal({ editor, pageConfig, title, electronAPI, on
   const posClass = numberPos === 'left' ? 'text-left' : numberPos === 'right' ? 'text-right' : 'text-center';
 
   return (
-    <Modal onClose={onClose} size="2xl" title="Export" subtitle={title || null} icon={Download} className="!max-w-5xl">
+    <Modal onClose={onClose} size="2xl" title={t("Export")} subtitle={title || null} icon={Download} className="!max-w-5xl">
       <div className="flex min-h-0" style={{ height: '78vh' }}>
         <div ref={previewColRef} className="custom-scrollbar flex min-w-0 flex-1 flex-col items-center overflow-y-auto bg-shade/30 px-4 py-6">
           <style>{previewCss}</style>
@@ -148,7 +150,7 @@ export default function ExportModal({ editor, pageConfig, title, electronAPI, on
 
         <div className="flex w-[21rem] shrink-0 flex-col border-l border-border-subtle">
           <div className="custom-scrollbar flex flex-1 flex-col gap-5 overflow-y-auto p-5">
-            <OptionGroup title="Format">
+            <OptionGroup title={t("Format")}>
               <FormatChoice value={format} onChange={setFormat} />
             </OptionGroup>
             <OptionGroup>
@@ -158,7 +160,7 @@ export default function ExportModal({ editor, pageConfig, title, electronAPI, on
                 format={format} start={pageNumberStart} onStart={setPageNumberStart}
               />
             </OptionGroup>
-            <p className="text-xs leading-relaxed text-text-subtle">Paper size, margins and fonts come from this chapter's page setup.</p>
+            <p className="text-xs leading-relaxed text-text-subtle">{t("Paper size, margins and fonts come from this chapter's page setup.")}</p>
           </div>
           <ExportFooter format={format} exporting={exporting} onCancel={onClose} onExport={handleExport} />
         </div>

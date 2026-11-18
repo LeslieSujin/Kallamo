@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import { Suspense, useCallback, useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { ArrowDown, ArrowLeft, Paperclip, X, Folder, AlertTriangle, SlidersHorizontal, Trash2, History } from 'lucide-react';
@@ -41,6 +42,7 @@ const ALWAYS_RENDERED_ROWS = 10;
 const bubbleAlpha = opacity => opacity / 100;
 
 export default function ChatWorkspaceView() {
+  const { t } = useI18n();
   const {
     activeChat,
     activeMessages,
@@ -973,7 +975,7 @@ export default function ChatWorkspaceView() {
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-shade/70 border-2 border-dashed border-accent/40 m-4 rounded-xl pointer-events-none animate-in fade-in duration-200">
             <div className="flex flex-col items-center space-y-4">
               <Paperclip className="w-12 h-12 text-accent animate-bounce" />
-              <span className="text-sm font-bold text-text-primary tracking-wide">Drop files here to attach to chat</span>
+              <span className="text-sm font-bold text-text-primary tracking-wide">{t("Drop files here to attach to chat")}</span>
             </div>
           </div>
         )}
@@ -992,7 +994,7 @@ export default function ChatWorkspaceView() {
             </h2>
           </div>
 
-          <nav aria-label="Workspace areas" className="ws-well flex min-w-0 items-center gap-0.5 rounded-lg border border-border-subtle bg-surface-input/80 p-1 select-none z-10">
+          <nav aria-label={t("Workspace areas")} className="ws-well flex min-w-0 items-center gap-0.5 rounded-lg border border-border-subtle bg-surface-input/80 p-1 select-none z-10">
             {[
               ['chat', 'Workspace', WorkspaceGlyph],
               ['writing', 'Writing', WritingGlyph],
@@ -1030,7 +1032,7 @@ export default function ChatWorkspaceView() {
                 }`}
             >
               <SlidersHorizontal className="h-4 w-4" />
-              <span>Configuration</span>
+              <span>{t("Configuration")}</span>
             </button>
           </div>
         </div>
@@ -1053,16 +1055,14 @@ export default function ChatWorkspaceView() {
                     disabled={isLoadingOlderMessages}
                     className="h-8 rounded-control border border-border-default bg-surface-panel/80 px-3 text-xs font-semibold text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-wait disabled:opacity-60"
                   >
-                    {isLoadingOlderMessages ? 'Loading history…' : 'Show 50 earlier messages'}
+                    {isLoadingOlderMessages ? t("Loading history…") : t("Show 50 earlier messages")}
                   </button>
                   <button
                     type="button"
                     onClick={handleJumpToStart}
                     disabled={isLoadingOlderMessages}
                     className="h-8 rounded-control border border-border-default bg-surface-panel/80 px-3 text-xs font-semibold text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-wait disabled:opacity-60"
-                  >
-                    Go to start
-                  </button>
+                  >{t("Go to start")}</button>
                 </div>
               )}
               {activeMessages.map((msg, index) => (
@@ -1099,9 +1099,7 @@ export default function ChatWorkspaceView() {
               onClick={scrollToLatest}
               className="absolute right-6 bottom-36 z-20 inline-flex h-9 items-center gap-2 rounded-full border border-accent/40 bg-surface-panel px-3.5 text-xs font-semibold text-accent shadow-overlay transition-colors hover:bg-accent hover:text-on-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
-              <ArrowDown aria-hidden="true" className="h-3.5 w-3.5" />
-              New reply below
-            </button>
+              <ArrowDown aria-hidden="true" className="h-3.5 w-3.5" />{t("New reply below")}</button>
           )}
 
           {/* The veil lets the thread fade under the composer without hiding the background. */}
@@ -1157,11 +1155,11 @@ export default function ChatWorkspaceView() {
                   onCancel={handleCancelGeneration}
                   onSend={handleSend}
                   pendingFileCount={pendingFiles.length}
-                  placeholder={activeMessages.length > 0 ? 'Write a message…' : 'Write a message or drop files here…'}
+                  placeholder={activeMessages.length > 0 ? t("Write a message…") : t("Write a message or drop files here…")}
                   workspaceId={activeChat.id}
                   leading={(
                     <>
-                      <IconButton icon={Paperclip} label="Attach files" size="sm" onClick={() => fileInputRef.current?.click()} />
+                      <IconButton icon={Paperclip} label={t("Attach files")} size="sm" onClick={() => fileInputRef.current?.click()} />
                       {activeChat.showContextBar === 1 && <ContextMeter tokens={ctxTokens} threshold={ctxThreshold} />}
                       {/* Past the payload budget the oldest live messages stop being sent at all.
                           It stays a marker rather than a banner: the state lasts as long as the
@@ -1172,12 +1170,10 @@ export default function ChatWorkspaceView() {
                           onClick={() => setSummarizeModalOpen(true)}
                           data-tooltip={ctxHistoryCut > 0
                             ? `${ctxHistoryCut} older ${ctxHistoryCut === 1 ? 'message was' : 'messages were'} left out of the last reply to fit the payload budget. Archive them to keep them searchable.`
-                            : 'Active history exceeds the payload budget. The oldest messages are being cut. Archive them.'}
+                            : t("Active history exceeds the payload budget. The oldest messages are being cut. Archive them.")}
                           className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-status-danger/12 px-2.5 text-xs font-semibold text-status-danger transition-colors hover:bg-status-danger/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-status-danger/40 cursor-pointer"
                         >
-                          <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5" />
-                          Over payload limit
-                        </button>
+                          <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5" />{t("Over payload limit")}</button>
                       )}
                     </>
                   )}
@@ -1272,7 +1268,7 @@ export default function ChatWorkspaceView() {
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span className="text-sm font-semibold">Request failed</span>
+              <span className="text-sm font-semibold">{t("Request failed")}</span>
             </div>
             <button
               onClick={() => setEditError(null)}
@@ -1282,17 +1278,14 @@ export default function ChatWorkspaceView() {
             </button>
           </div>
 
-          <p className="text-xs text-gray-300 leading-relaxed">
-            The generation for your edited message failed: {editError.errorMessage}
+          <p className="text-xs text-gray-300 leading-relaxed">{t("The generation for your edited message failed:")}{editError.errorMessage}
           </p>
 
           <div className="flex items-center justify-end space-x-2 pt-1 select-none">
             <button
               onClick={() => setEditError(null)}
               className="px-2.5 py-1 text-[0.625rem] font-bold uppercase text-gray-400 hover:text-text-primary cursor-pointer transition-colors"
-            >
-              Dismiss
-            </button>
+            >{t("Dismiss")}</button>
             <button
               onClick={async () => {
                 const { msgId, editedText } = editError;
@@ -1302,9 +1295,7 @@ export default function ChatWorkspaceView() {
                 await handleEditUserMessage(msgId, editedText, targetId);
               }}
               className="px-3 py-1 bg-danger-solid hover:bg-danger-solid-hover text-on-danger rounded text-[0.625rem] font-bold uppercase hover:scale-[1.02] active:scale-95 transition-[background-color,transform] cursor-pointer"
-            >
-              Retry
-            </button>
+            >{t("Retry")}</button>
           </div>
         </div>
       )}
@@ -1358,26 +1349,26 @@ export default function ChatWorkspaceView() {
           <ConfirmDialog
             tone="danger"
             icon={isDeleteMsg ? Trash2 : History}
-            title={isDeleteMsg ? 'Delete message' : 'Revert chat to this message'}
+            title={isDeleteMsg ? t("Delete message") : t("Revert chat to this message")}
             message={(
               <div className="space-y-3">
                 <p>{isDeleteMsg
-                  ? 'This message is removed for good. This cannot be undone.'
-                  : 'Every message after this one is deleted for good. This cannot be undone.'}</p>
+                  ? t("This message is removed for good. This cannot be undone.")
+                  : t("Every message after this one is deleted for good. This cannot be undone.")}</p>
                 {isDeleteMsg && hasAttachments && (
                   <div className="rounded-card border border-border-subtle bg-surface-input/60 px-3 py-2.5 text-text-secondary">
                     <Checkbox
                       size="sm"
                       checked={deleteAttachedFiles}
                       onChange={setDeleteAttachedFiles}
-                      label="Also delete attached files from memory"
+                      label={t("Also delete attached files from memory")}
                     />
                   </div>
                 )}
               </div>
             )}
             actions={[
-              { label: 'Cancel', variant: 'ghost', onClick: close },
+              { label: t("Cancel"), variant: 'ghost', onClick: close },
               { label: isDeleteMsg ? 'Delete' : 'Revert', variant: 'danger', onClick: confirm, autoFocus: true }
             ]}
             onClose={close}

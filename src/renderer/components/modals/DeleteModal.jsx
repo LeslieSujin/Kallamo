@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { Trash2 } from 'lucide-react';
 import Modal from '../ui/Modal';
@@ -18,13 +19,14 @@ export default function DeleteModal({
   checkboxValue,
   onCheckboxChange
 }) {
+  const { t } = useI18n();
   return (
     <Modal onClose={onClose} size="md">
       <div className="flex gap-4 px-5 pt-5">
         <ToneTile icon={Trash2} color="var(--theme-status-danger)" />
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-text-primary">{title || 'Delete this?'}</h2>
-          <p className="mt-1 text-sm leading-relaxed text-text-muted">{message || 'This cannot be undone.'}</p>
+          <h2 className="text-base font-semibold text-text-primary">{title || t("Delete this?")}</h2>
+          <p className="mt-1 text-sm leading-relaxed text-text-muted">{message || t("This cannot be undone.")}</p>
         </div>
       </div>
       <div className="space-y-3.5 px-5 pb-5 pt-4">
@@ -40,8 +42,8 @@ export default function DeleteModal({
         {showCheckbox && <Checkbox checked={Boolean(checkboxValue)} onChange={value => onCheckboxChange?.(value)} label={checkboxLabel} />}
       </div>
       <div className="flex items-center justify-end gap-2 border-t border-border-subtle px-5 py-3.5">
-        <Button variant="subtle" onClick={onClose}>Cancel</Button>
-        <Button variant="danger" icon={Trash2} onClick={() => onConfirm(checkboxValue)}>{confirmText || 'Delete'}</Button>
+        <Button variant="subtle" onClick={onClose}>{t("Cancel")}</Button>
+        <Button variant="danger" icon={Trash2} onClick={() => onConfirm(checkboxValue)}>{confirmText || t("Delete")}</Button>
       </div>
     </Modal>
   );

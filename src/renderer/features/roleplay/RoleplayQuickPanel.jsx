@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Backpack, Check, ChevronRight, Clock3, PanelRightClose, Plus, Settings2, X } from 'lucide-react';
 import SearchableSelect from '../../components/ui/SearchableSelect';
@@ -39,6 +40,7 @@ function RoleplayQuickPanel({
   initialCollapsed = false,
   visible = true
 }) {
+  const { t } = useI18n();
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [tab, setTab] = useState('scene');
   const [settings, setSettings] = useState({});
@@ -399,29 +401,29 @@ function RoleplayQuickPanel({
   const visibleTurns = showAllTurns ? recentTurns : recentTurns.slice(0, RECENT_TURN_LIMIT);
 
   return (
-    <aside aria-label="Roleplay" className="glass-rail glass-dense relative z-20 flex h-full pt-10 w-[clamp(18rem,30vw,22.5rem)] shrink-0 flex-col border-l border-border-subtle shadow-2xl 2xl:w-[23.5rem]">
+    <aside aria-label={t("Roleplay")} className="glass-rail glass-dense relative z-20 flex h-full pt-10 w-[clamp(18rem,30vw,22.5rem)] shrink-0 flex-col border-l border-border-subtle shadow-2xl 2xl:w-[23.5rem]">
       <header className="flex h-14 shrink-0 items-center justify-between border-b border-border-subtle pl-4 pr-3">
         <div className="flex min-w-0 items-center gap-2.5 text-accent">
           <RoleplayStatus processing={narrativeStateProcessing} pendingCount={pendingCount} />
           <span className="min-w-0">
-            <span className="block text-xs font-bold uppercase tracking-[0.16em]">Roleplay</span>
+            <span className="block text-xs font-bold uppercase tracking-[0.16em]">{t("Roleplay")}</span>
             {(narrativeStateProcessing || pendingCount > 0) && (
               <span className="mt-0.5 block truncate text-[0.6875rem] font-medium text-text-subtle">{roleplayStatusLabel}</span>
             )}
           </span>
         </div>
         <div className="flex items-center gap-0.5">
-          <IconButton icon={Settings2} label="Roleplay settings" size="sm" onClick={openConfiguration} />
-          <IconButton icon={PanelRightClose} label="Collapse panel" size="sm" onClick={() => savePanelState(true)} />
+          <IconButton icon={Settings2} label={t("Roleplay settings")} size="sm" onClick={openConfiguration} />
+          <IconButton icon={PanelRightClose} label={t("Collapse panel")} size="sm" onClick={() => savePanelState(true)} />
         </div>
       </header>
 
       {editingClock && calendar ? (
         <section className="shrink-0 space-y-3 border-b border-border-subtle bg-surface-canvas/40 px-4 py-3">
-          <WorldDateInput calendar={calendar} value={clockDraft} includeTime allowClear={false} label="Roleplay date and time" emptyLabel="Set date and time" onChange={setClockDraft} />
+          <WorldDateInput calendar={calendar} value={clockDraft} includeTime allowClear={false} label={t("Roleplay date and time")} emptyLabel="Set date and time" onChange={setClockDraft} />
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" size="sm" onClick={() => { setClockDraft(clock); setEditingClock(false); }}>Cancel</Button>
-            <Button variant="primary" size="sm" icon={Check} onClick={saveClock}>Save time</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setClockDraft(clock); setEditingClock(false); }}>{t("Cancel")}</Button>
+            <Button variant="primary" size="sm" icon={Check} onClick={saveClock}>{t("Save time")}</Button>
           </div>
         </section>
       ) : (
@@ -448,8 +450,8 @@ function RoleplayQuickPanel({
             </section>
 
             <section>
-              <SectionHead title="In scene">
-                <Button variant="subtle" size="sm" icon={Plus} aria-expanded={addingCharacter} onClick={() => setAddingCharacter(value => !value)}>Add</Button>
+              <SectionHead title={t("In scene")}>
+                <Button variant="subtle" size="sm" icon={Plus} aria-expanded={addingCharacter} onClick={() => setAddingCharacter(value => !value)}>{t("Add")}</Button>
               </SectionHead>
               {addingCharacter && (
                 <div className="mb-2 animate-rise-in">
@@ -460,9 +462,9 @@ function RoleplayQuickPanel({
                     options={actorOptions.map(option => presentIds.has(option.id) || option.id === settings.playerEntityId
                       ? { ...option, disabled: true, disabledLabel: 'In scene' }
                       : option)}
-                    placeholder="Add a character"
-                    searchPlaceholder="Search characters"
-                    ariaLabel="Add a character to the scene"
+                    placeholder={t("Add a character")}
+                    searchPlaceholder={t("Search characters")}
+                    ariaLabel={t("Add a character to the scene")}
                     searchInTrigger
                     autoOpen
                   />
@@ -470,15 +472,15 @@ function RoleplayQuickPanel({
               )}
               {player
                 ? <PlayerCard entity={player} typeLabel={typeLabels.get(player.type)} resources={vitals.resources.get(player.id) || []} progress={vitals.progress?.entityId === player.id ? vitals.progress : null} />
-                : <p className="rounded-card border border-dashed border-border-subtle px-3 py-5 text-center text-xs text-text-disabled">Choose who you play in Roleplay settings.</p>}
+                : <p className="rounded-card border border-dashed border-border-subtle px-3 py-5 text-center text-xs text-text-disabled">{t("Choose who you play in Roleplay settings.")}</p>}
               {participants.length > 0 && <CastGroup presence="participating" count={participants.length}>{participants.map(castRow)}</CastGroup>}
               {nearby.length > 0 && <CastGroup presence="nearby" count={nearby.length}>{nearby.map(castRow)}</CastGroup>}
-              {!otherCharacters.length && player && <p className="px-2 pt-3 text-center text-xs text-text-disabled">No one else is here.</p>}
+              {!otherCharacters.length && player && <p className="px-2 pt-3 text-center text-xs text-text-disabled">{t("No one else is here.")}</p>}
             </section>
 
             {recentTurns.length > 0 && (
               <section>
-                <SectionHead title="Recent changes" />
+                <SectionHead title={t("Recent changes")} />
                 <ol className="relative">
                   {visibleTurns.map((turn, index) => (
                     <RecentTurn
@@ -500,7 +502,7 @@ function RoleplayQuickPanel({
                     onClick={() => setShowAllTurns(value => !value)}
                     className="ml-8 mt-1.5 rounded-md px-1 text-xs font-semibold text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                   >
-                    {showAllTurns ? 'Show fewer' : 'Show all turns'}
+                    {showAllTurns ? t("Show fewer") : t("Show all turns")}
                   </button>
                 )}
               </section>
@@ -534,23 +536,22 @@ function RoleplayQuickPanel({
 }
 
 function TransferEditor({ transfer, setTransfer, item, actors, locations, currentLocationId, onApply }) {
+  const { t } = useI18n();
   const options = transfer.mode === 'character' ? actors : locations;
   return (
     <section className="space-y-3 p-5">
-      <p className="text-sm text-text-muted">{transfer.mode === 'character' ? 'Choose the character who will receive this item.' : 'Choose the world location where this item will be placed.'}</p>
+      <p className="text-sm text-text-muted">{transfer.mode === 'character' ? t("Choose the character who will receive this item.") : t("Choose the world location where this item will be placed.")}</p>
       <SearchableSelect
         value={transfer.targetId || (transfer.mode === 'location' ? currentLocationId || '' : '')}
         onChange={targetId => setTransfer({ ...transfer, targetId })}
         options={options}
-        placeholder={transfer.mode === 'character' ? 'Select character' : 'Select Location'}
+        placeholder={transfer.mode === 'character' ? t("Select character") : t("Select Location")}
       />
       {item?.nature === 'type' && (
-        <label className="flex items-center justify-between text-xs font-medium text-text-muted">
-          Quantity
-          <input type="number" min="1" max={item.quantity} value={transfer.quantity} onChange={event => setTransfer({ ...transfer, quantity: event.target.value })} className="min-h-10 w-20 rounded-control border border-border-default bg-surface-input px-2 text-right text-sm text-text-primary outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/20" />
+        <label className="flex items-center justify-between text-xs font-medium text-text-muted">{t("Quantity")}<input type="number" min="1" max={item.quantity} value={transfer.quantity} onChange={event => setTransfer({ ...transfer, quantity: event.target.value })} className="min-h-10 w-20 rounded-control border border-border-default bg-surface-input px-2 text-right text-sm text-text-primary outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/20" />
         </label>
       )}
-      <Button variant="primary" fullWidth onClick={onApply}>Apply move</Button>
+      <Button variant="primary" fullWidth onClick={onApply}>{t("Apply move")}</Button>
     </section>
   );
 }
@@ -571,6 +572,7 @@ function turnMoment(turn) {
 }
 
 function RecentTurn({ turn, last, names, definitions, open, onToggle, onResolve, resolvingChangeId }) {
+  const { t } = useI18n();
   const pending = turn.changes.filter(isPendingChange).length;
   const kinds = [...new Set(turn.changes.map(change => change.kind))];
   const moment = turnMoment(turn);
@@ -592,7 +594,7 @@ function RecentTurn({ turn, last, names, definitions, open, onToggle, onResolve,
           <span className={`shrink-0 font-semibold ${turn.manual ? 'text-accent' : 'text-entity-event'}`}>{turnTitle(turn)}</span>
           {moment && <span className="truncate text-xs text-text-muted tabular-nums">{moment}</span>}
         </span>
-        {pending > 0 && <span className="shrink-0 rounded-full bg-status-warning/12 px-2 py-0.5 text-[0.6875rem] font-semibold text-status-warning">{pending} to review</span>}
+        {pending > 0 && <span className="shrink-0 rounded-full bg-status-warning/12 px-2 py-0.5 text-[0.6875rem] font-semibold text-status-warning">{pending}{' '}{t("to review")}</span>}
         <span aria-hidden="true" className="flex shrink-0 gap-1">
           {kinds.map(kind => <span key={kind} className={`h-[0.4375rem] w-[0.4375rem] rounded-full ${kindOf(kind).dot}`} />)}
         </span>
@@ -617,6 +619,7 @@ function RecentTurn({ turn, last, names, definitions, open, onToggle, onResolve,
 }
 
 function RecentTurnChange({ change, names, definitions, onResolve, resolving }) {
+  const { t } = useI18n();
   const [lead, ...details] = describeRecentChange(change, names, definitions);
   const pending = isPendingChange(change);
   const kind = kindOf(change.kind);
@@ -641,8 +644,8 @@ function RecentTurnChange({ change, names, definitions, onResolve, resolving }) 
       ))}
       {pending && (
         <div className="mt-2 flex justify-end gap-1.5">
-          <Button variant="ghost" size="sm" disabled={resolving} onClick={() => onResolve(change, 'rejected')}>Reject</Button>
-          <Button variant="primary" size="sm" disabled={resolving} onClick={() => onResolve(change, 'approved')}>Approve</Button>
+          <Button variant="ghost" size="sm" disabled={resolving} onClick={() => onResolve(change, 'rejected')}>{t("Reject")}</Button>
+          <Button variant="primary" size="sm" disabled={resolving} onClick={() => onResolve(change, 'approved')}>{t("Approve")}</Button>
         </div>
       )}
     </article>

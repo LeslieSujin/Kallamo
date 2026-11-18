@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useState } from 'react';
 import { AlertTriangle, BookOpen, Pencil, Plus, Search, Workflow } from 'lucide-react';
 import { AiGlyph } from '../../components/ui/glyphs';
@@ -29,6 +30,7 @@ const stepCount = workflow => {
  * in place, with the same dialogs as the Library, so nothing needs a trip away.
  */
 export default function ProfilesWorkflowsSection({ sectionRef, activeChat, writingProfiles, workflows, handleSaveChat }) {
+  const { t } = useI18n();
   const [profileQuery, setProfileQuery] = useState('');
   // { kind: 'profile' | 'knowledge' | 'workflow', item?: object }
   const [editing, setEditing] = useState(null);
@@ -53,15 +55,15 @@ export default function ProfilesWorkflowsSection({ sectionRef, activeChat, writi
       id="agents"
       sectionRef={sectionRef}
       icon={AiGlyph}
-      title="Profiles & Workflows"
-      description="Choose which AI Profiles and Workflows can run in this workspace."
+      title={t("Profiles & Workflows")}
+      description={t("Choose which AI Profiles and Workflows can run in this workspace.")}
     >
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="flex min-w-0 flex-col gap-2.5">
           <div className="flex items-center gap-2">
-            <FieldLabel>AI Profiles</FieldLabel>
-            <span className="flex-1 text-xs tabular-nums text-text-subtle">{profilesOn} of {writingProfiles.length} on</span>
-            <Button variant="subtle" size="sm" icon={Plus} onClick={() => setEditing({ kind: 'profile', item: null })}>New</Button>
+            <FieldLabel>{t("AI Profiles")}</FieldLabel>
+            <span className="flex-1 text-xs tabular-nums text-text-subtle">{profilesOn}{' '}{t("of")}{' '}{writingProfiles.length}{' '}{t("on")}</span>
+            <Button variant="subtle" size="sm" icon={Plus} onClick={() => setEditing({ kind: 'profile', item: null })}>{t("New")}</Button>
           </div>
           {writingProfiles.length > 0 && (
             <label className="field-input flex h-8 items-center gap-2 px-2.5 focus-within:border-accent/65">
@@ -70,14 +72,14 @@ export default function ProfilesWorkflowsSection({ sectionRef, activeChat, writi
                 type="text"
                 value={profileQuery}
                 onChange={event => setProfileQuery(event.target.value)}
-                placeholder="Filter profiles"
-                aria-label="Filter profiles"
+                placeholder={t("Filter profiles")}
+                aria-label={t("Filter profiles")}
                 className="min-w-0 flex-1 bg-transparent text-[0.8125rem] text-text-primary outline-none placeholder:text-text-subtle"
               />
             </label>
           )}
           <div className="max-h-[22rem] divide-y divide-border-subtle overflow-y-auto rounded-card border border-border-subtle bg-surface-inset custom-scrollbar">
-            {profiles.length === 0 && <p className="px-4 py-5 text-center text-xs text-text-subtle">{writingProfiles.length ? 'No profile matches.' : 'No profiles yet.'}</p>}
+            {profiles.length === 0 && <p className="px-4 py-5 text-center text-xs text-text-subtle">{writingProfiles.length ? t("No profile matches.") : t("No profiles yet.")}</p>}
             {profiles.map(profile => {
               const on = activeProfiles.includes(profile.id);
               const needsSetup = Boolean(profile.needsSetup);
@@ -89,7 +91,7 @@ export default function ProfilesWorkflowsSection({ sectionRef, activeChat, writi
                     {needsSetup && (
                       <span className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-status-warning">
                         <AlertTriangle aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
-                        <span className="truncate">Needs an API connection</span>
+                        <span className="truncate">{t("Needs an API connection")}</span>
                       </span>
                     )}
                   </span>
@@ -111,15 +113,15 @@ export default function ProfilesWorkflowsSection({ sectionRef, activeChat, writi
 
         <div className="flex min-w-0 flex-col gap-2.5">
           <div className="flex items-center gap-2">
-            <FieldLabel>Workflows</FieldLabel>
-            <span className="flex-1 text-xs tabular-nums text-text-subtle">{workflowsOn} of {workflows.length} on</span>
-            <Button variant="subtle" size="sm" icon={Plus} onClick={() => setEditing({ kind: 'workflow', item: null })}>New</Button>
+            <FieldLabel>{t("Workflows")}</FieldLabel>
+            <span className="flex-1 text-xs tabular-nums text-text-subtle">{workflowsOn}{' '}{t("of")}{' '}{workflows.length}{' '}{t("on")}</span>
+            <Button variant="subtle" size="sm" icon={Plus} onClick={() => setEditing({ kind: 'workflow', item: null })}>{t("New")}</Button>
           </div>
           <div className="max-h-[22rem] divide-y divide-border-subtle overflow-y-auto rounded-card border border-border-subtle bg-surface-inset custom-scrollbar">
             {workflows.length === 0 && (
               <div className="flex flex-col items-center gap-1.5 px-4 py-6 text-center">
                 <Workflow aria-hidden="true" className="h-5 w-5 text-text-disabled" />
-                <span className="text-xs text-text-subtle">No workflows yet. A workflow runs several profiles one after another.</span>
+                <span className="text-xs text-text-subtle">{t("No workflows yet. A workflow runs several profiles one after another.")}</span>
               </div>
             )}
             {workflows.map(workflow => {
@@ -130,7 +132,7 @@ export default function ProfilesWorkflowsSection({ sectionRef, activeChat, writi
                   <Workflow aria-hidden="true" className="h-4 w-4 shrink-0 text-text-subtle" />
                   <span className="ml-1 min-w-0 flex-1">
                     <span className={`block truncate text-[0.8125rem] ${on ? 'font-medium text-text-primary' : 'text-text-secondary'}`}>{workflow.name}</span>
-                    <span className="block text-xs text-text-subtle">{steps} {steps === 1 ? 'step' : 'steps'}</span>
+                    <span className="block text-xs text-text-subtle">{steps} {steps === 1 ? t("step") : t("steps")}</span>
                   </span>
                   <IconButton icon={Pencil} size="sm" label={`Edit ${workflow.name}`} onClick={() => setEditing({ kind: 'workflow', item: workflow })} />
                   <span aria-hidden="true" className="mx-1 h-4.5 w-px bg-border-subtle" />
@@ -139,7 +141,7 @@ export default function ProfilesWorkflowsSection({ sectionRef, activeChat, writi
               );
             })}
           </div>
-          <Help>Editing opens the profile, its knowledge or the workflow right here. Changes apply everywhere the profile or workflow is used.</Help>
+          <Help>{t("Editing opens the profile, its knowledge or the workflow right here. Changes apply everywhere the profile or workflow is used.")}</Help>
         </div>
       </div>
 

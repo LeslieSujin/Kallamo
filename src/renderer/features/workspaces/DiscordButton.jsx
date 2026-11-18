@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { DISCORD_PATH } from '../../components/ui/BrandIcons';
 
@@ -5,6 +6,7 @@ const DISCORD_URL = 'https://discord.com/invite/CE4C9JRS9H';
 
 // Discord's own colour marks it as a community link without borrowing the accent.
 export default function DiscordButton() {
+  const { t } = useI18n();
   return (
     <a
       href={DISCORD_URL}
@@ -16,8 +18,6 @@ export default function DiscordButton() {
         <svg viewBox="0 0 127.14 96.36" fill="currentColor" className="h-[1.0625rem] w-[1.0625rem]" aria-hidden="true">
           <path d={DISCORD_PATH} />
         </svg>
-      </span>
-      Join the community on Discord
-    </a>
+      </span>{t("Join the community on Discord")}</a>
   );
 }

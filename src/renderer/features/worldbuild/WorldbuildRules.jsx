@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import SegmentedControl from '../../components/ui/SegmentedControl';
 import ResourcesSection from '../configuration/roleplay/ResourcesSection';
@@ -13,6 +14,7 @@ const EMPTY_PROGRESSION = { mode: 'off', members: [], progressingIds: [], player
  * The rules belong to the world, so they live here and travel with its export.
  */
 export default function WorldbuildRules({ workspaceId, api, showToast, entities, worldName, onOpenCalendar }) {
+  const { t } = useI18n();
   const [tab, setTab] = useState('resources');
   const [config, setConfig] = useState(null);
 
@@ -56,26 +58,26 @@ export default function WorldbuildRules({ workspaceId, api, showToast, entities,
     <div className="flex flex-col gap-5 px-5 py-6 sm:px-8">
       <div className="flex flex-wrap items-start gap-4">
         <div className="min-w-0 flex-1">
-          <h1 className="text-[1.75rem] font-bold leading-tight text-text-primary">{worldName ? `${worldName} rules` : 'Rules'}</h1>
-          <p className="mt-1 text-[0.8125rem] text-text-secondary">How this world works in roleplay. They travel with the world when you export it.</p>
+          <h1 className="text-[1.75rem] font-bold leading-tight text-text-primary">{worldName ? `${worldName} rules` : t("Rules")}</h1>
+          <p className="mt-1 text-[0.8125rem] text-text-secondary">{t("How this world works in roleplay. They travel with the world when you export it.")}</p>
         </div>
         <SegmentedControl
           className="glass-panel"
-          label="Rules"
+          label={t("Rules")}
           value={tab}
           onChange={setTab}
           options={[
-            { value: 'resources', label: 'Resources', count: definitions.length },
-            { value: 'progression', label: 'Progression' },
-            { value: 'skills', label: 'Skills', count: skills.enabled ? skills.catalog.filter(skill => skill.status === 'confirmed').length : undefined },
-            { value: 'time', label: 'Time costs' }
+            { value: 'resources', label: t("Resources"), count: definitions.length },
+            { value: 'progression', label: t("Progression") },
+            { value: 'skills', label: t("Skills"), count: skills.enabled ? skills.catalog.filter(skill => skill.status === 'confirmed').length : undefined },
+            { value: 'time', label: t("Time costs") }
           ]}
         />
       </div>
 
       <div className="glass-panel rounded-surface border border-border-subtle bg-surface-panel/75 p-5 sm:p-6">
         {!config ? (
-          <p className="text-[0.8125rem] text-text-muted">Loading the rules…</p>
+          <p className="text-[0.8125rem] text-text-muted">{t("Loading the rules…")}</p>
         ) : tab === 'resources' ? (
           <ResourcesSection
             embedded

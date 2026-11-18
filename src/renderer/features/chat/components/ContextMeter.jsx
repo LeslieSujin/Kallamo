@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 const RADIUS = 7;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
@@ -8,6 +9,7 @@ function toneFor(percentage) {
 }
 
 export default function ContextMeter({ tokens, threshold }) {
+  const { t } = useI18n();
   const percentage = Math.min(Math.round((tokens / threshold) * 100), 100);
   const tone = toneFor(percentage);
   return (
@@ -31,7 +33,6 @@ export default function ContextMeter({ tokens, threshold }) {
           className="transition-[stroke-dasharray] duration-500"
         />
       </svg>
-      {percentage}% context
-    </span>
+      {percentage}{t("% context")}</span>
   );
 }

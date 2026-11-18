@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useState } from 'react';
 import { AlertTriangle, BookMarked, Check, CheckCircle2, Info, Loader2, RefreshCw, Sparkles } from 'lucide-react';
 import Button from '../../../components/ui/Button';
@@ -22,14 +23,15 @@ export default function NarrativeStateSection({
   sectionRef, policy, onPolicy, pending, recent, problems, updating, metrics, names,
   onResolve, onResolveMany, onReprocess, onTidy, tidyBusy
 }) {
+  const { t } = useI18n();
   const [recentLimit, setRecentLimit] = useState(RECENT_STEP);
   const [bulkBusy, setBulkBusy] = useState(false);
   const pendingCount = pending.length;
   const status = updating
-    ? { label: 'Reading the last reply', icon: Loader2, className: 'bg-status-info/12 text-status-info', spin: true }
+    ? { label: t("Reading the last reply"), icon: Loader2, className: 'bg-status-info/12 text-status-info', spin: true }
     : pendingCount
-      ? { label: `${pendingCount} to review`, className: 'bg-status-warning/12 text-status-warning' }
-      : { label: 'Up to date', icon: CheckCircle2, className: 'bg-tint/[0.06] text-text-secondary' };
+      ? { label: t('{count} to review', { count: pendingCount }), className: 'bg-status-warning/12 text-status-warning' }
+      : { label: t("Up to date"), icon: CheckCircle2, className: 'bg-tint/[0.06] text-text-secondary' };
   const StatusIcon = status.icon;
   const groups = GROUP_ORDER.map(kind => ({ kind, items: pending.filter(item => item.kind === kind) })).filter(group => group.items.length);
   const totals = metrics.reduce((sum, metric) => ({
@@ -48,8 +50,8 @@ export default function NarrativeStateSection({
       id="narrative-state"
       sectionRef={sectionRef}
       icon={BookMarked}
-      title="Narrative State"
-      description="After each reply, the AI writes down what changed in the story: where people are, what they learned, what they carry. That record is what it remembers on the next turn."
+      title={t("Narrative State")}
+      description={t("After each reply, the AI writes down what changed in the story: where people are, what they learned, what they carry. That record is what it remembers on the next turn.")}
       status={(
         <span className={`inline-flex h-6.5 shrink-0 items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold ${status.className}`}>
           {StatusIcon && <StatusIcon aria-hidden="true" className={`h-3.5 w-3.5 ${status.spin ? 'animate-spin motion-reduce:animate-none' : ''}`} />}
@@ -66,33 +68,33 @@ export default function NarrativeStateSection({
                   ? <AlertTriangle aria-hidden="true" className="h-4.5 w-4.5 shrink-0 text-status-warning" />
                   : <Info aria-hidden="true" className="h-4.5 w-4.5 shrink-0 text-status-info" />}
                 <div className="min-w-0 flex-1">
-                  <span className="block text-[0.8125rem] font-semibold text-text-primary">{problem.title}</span>
+                  <span className="block text-[0.8125rem] font-semibold text-text-primary">{t(problem.title)}</span>
                   <span className="block text-xs leading-relaxed text-text-muted">{problem.detail}</span>
                 </div>
-                <Button variant="ghost" size="sm" icon={problem.tone === 'warning' ? RefreshCw : null} onClick={problem.onFix}>{problem.action}</Button>
+                <Button variant="ghost" size="sm" icon={problem.tone === 'warning' ? RefreshCw : null} onClick={problem.onFix}>{t(problem.action)}</Button>
               </div>
             ))}
           </div>
         )}
 
         <div>
-          <h3 className="text-sm font-semibold text-text-primary">How AI changes are applied</h3>
-          <div role="radiogroup" aria-label="How AI changes are applied" className="mt-3 grid gap-2.5 md:grid-cols-3">
+          <h3 className="text-sm font-semibold text-text-primary">{t("How AI changes are applied")}</h3>
+          <div role="radiogroup" aria-label={t("How AI changes are applied")} className="mt-3 grid gap-2.5 md:grid-cols-3">
             {POLICIES.map(option => (
-              <ChoiceCard key={option.value} name="narrative-policy" selected={policy === option.value} onSelect={() => onPolicy(option.value)} title={option.title} description={option.description} />
+              <ChoiceCard key={option.value} name="narrative-policy" selected={policy === option.value} onSelect={() => onPolicy(option.value)} title={t(option.title)} description={t(option.description)} />
             ))}
           </div>
-          <Help className="mt-2">Resources and Progression can each follow their own rule, set in Worldbuild, Rules.</Help>
+          <Help className="mt-2">{t("Resources and Progression can each follow their own rule, set in Worldbuild, Rules.")}</Help>
         </div>
 
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-2.5">
-            <h3 className="text-sm font-semibold text-text-primary">Waiting for you</h3>
-            <span className="flex-1 text-xs tabular-nums text-text-subtle">{pendingCount ? `${pendingCount} ${pendingCount === 1 ? 'change' : 'changes'}` : ''}</span>
+            <h3 className="text-sm font-semibold text-text-primary">{t("Waiting for you")}</h3>
+            <span className="flex-1 text-xs tabular-nums text-text-subtle">{pendingCount ? t(pendingCount === 1 ? '{count} change' : '{count} changes', { count: pendingCount }) : ''}</span>
             {pendingCount > 1 && (
               <>
-                <Button variant="subtle" size="sm" disabled={bulkBusy} onClick={() => resolveAll('rejected')}>Reject all</Button>
-                <Button variant="ghost" size="sm" loading={bulkBusy} onClick={() => resolveAll('approved')}>Approve all</Button>
+                <Button variant="subtle" size="sm" disabled={bulkBusy} onClick={() => resolveAll('rejected')}>{t("Reject all")}</Button>
+                <Button variant="ghost" size="sm" loading={bulkBusy} onClick={() => resolveAll('approved')}>{t("Approve all")}</Button>
               </>
             )}
           </div>
@@ -102,7 +104,7 @@ export default function NarrativeStateSection({
                 <div key={group.kind}>
                   <div className={`flex items-center gap-2 bg-tint/[0.025] px-3.5 py-2 text-xs font-semibold text-text-muted ${groupIndex ? 'border-t border-border-subtle' : ''}`}>
                     <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${kindOf(group.kind).dot}`} />
-                    {kindOf(group.kind).group}
+                    {t(kindOf(group.kind).group)}
                     <span className="font-medium tabular-nums text-text-subtle">{group.items.length}</span>
                   </div>
                   {group.items.map(item => <PendingItem key={`${item.kind}:${item.id}`} item={item} names={names} onResolve={onResolve} />)}
@@ -111,24 +113,22 @@ export default function NarrativeStateSection({
             </div>
           ) : (
             <p className="flex items-center gap-2 rounded-card border border-dashed border-border-subtle px-4 py-4 text-[0.8125rem] text-text-muted">
-              <Check aria-hidden="true" className="h-4 w-4 shrink-0 text-text-subtle" />
-              Nothing to review. Changes the AI isn't sure about will show up here.
-            </p>
+              <Check aria-hidden="true" className="h-4 w-4 shrink-0 text-text-subtle" />{t("Nothing to review. Changes the AI isn't sure about will show up here.")}</p>
           )}
         </div>
 
         {recent.length > 0 && (
           <div>
             <div className="mb-3 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-              <h3 className="text-sm font-semibold text-text-primary">Recent changes</h3>
-              <Help>Already in the record. The Roleplay panel in the chat shows them turn by turn.</Help>
+              <h3 className="text-sm font-semibold text-text-primary">{t("Recent changes")}</h3>
+              <Help>{t("Already in the record. The Roleplay panel in the chat shows them turn by turn.")}</Help>
             </div>
             <div className="divide-y divide-border-subtle overflow-hidden rounded-card border border-border-subtle bg-surface-inset">
               {recent.slice(0, recentLimit).map(item => {
                 const view = describeChange(item, names);
                 return (
                   <div key={`${item.kind}:${item.id}`} className="flex items-center gap-3 px-3.5 py-2.5">
-                    <span className={`inline-flex h-5.5 shrink-0 items-center rounded-md px-2 text-xs font-semibold ${kindOf(item.kind).chip}`}>{view.label}</span>
+                    <span className={`inline-flex h-5.5 shrink-0 items-center rounded-md px-2 text-xs font-semibold ${kindOf(item.kind).chip}`}>{t(view.label)}</span>
                     <span className="min-w-0 flex-1 truncate text-[0.8125rem] text-text-secondary" data-tooltip={view.title.length > 90 ? view.title : undefined}>{view.title}</span>
                     {view.who && <span className="max-w-[12.5rem] shrink-0 truncate text-xs text-text-subtle">{view.who}</span>}
                   </div>
@@ -136,7 +136,7 @@ export default function NarrativeStateSection({
               })}
               {recent.length > recentLimit && (
                 <div className="flex justify-center p-1.5">
-                  <Button variant="subtle" size="sm" onClick={() => setRecentLimit(limit => limit + RECENT_STEP)}>Show {Math.min(RECENT_STEP, recent.length - recentLimit)} more</Button>
+                  <Button variant="subtle" size="sm" onClick={() => setRecentLimit(limit => limit + RECENT_STEP)}>{t("Show")}{' '}{Math.min(RECENT_STEP, recent.length - recentLimit)}{' '}{t("more")}</Button>
                 </div>
               )}
             </div>
@@ -145,22 +145,22 @@ export default function NarrativeStateSection({
 
         <div className="grid gap-6 border-t border-border-subtle pt-5 md:grid-cols-2">
           <div>
-            <h3 className="text-sm font-semibold text-text-primary">Tidy the record</h3>
-            <Help className="mb-3 mt-1">Finds statements stored twice and passing scene detail kept as lasting fact. You see the list before anything changes.</Help>
-            <Button variant="ghost" size="sm" icon={Sparkles} loading={tidyBusy} onClick={onTidy}>Check records</Button>
+            <h3 className="text-sm font-semibold text-text-primary">{t("Tidy the record")}</h3>
+            <Help className="mb-3 mt-1">{t("Finds statements stored twice and passing scene detail kept as lasting fact. You see the list before anything changes.")}</Help>
+            <Button variant="ghost" size="sm" icon={Sparkles} loading={tidyBusy} onClick={onTidy}>{t("Check records")}</Button>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-text-primary">Cost</h3>
+            <h3 className="text-sm font-semibold text-text-primary">{t("Cost")}</h3>
             {totals.turns ? (
               <>
-                <Help className="mb-2.5 mt-1">The last {totals.turns} {totals.turns === 1 ? 'turn' : 'turns'}.</Help>
+                <Help className="mb-2.5 mt-1">{t("The last")}{' '}{totals.turns} {totals.turns === 1 ? t("turn") : t("turns")}.</Help>
                 <dl className="flex flex-col gap-1.5 text-[0.8125rem] tabular-nums">
-                  <div className="flex justify-between"><dt className="text-text-muted">Per turn, on average</dt><dd className="font-semibold text-text-primary">{compactTokens(totals.tokens / totals.turns)} tokens</dd></div>
-                  <div className="flex justify-between"><dt className="text-text-muted">In total</dt><dd className="text-text-secondary">{compactTokens(totals.tokens)} tokens</dd></div>
-                  <div className="flex justify-between"><dt className="text-text-muted">Read in depth</dt><dd className="text-text-secondary">{totals.deep} of {totals.turns} turns</dd></div>
+                  <div className="flex justify-between"><dt className="text-text-muted">{t("Per turn, on average")}</dt><dd className="font-semibold text-text-primary">{compactTokens(totals.tokens / totals.turns)}{' '}{t("tokens")}</dd></div>
+                  <div className="flex justify-between"><dt className="text-text-muted">{t("In total")}</dt><dd className="text-text-secondary">{compactTokens(totals.tokens)}{' '}{t("tokens")}</dd></div>
+                  <div className="flex justify-between"><dt className="text-text-muted">{t("Read in depth")}</dt><dd className="text-text-secondary">{totals.deep}{' '}{t("of")}{' '}{totals.turns}{' '}{t("turns")}</dd></div>
                 </dl>
               </>
-            ) : <Help className="mt-1">No turn has been read yet.</Help>}
+            ) : <Help className="mt-1">{t("No turn has been read yet.")}</Help>}
           </div>
         </div>
       </div>
@@ -169,6 +169,7 @@ export default function NarrativeStateSection({
 }
 
 function PendingItem({ item, names, onResolve }) {
+  const { t } = useI18n();
   const [busy, setBusy] = useState(false);
   const view = describeChange(item, names);
   const resolve = async decision => {
@@ -177,15 +178,15 @@ function PendingItem({ item, names, onResolve }) {
   };
   return (
     <div className="flex flex-wrap items-start gap-3.5 border-t border-border-subtle p-3.5 sm:flex-nowrap">
-      <span className={`mt-px inline-flex h-5.5 shrink-0 items-center rounded-md px-2 text-xs font-semibold ${kindOf(item.kind).chip}`}>{view.label}</span>
+      <span className={`mt-px inline-flex h-5.5 shrink-0 items-center rounded-md px-2 text-xs font-semibold ${kindOf(item.kind).chip}`}>{t(view.label)}</span>
       <div className="min-w-0 flex-1">
         <p className={`text-[0.8125rem] leading-relaxed text-text-primary ${item.kind === 'narrative' ? 'font-medium' : 'font-semibold'}`}>{view.title}</p>
         {view.detail && <p className="mt-0.5 text-xs leading-relaxed text-text-muted">{view.detail}</p>}
         {view.who && <p className="mt-1 text-xs text-text-subtle">{view.who}</p>}
       </div>
       <div className="flex shrink-0 gap-1.5">
-        <Button variant="subtle" size="sm" disabled={busy} onClick={() => resolve('rejected')}>Reject</Button>
-        <Button variant="ghost" size="sm" icon={Check} disabled={busy} onClick={() => resolve('approved')}>Approve</Button>
+        <Button variant="subtle" size="sm" disabled={busy} onClick={() => resolve('rejected')}>{t("Reject")}</Button>
+        <Button variant="ghost" size="sm" icon={Check} disabled={busy} onClick={() => resolve('approved')}>{t("Approve")}</Button>
       </div>
     </div>
   );

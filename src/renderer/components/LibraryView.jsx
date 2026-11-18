@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { copyText } from '../utils/clipboard';
@@ -17,6 +18,7 @@ import { PROFILE_STARTERS, ProfilesIntro, VariablesIntro, WorkflowsIntro } from 
 import { LibraryRail, RailItem, RailEmpty, ProfileDetail, WorkflowDetail, VariableDetail } from '../features/library/LibraryInspector';
 
 export default function LibraryView() {
+  const { t } = useI18n();
   const { 
     setCurrentView,
     writingProfiles,
@@ -296,14 +298,14 @@ export default function LibraryView() {
   const select = (tab, id) => { closeEditors(); setSelected(prev => ({ ...prev, [tab]: id })); };
 
   const tabs = [
-    { id: 'profiles', label: 'AI profiles', count: writingProfiles.length },
-    { id: 'workflows', label: 'Workflows', count: workflows.length },
-    { id: 'variables', label: 'Variables', count: variables.length },
+    { id: 'profiles', label: t("AI profiles"), count: writingProfiles.length },
+    { id: 'workflows', label: t("Workflows"), count: workflows.length },
+    { id: 'variables', label: t("Variables"), count: variables.length },
   ];
   const rail = {
-    profiles: { newLabel: 'New profile', onNew: () => openNewProfile(), onImport: handleImportProfile },
-    workflows: { newLabel: 'New workflow', onNew: openNewWorkflow, onImport: handleImportWorkflow },
-    variables: { newLabel: 'New variable', onNew: () => openNewVariable(), onImport: null },
+    profiles: { newLabel: t("New profile"), onNew: () => openNewProfile(), onImport: handleImportProfile },
+    workflows: { newLabel: t("New workflow"), onNew: openNewWorkflow, onImport: handleImportWorkflow },
+    variables: { newLabel: t("New variable"), onNew: () => openNewVariable(), onImport: null },
   }[activeTab];
 
   const duplicateProfile = async (profile) => {
@@ -350,13 +352,13 @@ export default function LibraryView() {
             leading={<ProfileAvatar color={profile.color || '#FBCB2D'} size={32} muted={profile.needsSetup} />}
             title={profile.name}
             meta={profile.needsSetup
-              ? <span className="text-xs font-semibold text-status-setup">Needs a model</span>
+              ? <span className="text-xs font-semibold text-status-setup">{t("Needs a model")}</span>
               : <span className="font-mono text-[0.6875rem] text-text-subtle">{profile.model}</span>}
           />
         ))}
         {showProfileModal && !profileToEdit && newItem('New profile')}
-        {writingProfiles.length > 0 && shownProfiles.length === 0 && <RailEmpty>Nothing matches the search.</RailEmpty>}
-        {writingProfiles.length === 0 && !showProfileModal && <RailEmpty>No profiles yet.</RailEmpty>}
+        {writingProfiles.length > 0 && shownProfiles.length === 0 && <RailEmpty>{t("Nothing matches the search.")}</RailEmpty>}
+        {writingProfiles.length === 0 && !showProfileModal && <RailEmpty>{t("No profiles yet.")}</RailEmpty>}
       </>
     ),
     workflows: (
@@ -377,16 +379,16 @@ export default function LibraryView() {
                     return <ReedPen key={index} size={13} color={profile?.color || 'currentColor'} className={profile ? '' : 'text-text-disabled'} opacity={profile && !profile.needsSetup ? 1 : 0.4} />;
                   })}
                   {blocked
-                    ? <span className="ml-1 text-xs font-semibold text-status-setup">A step has no model</span>
-                    : <span className="caption ml-1">{steps.length} step{steps.length === 1 ? '' : 's'}</span>}
+                    ? <span className="ml-1 text-xs font-semibold text-status-setup">{t("A step has no model")}</span>
+                    : <span className="caption ml-1">{steps.length}{' '}{t("step")}{steps.length === 1 ? '' : 's'}</span>}
                 </span>
               )}
             />
           );
         })}
         {showWorkflowModal && !workflowToEdit && newItem('New workflow')}
-        {workflows.length > 0 && shownWorkflows.length === 0 && <RailEmpty>Nothing matches the search.</RailEmpty>}
-        {workflows.length === 0 && !showWorkflowModal && <RailEmpty>No workflows yet.</RailEmpty>}
+        {workflows.length > 0 && shownWorkflows.length === 0 && <RailEmpty>{t("Nothing matches the search.")}</RailEmpty>}
+        {workflows.length === 0 && !showWorkflowModal && <RailEmpty>{t("No workflows yet.")}</RailEmpty>}
       </>
     ),
     variables: (
@@ -401,8 +403,8 @@ export default function LibraryView() {
           />
         ))}
         {showVariableModal && !variableToEdit && newItem('New variable')}
-        {variables.length > 0 && shownVariables.length === 0 && <RailEmpty>Nothing matches the search.</RailEmpty>}
-        {variables.length === 0 && !showVariableModal && <RailEmpty>No variables yet.</RailEmpty>}
+        {variables.length > 0 && shownVariables.length === 0 && <RailEmpty>{t("Nothing matches the search.")}</RailEmpty>}
+        {variables.length === 0 && !showVariableModal && <RailEmpty>{t("No variables yet.")}</RailEmpty>}
       </>
     ),
   }[activeTab];
@@ -429,7 +431,7 @@ export default function LibraryView() {
                 `Profile "${savedProfile.name}" created. Give it documents and memory in its knowledge base.`,
                 'success',
                 8000,
-                { label: 'Open knowledge base', onClick: () => openManageKb(savedProfile) }
+                { label: t("Open knowledge base"), onClick: () => openManageKb(savedProfile) }
               );
             }
           }}
@@ -531,18 +533,18 @@ export default function LibraryView() {
       </LibraryRail>
 
       <div className="relative min-w-0 flex-1 overflow-y-auto custom-scrollbar pt-10 [mask-image:linear-gradient(to_bottom,transparent_0,transparent_2.25rem,black_4.25rem)]">
-        {pane || <p className="caption px-14 pt-12">Nothing matches the search.</p>}
+        {pane || <p className="caption px-14 pt-12">{t("Nothing matches the search.")}</p>}
       </div>
 
       {showDeleteModal && (
         <DeleteModal
-          title={deleteTarget?.type === 'profile' ? 'Delete this AI profile?' : deleteTarget?.type === 'workflow' ? 'Delete this workflow?' : 'Delete this variable?'}
+          title={deleteTarget?.type === 'profile' ? t("Delete this AI profile?") : deleteTarget?.type === 'workflow' ? t("Delete this workflow?") : t("Delete this variable?")}
           message={deleteTarget?.type === 'profile'
-            ? 'Workspaces that use it lose this voice, and workflows lose the steps it runs. This cannot be undone.'
+            ? t("Workspaces that use it lose this voice, and workflows lose the steps it runs. This cannot be undone.")
             : deleteTarget?.type === 'workflow'
-              ? 'Its AI profiles stay in the Library. This cannot be undone.'
-              : 'Rules that mention it keep the tag as plain text. This cannot be undone.'}
-          confirmText={deleteTarget?.type === 'profile' ? 'Delete profile' : deleteTarget?.type === 'workflow' ? 'Delete workflow' : 'Delete variable'}
+              ? t("Its AI profiles stay in the Library. This cannot be undone.")
+              : t("Rules that mention it keep the tag as plain text. This cannot be undone.")}
+          confirmText={deleteTarget?.type === 'profile' ? t("Delete profile") : deleteTarget?.type === 'workflow' ? t("Delete workflow") : t("Delete variable")}
           subject={deleteSubject(deleteTarget)}
           onConfirm={confirmDelete}
           onClose={() => {
@@ -593,9 +595,9 @@ export default function LibraryView() {
         <ImportProgressModal
           progress={importProgress}
           statusText={importStatus}
-          title={importType === 'profile' ? 'Importing an AI profile' : 'Importing a workflow'}
+          title={importType === 'profile' ? t("Importing an AI profile") : t("Importing a workflow")}
           stages={importType === 'profile' ? PROGRESS_STAGES.profileImport : PROGRESS_STAGES.workflowImport}
-          footnote={importType === 'profile' ? 'Keep Kallamo open until it finishes. The profile appears in the Library when it is done.' : 'Keep Kallamo open until it finishes. The workflow and its profiles appear in the Library when it is done.'}
+          footnote={importType === 'profile' ? t("Keep Kallamo open until it finishes. The profile appears in the Library when it is done.") : t("Keep Kallamo open until it finishes. The workflow and its profiles appear in the Library when it is done.")}
         />
       )}
     </div>

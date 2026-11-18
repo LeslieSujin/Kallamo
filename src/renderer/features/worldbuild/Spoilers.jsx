@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { createContext, forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { EditorContent, useEditor } from '@tiptap/react';
@@ -45,20 +46,18 @@ export function useSpoiler(field) {
 
 // Stands in for a hidden field until it is clicked. `compact` fits a line of small text.
 export function SpoilerCover({ field, compact = false, className = '', children }) {
+  const { t } = useI18n();
   const spoiler = useSpoiler(field);
   if (!spoiler.covered) return children;
   if (compact) return (
-    <button type="button" onClick={spoiler.reveal} aria-label="Hidden. Reveal"
+    <button type="button" onClick={spoiler.reveal} aria-label={t("Hidden. Reveal")}
       className="inline-flex h-5 items-center gap-1 rounded-sm border border-dashed border-border-default px-1.5 text-xs text-text-muted transition-colors hover:border-border-strong hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-      <EyeOff className="h-3 w-3" aria-hidden="true" />Hidden
-    </button>
+      <EyeOff className="h-3 w-3" aria-hidden="true" />{t("Hidden")}</button>
   );
   return (
-    <button type="button" onClick={spoiler.reveal} aria-label="Hidden. Reveal"
+    <button type="button" onClick={spoiler.reveal} aria-label={t("Hidden. Reveal")}
       className={`${className} inline-flex min-h-8 items-center gap-1.5 rounded-control border border-dashed border-border-default bg-surface-hover/30 px-2.5 py-1 text-xs font-medium text-text-muted transition-colors hover:border-border-strong hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`}>
-      <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
-      Hidden
-      <span className="text-text-subtle">Click to reveal</span>
+      <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />{t("Hidden")}<span className="text-text-subtle">{t("Click to reveal")}</span>
     </button>
   );
 }
@@ -91,10 +90,11 @@ export function SpoilerRow({ field, editing = false, children }) {
 
 // The same choice inside a row's actions menu, for lists that edit in place.
 export function SpoilerMenuItem({ field, onDone }) {
+  const { t } = useI18n();
   const spoiler = useSpoiler(field);
   if (!field) return null;
   return (
-    <MenuItem icon={spoiler.hidden ? Eye : EyeOff} label={spoiler.hidden ? 'Show to readers' : 'Hide from readers'}
+    <MenuItem icon={spoiler.hidden ? Eye : EyeOff} label={spoiler.hidden ? t("Show to readers") : t("Hide from readers")}
       onSelect={() => { spoiler.setHidden(!spoiler.hidden); onDone?.(); }} />
   );
 }
@@ -103,12 +103,13 @@ export function SpoilerMenuItem({ field, onDone }) {
 // Covered like a Discord spoiler: a solid bar over the real words, so it keeps their size and
 // wraps with the line. It stays open until the sheet is opened again.
 function InlineSpoiler({ value }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const shape = 'rounded-sm px-0.5 [box-decoration-break:clone] [-webkit-box-decoration-break:clone]';
   if (open) return <span className={`${shape} bg-surface-hover/60`}>{value}</span>;
   const reveal = (event) => { event.stopPropagation(); setOpen(true); };
   return (
-    <span role="button" tabIndex={0} aria-label="Hidden text. Reveal" onClick={reveal}
+    <span role="button" tabIndex={0} aria-label={t("Hidden text. Reveal")} onClick={reveal}
       onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); reveal(event); } }}
       className={`${shape} cursor-pointer select-none bg-text-subtle text-transparent transition-colors hover:bg-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40`}>
       <span aria-hidden="true">{value}</span>
@@ -209,6 +210,7 @@ const fromDoc = (doc) => (doc.content || []).map(paragraph => (paragraph.content
 // Edits plain text the way a textarea does, but a ||spoiler|| stays covered until the caret
 // goes into it. onChange receives a textarea-shaped event.
 export const SpoilerTextArea = forwardRef(function SpoilerTextArea({ value, onChange, rows = 5, placeholder = '', id, 'aria-label': ariaLabel }, ref) {
+  const { t } = useI18n();
   const lastValue = useRef(String(value || ''));
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -264,9 +266,8 @@ export const SpoilerTextArea = forwardRef(function SpoilerTextArea({ value, onCh
       <div className="mt-1.5 flex items-center gap-2">
         <button type="button" disabled={!canHide} onMouseDown={(event) => event.preventDefault()} onClick={() => editor && hideSelection(editor)}
           className="inline-flex items-center gap-1.5 rounded text-xs font-semibold text-text-muted transition-colors hover:text-text-primary disabled:cursor-default disabled:text-text-disabled focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-          <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />Hide selected text
-        </button>
-        <span className="caption">Or write ||like this||. Hidden text stays covered until clicked.</span>
+          <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />{t("Hide selected text")}</button>
+        <span className="caption">{t("Or write ||like this||. Hidden text stays covered until clicked.")}</span>
       </div>
     </div>
   );

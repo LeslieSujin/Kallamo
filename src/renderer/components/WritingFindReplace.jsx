@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronUp, ChevronDown, CaseSensitive, Search, Lock } from 'lucide-react';
@@ -7,6 +8,7 @@ import { searchKey, collectSearchMatches } from './writingExtensions';
 
 // Replace is disabled while the chapter is locked, so it can't desync a pending suggestion's anchors.
 export default function WritingFindReplace({ editor, locked, onClose }) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [replacement, setReplacement] = useState('');
   const [caseSensitive, setCaseSensitive] = useState(false);
@@ -117,46 +119,44 @@ export default function WritingFindReplace({ editor, locked, onClose }) {
   const field = 'flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md border border-border-default bg-surface-input px-2.5 focus-within:border-accent/70';
 
   return createPortal(
-    <div role="dialog" aria-label="Find and replace" style={panelStyle} className="flex w-[22.5rem] max-w-[calc(100vw-2rem)] flex-col gap-2 rounded-card border border-border-default bg-surface-panel/97 p-2.5 shadow-overlay">
+    <div role="dialog" aria-label={t("Find and replace")} style={panelStyle} className="flex w-[22.5rem] max-w-[calc(100vw-2rem)] flex-col gap-2 rounded-card border border-border-default bg-surface-panel/97 p-2.5 shadow-overlay">
       <div className="flex items-center gap-1">
         <label className={field}>
-          <span className="sr-only">Find</span>
+          <span className="sr-only">{t("Find")}</span>
           <Search className="h-4 w-4 shrink-0 text-text-subtle" aria-hidden="true" />
           <input
             ref={findRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onFindKey}
-            placeholder="Find"
+            placeholder={t("Find")}
             className="min-w-0 flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-subtle focus:outline-none"
           />
-          {query && <span className="shrink-0 text-xs tabular-nums text-text-subtle">{matches.length ? `${current + 1} of ${matches.length}` : 'No matches'}</span>}
+          {query && <span className="shrink-0 text-xs tabular-nums text-text-subtle">{matches.length ? `${current + 1} of ${matches.length}` : t("No matches")}</span>}
         </label>
-        <Tooltip content="Match case"><button type="button" aria-label="Match case" aria-pressed={caseSensitive} onClick={() => setCaseSensitive(v => !v)} className={iconBtn(caseSensitive)}><CaseSensitive className="h-4 w-4" /></button></Tooltip>
-        <Tooltip content="Previous (Shift Enter)"><button type="button" aria-label="Previous match" onClick={() => step(-1)} disabled={!matches.length} className={iconBtn(false)}><ChevronUp className="h-4 w-4" /></button></Tooltip>
-        <Tooltip content="Next (Enter)"><button type="button" aria-label="Next match" onClick={() => step(1)} disabled={!matches.length} className={iconBtn(false)}><ChevronDown className="h-4 w-4" /></button></Tooltip>
-        <Tooltip content="Close (Esc)"><button type="button" aria-label="Close" onClick={onClose} className={iconBtn(false)}><X className="h-4 w-4" /></button></Tooltip>
+        <Tooltip content="Match case"><button type="button" aria-label={t("Match case")} aria-pressed={caseSensitive} onClick={() => setCaseSensitive(v => !v)} className={iconBtn(caseSensitive)}><CaseSensitive className="h-4 w-4" /></button></Tooltip>
+        <Tooltip content="Previous (Shift Enter)"><button type="button" aria-label={t("Previous match")} onClick={() => step(-1)} disabled={!matches.length} className={iconBtn(false)}><ChevronUp className="h-4 w-4" /></button></Tooltip>
+        <Tooltip content="Next (Enter)"><button type="button" aria-label={t("Next match")} onClick={() => step(1)} disabled={!matches.length} className={iconBtn(false)}><ChevronDown className="h-4 w-4" /></button></Tooltip>
+        <Tooltip content="Close (Esc)"><button type="button" aria-label={t("Close")} onClick={onClose} className={iconBtn(false)}><X className="h-4 w-4" /></button></Tooltip>
       </div>
 
       {locked ? (
         <p className="flex items-start gap-2 px-1 py-0.5 text-xs leading-relaxed text-text-muted">
-          <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
-          Replacing is paused until you accept or reject the AI suggestion in this chapter.
-        </p>
+          <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />{t("Replacing is paused until you accept or reject the AI suggestion in this chapter.")}</p>
       ) : (
         <div className="flex items-center gap-1.5">
           <label className={field}>
-            <span className="sr-only">Replace with</span>
+            <span className="sr-only">{t("Replace with")}</span>
             <input
               value={replacement}
               onChange={(e) => setReplacement(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); replaceCurrent(); } if (e.key === 'Escape') onClose(); }}
-              placeholder="Replace with"
+              placeholder={t("Replace with")}
               className="min-w-0 flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-subtle focus:outline-none"
             />
           </label>
-          <Button variant="ghost" size="sm" onClick={replaceCurrent} disabled={!matches.length}>Replace</Button>
-          <Button variant="ghost" size="sm" onClick={replaceAll} disabled={!matches.length}>Replace all</Button>
+          <Button variant="ghost" size="sm" onClick={replaceCurrent} disabled={!matches.length}>{t("Replace")}</Button>
+          <Button variant="ghost" size="sm" onClick={replaceAll} disabled={!matches.length}>{t("Replace all")}</Button>
         </div>
       )}
     </div>,

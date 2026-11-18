@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Clock3, History, Info, MapPin, X } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
@@ -45,6 +46,7 @@ function buildLog(messages, frames) {
 }
 
 export default function SummaryLogModal({ block, chatId, electronAPI, backgroundImage, onClose }) {
+  const { t } = useI18n();
   const messages = useMemo(
     () => (block?.raw?.messages || []).filter(message => message && typeof message === 'object' && message.content != null),
     [block]
@@ -123,7 +125,7 @@ export default function SummaryLogModal({ block, chatId, electronAPI, background
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close summary"
+          aria-label={t("Close summary")}
           className="absolute right-3.5 top-3.5 flex h-9 w-9 items-center justify-center rounded-full border border-tint/20 bg-surface-canvas/55 text-text-primary backdrop-blur-md hover:bg-surface-canvas/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 cursor-pointer"
         >
           <X className="h-4 w-4" />
@@ -131,14 +133,14 @@ export default function SummaryLogModal({ block, chatId, electronAPI, background
         <div className="absolute inset-x-7 bottom-4 flex items-end justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-1.5">
             <span className="inline-flex h-6 items-center gap-1.5 self-start rounded-full border border-mode-history/35 bg-surface-canvas/60 px-2.5 text-xs font-medium text-mode-history backdrop-blur-md">
-              <History className="h-3.5 w-3.5" aria-hidden="true" />{isRoleplay ? 'History summary · Roleplay' : 'History summary'}
+              <History className="h-3.5 w-3.5" aria-hidden="true" />{isRoleplay ? t("History summary · Roleplay") : t("History summary")}
             </span>
             <h2 className="truncate text-2xl font-semibold tracking-tight text-text-primary [text-shadow:0_1px_12px_color-mix(in_srgb,var(--theme-shade)_50%,transparent)]">{block?.title}</h2>
             <span className="text-sm text-text-secondary tabular-nums">{meta}</span>
           </div>
           {isRoleplay && activeScene?.point?.locationName && (
             <span className="hidden h-7 shrink-0 items-center gap-1.5 rounded-lg border border-tint/15 bg-surface-canvas/60 px-2.5 text-xs text-text-secondary backdrop-blur-md sm:inline-flex">
-              <MapPin className="h-3.5 w-3.5 text-status-success" aria-hidden="true" />Scene in view: {activeScene.point.locationName}
+              <MapPin className="h-3.5 w-3.5 text-status-success" aria-hidden="true" />{t("Scene in view:")}{' '}{activeScene.point.locationName}
             </span>
           )}
         </div>
@@ -149,43 +151,43 @@ export default function SummaryLogModal({ block, chatId, electronAPI, background
           {isRoleplay ? (
             <div className="flex items-start gap-3 rounded-card border border-border-subtle bg-tint/[0.03] px-4 py-3">
               <div className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold text-text-secondary">Recap</span>
+                <span className="block text-sm font-semibold text-text-secondary">{t("Recap")}</span>
                 {block?.summary
                   ? <div className={`markdown-content mt-1 text-sm leading-relaxed text-text-primary ${recapOpen ? '' : 'line-clamp-2'}`} dangerouslySetInnerHTML={{ __html: parseMarkdown(block.summary) }} />
-                  : <p className="mt-1 text-sm italic text-text-muted">No recap was written for this archive.</p>}
+                  : <p className="mt-1 text-sm italic text-text-muted">{t("No recap was written for this archive.")}</p>}
               </div>
               {block?.summary && (
                 <button type="button" onClick={() => setRecapOpen(value => !value)} className="shrink-0 rounded text-xs font-semibold text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 cursor-pointer">
-                  {recapOpen ? 'Show less' : 'Show all'}
+                  {recapOpen ? t("Show less") : t("Show all")}
                 </button>
               )}
             </div>
           ) : (
             <div className="flex flex-col gap-2.5">
-              <span className="text-sm font-semibold text-text-secondary">Recap</span>
+              <span className="text-sm font-semibold text-text-secondary">{t("Recap")}</span>
               {block?.summary
                 ? <div className="markdown-content text-[0.9375rem] leading-relaxed text-text-primary" dangerouslySetInnerHTML={{ __html: parseMarkdown(block.summary) }} />
-                : <p className="text-sm italic text-text-muted">No recap was written for this archive. The saved history below is complete and searchable either way.</p>}
+                : <p className="text-sm italic text-text-muted">{t("No recap was written for this archive. The saved history below is complete and searchable either way.")}</p>}
               <div className="flex items-start gap-2 rounded-control border border-border-subtle bg-tint/[0.03] px-3 py-2.5">
                 <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
-                <span className="text-xs leading-relaxed text-text-muted">This recap is for you. The AI does not read it: it searches the saved messages below and pulls back the passages that matter.</span>
+                <span className="text-xs leading-relaxed text-text-muted">{t("This recap is for you. The AI does not read it: it searches the saved messages below and pulls back the passages that matter.")}</span>
               </div>
             </div>
           )}
 
           {!isRoleplay && (
             <div className="flex items-center gap-2.5">
-              <span className="text-sm font-semibold text-text-secondary">Saved conversation</span>
+              <span className="text-sm font-semibold text-text-secondary">{t("Saved conversation")}</span>
               <span className="h-px flex-1 bg-border-subtle" />
-              {messages.length > 0 && <span className="text-xs text-text-subtle">{messages.length} messages</span>}
+              {messages.length > 0 && <span className="text-xs text-text-subtle">{messages.length}{' '}{t("messages")}</span>}
             </div>
           )}
 
           {messages.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-10 text-center">
               <Info className="h-5 w-5 text-text-subtle" aria-hidden="true" />
-              <p className="text-sm text-text-muted">No transcript was saved for this summary.</p>
-              <p className="max-w-sm text-xs text-text-subtle">It was archived before transcripts were kept. The recap and the search data still work.</p>
+              <p className="text-sm text-text-muted">{t("No transcript was saved for this summary.")}</p>
+              <p className="max-w-sm text-xs text-text-subtle">{t("It was archived before transcripts were kept. The recap and the search data still work.")}</p>
             </div>
           ) : items.map(item => {
             if (item.kind === 'scene') {
@@ -197,9 +199,9 @@ export default function SummaryLogModal({ block, chatId, electronAPI, background
                   <div className="absolute inset-0 flex items-center justify-between gap-4 px-4">
                     <span className="flex min-w-0 flex-col gap-0.5">
                       <span className="flex items-center gap-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-status-success">
-                        <MapPin className="h-3 w-3" aria-hidden="true" />Scene {item.index}
+                        <MapPin className="h-3 w-3" aria-hidden="true" />{t("Scene")}{' '}{item.index}
                       </span>
-                      <span className="truncate text-[0.9375rem] font-semibold text-text-primary">{item.point?.locationName || 'Unknown location'}</span>
+                      <span className="truncate text-[0.9375rem] font-semibold text-text-primary">{item.point?.locationName || t("Unknown location")}</span>
                     </span>
                     <span className="flex shrink-0 flex-col items-end gap-0.5 text-xs text-text-secondary">
                       <span>{formatFrameDate(item.point)}</span>
@@ -225,8 +227,8 @@ export default function SummaryLogModal({ block, chatId, electronAPI, background
               return (
                 <div key={item.key} className="flex max-w-[78%] flex-col items-end gap-1.5 self-end">
                   <span className="flex items-center gap-1.5 text-xs text-text-muted">
-                    <span className="font-semibold text-text-secondary">You</span>
-                    {item.playerName && <>as<span className="rounded-full border border-status-info/30 bg-status-info/12 px-2 py-px font-medium text-status-info">{item.playerName}</span></>}
+                    <span className="font-semibold text-text-secondary">{t("You")}</span>
+                    {item.playerName && <>{t("as")}<span className="rounded-full border border-status-info/30 bg-status-info/12 px-2 py-px font-medium text-status-info">{item.playerName}</span></>}
                     {stamp && <span>· {stamp}</span>}
                   </span>
                   <div className="whitespace-pre-wrap rounded-2xl rounded-br-md border border-border-subtle bg-surface-hover px-3.5 py-2.5 text-sm leading-relaxed text-text-primary">{message.content}</div>

@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { Children, useId } from 'react';
 import Toggle from '../../components/ui/Toggle';
 import NumberInput from '../../components/ui/NumberInput';
@@ -40,6 +41,7 @@ export const REASON_LIMIT = 80;
 
 // Why a number was changed by hand: one short line, so it reads whole in History and tooltips.
 export function ReasonInput({ value, onChange, label, className = '' }) {
+  const { t } = useI18n();
   const left = REASON_LIMIT - String(value || '').length;
   return (
     <label className={`flex items-center gap-2 rounded-control border border-border-default bg-surface-input pl-3 pr-2.5 focus-within:border-accent/70 ${className}`}>
@@ -49,7 +51,7 @@ export function ReasonInput({ value, onChange, label, className = '' }) {
         maxLength={REASON_LIMIT}
         value={value || ''}
         onChange={event => onChange(event.target.value)}
-        placeholder="Why? Optional, shows in History"
+        placeholder={t("Why? Optional, shows in History")}
       />
       <span className={`shrink-0 text-xs tabular-nums ${left <= 10 ? 'text-status-warning' : 'text-text-subtle'}`}>{left}</span>
     </label>

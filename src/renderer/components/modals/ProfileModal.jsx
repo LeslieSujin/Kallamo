@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Plug, Trash2 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -37,6 +38,7 @@ export function ProfileAvatar({ color, size = 44, muted = false }) {
 }
 
 export default function ProfileModal({ profile, preset, starters = null, onClose, onSave, onDelete, initialTab = 'rules', inline = false }) {
+  const { t } = useI18n();
   const { apiProfiles, handleSaveProfile, variables, chats } = useApp();
   const isEditing = !!profile;
 
@@ -142,7 +144,7 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
     >
       {!isEditing && starters && (
         <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-tint/[0.06] px-6 py-3">
-          <span className="caption mr-1">Start from</span>
+          <span className="caption mr-1">{t("Start from")}</span>
           {starters.map(starter => (
             <button
               key={starter.label}
@@ -160,12 +162,11 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         <div className="flex shrink-0 flex-col gap-6 overflow-y-auto custom-scrollbar border-border-subtle px-6 py-5 lg:w-[26rem] lg:border-r">
           <section className="flex flex-col gap-3.5">
-            <h3 className="text-sm font-bold text-text-primary">Identity</h3>
-            <TextInput label="Name" value={name} onChange={e => setName(e.target.value)} placeholder="Line editor" autoFocus={!isEditing} />
-            <Textarea label="Description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Tightens prose in the Writing Desk without changing your voice." rows={3} className="min-h-[5.25rem]" />
+            <h3 className="text-sm font-bold text-text-primary">{t("Identity")}</h3>
+            <TextInput label={t("Name")} value={name} onChange={e => setName(e.target.value)} placeholder={t("Line editor")} autoFocus={!isEditing} />
+            <Textarea label={t("Description")} value={description} onChange={e => setDescription(e.target.value)} placeholder={t("Tightens prose in the Writing Desk without changing your voice.")} rows={3} className="min-h-[5.25rem]" />
             <div>
-              <span className="mb-1.5 block text-sm font-medium text-text-secondary">
-                Colour <span className="caption">(names this profile in the chat)</span>
+              <span className="mb-1.5 block text-sm font-medium text-text-secondary">{t("Colour")}<span className="caption">{t("(names this profile in the chat)")}</span>
               </span>
               <div className="flex flex-wrap gap-2.5">
                 {COLORS.map(c => (
@@ -184,35 +185,35 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
           </section>
 
           <section data-tour="profile-connection" className="flex flex-col gap-3.5">
-            <h3 className="text-sm font-bold text-text-primary">Connection</h3>
+            <h3 className="text-sm font-bold text-text-primary">{t("Connection")}</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <span className="mb-1.5 block text-sm font-medium text-text-secondary">API profile</span>
+                <span className="mb-1.5 block text-sm font-medium text-text-secondary">{t("API profile")}</span>
                 <SelectMenu
-                  ariaLabel="API profile"
+                  ariaLabel={t("API profile")}
                   value={apiProfileId}
                   onChange={value => { setApiProfileId(value); setModel(''); }}
-                  options={[{ value: '', label: 'Not linked' }, ...apiProfiles.map(ap => ({ value: ap.id, label: ap.name }))]}
+                  options={[{ value: '', label: t("Not linked") }, ...apiProfiles.map(ap => ({ value: ap.id, label: ap.name }))]}
                 />
               </div>
               <div>
-                <span className="mb-1.5 block text-sm font-medium text-text-secondary">Model</span>
+                <span className="mb-1.5 block text-sm font-medium text-text-secondary">{t("Model")}</span>
                 {apiProfileId ? (
                   <SelectMenu
-                    ariaLabel="Model"
+                    ariaLabel={t("Model")}
                     value={model}
                     onChange={setModel}
-                    options={[{ value: '', label: 'Choose a model' }, ...modelOptions.map(m => ({ value: m, label: m }))]}
+                    options={[{ value: '', label: t("Choose a model") }, ...modelOptions.map(m => ({ value: m, label: m }))]}
                   />
                 ) : (
-                  <div className="flex min-h-9 min-w-0 items-center rounded-control border border-border-default bg-surface-input px-3 text-sm text-text-disabled"><span className="truncate">No connection</span></div>
+                  <div className="flex min-h-9 min-w-0 items-center rounded-control border border-border-default bg-surface-input px-3 text-sm text-text-disabled"><span className="truncate">{t("No connection")}</span></div>
                 )}
               </div>
             </div>
             {!apiProfiles.length ? (
-              <p className="flex items-center gap-2 text-xs text-status-warning"><Plug className="h-3.5 w-3.5" aria-hidden="true" />No connections yet. Add one in Settings, under Connections.</p>
+              <p className="flex items-center gap-2 text-xs text-status-warning"><Plug className="h-3.5 w-3.5" aria-hidden="true" />{t("No connections yet. Add one in Settings, under Connections.")}</p>
             ) : (!apiProfileId || !model) ? (
-              <p className="flex items-center gap-2 text-xs text-status-warning"><Plug className="h-3.5 w-3.5" aria-hidden="true" />Without a connection and a model this profile can't reply.</p>
+              <p className="flex items-center gap-2 text-xs text-status-warning"><Plug className="h-3.5 w-3.5" aria-hidden="true" />{t("Without a connection and a model this profile can't reply.")}</p>
             ) : (
               <span className="caption">{apiLabel}</span>
             )}
@@ -220,14 +221,14 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
 
           <section className="flex flex-col gap-3.5">
             <div className="flex items-center gap-2">
-              <h3 className="flex-1 text-sm font-bold text-text-primary">Generation</h3>
-              <span className="caption">Custom JSON</span>
-              <Toggle checked={manualMode} onChange={setManualMode} ariaLabel="Custom JSON" />
+              <h3 className="flex-1 text-sm font-bold text-text-primary">{t("Generation")}</h3>
+              <span className="caption">{t("Custom JSON")}</span>
+              <Toggle checked={manualMode} onChange={setManualMode} ariaLabel={t("Custom JSON")} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <div className="mb-1.5 flex justify-between">
-                  <label htmlFor="profile-temperature" className="text-sm font-medium text-text-secondary">Temperature</label>
+                  <label htmlFor="profile-temperature" className="text-sm font-medium text-text-secondary">{t("Temperature")}</label>
                   <span className="text-sm tabular-nums text-text-primary">{temperature}</span>
                 </div>
                 <input
@@ -242,7 +243,7 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
                 />
               </div>
               <div>
-                <label htmlFor="profile-max-tokens" className="mb-1.5 block text-sm font-medium text-text-secondary">Max reply tokens</label>
+                <label htmlFor="profile-max-tokens" className="mb-1.5 block text-sm font-medium text-text-secondary">{t("Max reply tokens")}</label>
                 <NumberInput
                   id="profile-max-tokens"
                   value={maxTokens}
@@ -256,7 +257,7 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
             </div>
             {manualMode && (
               <Textarea
-                hint="Raw JSON properties added to the API request. A key set here replaces the value above."
+                hint={t("Raw JSON properties added to the API request. A key set here replaces the value above.")}
                 value={manualJson}
                 onChange={e => setManualJson(e.target.value)}
                 rows={4}
@@ -268,11 +269,9 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
         </div>
 
         <div className="flex min-h-[28rem] min-w-0 flex-1 flex-col px-6 pb-5">
-          <div role="tablist" aria-label="Profile instructions" className="flex shrink-0 border-b border-border-subtle">
-            <TabButton active={tab === 'rules'} onClick={() => setTab('rules')}>Behavior and rules</TabButton>
-            <TabButton active={tab === 'search'} onClick={() => setTab('search')}>
-              Smart search
-              {isAgentic && <span className="rounded-full bg-tint/[0.07] px-1.5 py-px text-xs font-medium text-text-secondary">On</span>}
+          <div role="tablist" aria-label={t("Profile instructions")} className="flex shrink-0 border-b border-border-subtle">
+            <TabButton active={tab === 'rules'} onClick={() => setTab('rules')}>{t("Behavior and rules")}</TabButton>
+            <TabButton active={tab === 'search'} onClick={() => setTab('search')}>{t("Smart search")}{isAgentic && <span className="rounded-full bg-tint/[0.07] px-1.5 py-px text-xs font-medium text-text-secondary">{t("On")}</span>}
             </TabButton>
           </div>
 
@@ -282,8 +281,8 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
               value={systemPrompt}
               onChange={setSystemPrompt}
               variables={variables}
-              caption="How this profile writes: voice, rules, format."
-              placeholder="Edit the selected text for clarity and rhythm. Keep the author's voice, names and facts exactly as written. Return only the edited text."
+              caption={t("How this profile writes: voice, rules, format.")}
+              placeholder={t("Edit the selected text for clarity and rhythm. Keep the author's voice, names and facts exactly as written. Return only the edited text.")}
             />
           ) : (
             <div className="mt-4 flex min-h-0 flex-1 flex-col gap-4">
@@ -291,33 +290,31 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
                 <Toggle
                   checked={isAgentic}
                   onChange={setIsAgentic}
-                  label="Search before replying"
-                  description="The AI reads the conversation and writes its own searches through Memory, Worldbuild and this profile's knowledge base, instead of matching your message word for word."
+                  label={t("Search before replying")}
+                  description={t("The AI reads the conversation and writes its own searches through Memory, Worldbuild and this profile's knowledge base, instead of matching your message word for word.")}
                 />
               </div>
               {isAgentic ? (
                 <>
                   <div className="flex flex-wrap items-center gap-4 px-0.5">
                     <div className="min-w-0 flex-1">
-                      <span className="block text-sm font-bold text-text-secondary">Search rounds</span>
-                      <p className="caption mt-1">One round is a search and a look at what came back. 1 is cheapest, 3 is balanced, more follows leads further and costs more.</p>
+                      <span className="block text-sm font-bold text-text-secondary">{t("Search rounds")}</span>
+                      <p className="caption mt-1">{t("One round is a search and a look at what came back. 1 is cheapest, 3 is balanced, more follows leads further and costs more.")}</p>
                     </div>
-                    <SegmentedControl label="Search rounds" value={agenticMaxTurns} onChange={setAgenticMaxTurns} options={ROUNDS} />
+                    <SegmentedControl label={t("Search rounds")} value={agenticMaxTurns} onChange={setAgenticMaxTurns} options={ROUNDS} />
                   </div>
                   <PromptEditor
                     key="search"
-                    title="Search instructions"
+                    title={t("Search instructions")}
                     value={agenticPrompt}
                     onChange={setAgenticPrompt}
                     variables={variables}
-                    caption="Tells the search step what to look for. The reply itself still follows Behavior and rules."
-                    placeholder="Find the passages where the selected characters and places appear, so the edit keeps every fact consistent."
+                    caption={t("Tells the search step what to look for. The reply itself still follows Behavior and rules.")}
+                    placeholder={t("Find the passages where the selected characters and places appear, so the edit keeps every fact consistent.")}
                   />
                 </>
               ) : (
-                <p className="caption max-w-lg px-0.5 leading-relaxed">
-                  Off: retrieval runs a plain similarity search against your message text. Turn it on to let the AI write its own searches.
-                </p>
+                <p className="caption max-w-lg px-0.5 leading-relaxed">{t("Off: retrieval runs a plain similarity search against your message text. Turn it on to let the AI write its own searches.")}</p>
               )}
             </div>
           )}
@@ -326,11 +323,11 @@ export default function ProfileModal({ profile, preset, starters = null, onClose
 
       <footer className="flex shrink-0 items-center gap-2.5 border-t border-border-subtle px-6 py-3.5">
         {isEditing && onDelete && (
-          <Button variant="subtle" icon={Trash2} className="!text-status-danger hover:!bg-status-danger/10" onClick={() => onDelete(profile)}>Delete</Button>
+          <Button variant="subtle" icon={Trash2} className="!text-status-danger hover:!bg-status-danger/10" onClick={() => onDelete(profile)}>{t("Delete")}</Button>
         )}
         <span className="flex-1" />
-        <Button variant="subtle" onClick={onClose}>Cancel</Button>
-        <Button data-tour="profile-save" onClick={handleSave} disabled={!name.trim()}>Save profile</Button>
+        <Button variant="subtle" onClick={onClose}>{t("Cancel")}</Button>
+        <Button data-tour="profile-save" onClick={handleSave} disabled={!name.trim()}>{t("Save profile")}</Button>
       </footer>
     </Modal>
   );
@@ -353,6 +350,7 @@ function TabButton({ active, onClick, children }) {
 
 // A prompt field with Write / Preview, {{variable}} autocomplete and an expanded preview.
 function PromptEditor({ title, value, onChange, variables, caption, placeholder }) {
+  const { t } = useI18n();
   const [mode, setMode] = useState('editor');
   const [ac, setAc] = useState({ isOpen: false, search: '', triggerIndex: -1 });
   const [acIndex, setAcIndex] = useState(0);
@@ -416,7 +414,7 @@ function PromptEditor({ title, value, onChange, variables, caption, placeholder 
     <div className="mt-3.5 flex min-h-0 flex-1 flex-col gap-3">
       <div className="flex items-center gap-2.5">
         {title ? <h3 className="flex-1 text-sm font-bold text-text-primary">{title}</h3> : <span className="caption flex-1">{caption}</span>}
-        <SegmentedControl label="Editor mode" value={mode} onChange={(next) => { setMode(next); closeAc(); }} options={MODES} />
+        <SegmentedControl label={t("Editor mode")} value={mode} onChange={(next) => { setMode(next); closeAc(); }} options={MODES} />
       </div>
       {mode === 'editor' ? (
         <div className="relative flex min-h-0 flex-1 flex-col">
@@ -454,7 +452,7 @@ function PromptEditor({ title, value, onChange, variables, caption, placeholder 
       )}
       <div className="flex items-center gap-3">
         {title && caption && <span className="caption">{caption}</span>}
-        <span className="caption ml-auto">Type <span className="font-mono text-text-secondary">{'{{'}</span> to insert a variable.</span>
+        <span className="caption ml-auto">{t("Type")}{' '}<span className="font-mono text-text-secondary">{'{{'}</span>{' '}{t("to insert a variable.")}</span>
       </div>
     </div>
   );

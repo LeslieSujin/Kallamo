@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import {
   Backpack, CalendarDays, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Clapperboard, Gamepad2, HandHelping, Image as ImageIcon, Loader2, MapPin,
@@ -69,6 +70,7 @@ export function Avatar({ entity, player = false, size = 'md' }) {
 
 /** The collapsed panel: a slim rail that keeps the scene in view beside the chat. */
 export function RoleplayRail({ statusLabel, processing, pendingCount, calendar, clock, player, others, presenceOf, typeLabels, resourcesOf, locationName, locationType, inventoryCount, onOpen }) {
+  const { t } = useI18n();
   const visible = others.slice(0, COLLAPSED_ACTOR_LIMIT);
   const hidden = others.slice(COLLAPSED_ACTOR_LIMIT);
   const railButton = 'inline-flex items-center justify-center rounded-control transition-colors hover:bg-surface-hover/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40';
@@ -84,7 +86,7 @@ export function RoleplayRail({ statusLabel, processing, pendingCount, calendar, 
         <span className="flex items-center gap-1.5">
           <span className={meta(entity.type).soft}>{typeLabels?.get(entity.type) || meta(entity.type).label}</span>
           <span aria-hidden="true" className="text-text-disabled">·</span>
-          <span className={state === 'playing' ? 'text-accent' : 'text-text-muted'}>{state === 'playing' ? 'You play them' : PRESENCE[state]?.label}</span>
+          <span className={state === 'playing' ? 'text-accent' : 'text-text-muted'}>{state === 'playing' ? t("You play them") : PRESENCE[state]?.label}</span>
         </span>
       </span>
     </span>
@@ -92,13 +94,13 @@ export function RoleplayRail({ statusLabel, processing, pendingCount, calendar, 
     </span>
   );
   return (
-    <aside aria-label="Roleplay" className="glass-rail glass-dense relative z-20 flex h-full w-16 shrink-0 flex-col items-center gap-1 border-l border-border-subtle pb-3 pt-[3.25rem]">
+    <aside aria-label={t("Roleplay")} className="glass-rail glass-dense relative z-20 flex h-full w-16 shrink-0 flex-col items-center gap-1 border-l border-border-subtle pb-3 pt-[3.25rem]">
       <Tooltip side="left" content="Open roleplay panel">
-        <button type="button" onClick={() => onOpen()} aria-label="Open roleplay panel" className={`${railButton} h-10 w-10 text-text-muted hover:text-text-primary`}>
+        <button type="button" onClick={() => onOpen()} aria-label={t("Open roleplay panel")} className={`${railButton} h-10 w-10 text-text-muted hover:text-text-primary`}>
           <PanelRightOpen aria-hidden="true" className="h-[1.125rem] w-[1.125rem]" />
         </button>
       </Tooltip>
-      <Tooltip side="left" content={<span className="font-medium text-text-primary">Roleplay · {statusLabel}</span>}>
+      <Tooltip side="left" content={<span className="font-medium text-text-primary">{t("Roleplay ·")}{' '}{statusLabel}</span>}>
         <span tabIndex={0} className="flex h-6 items-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
           <RoleplayStatus processing={processing} pendingCount={pendingCount} /><span className="sr-only">{statusLabel}</span>
         </span>
@@ -161,8 +163,8 @@ export function RoleplayRail({ statusLabel, processing, pendingCount, calendar, 
           <span className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-entity-location/40 bg-entity-location/15 text-entity-location"><MapPin aria-hidden="true" className="h-4 w-4" /></span>
             <span className="min-w-0">
-              <span className="block truncate text-[0.8125rem] font-semibold text-text-primary">{locationName || 'No current location'}</span>
-              <span className="text-entity-location">{locationType || 'Location'}</span>
+              <span className="block truncate text-[0.8125rem] font-semibold text-text-primary">{locationName || t("No current location")}</span>
+              <span className="text-entity-location">{locationType || t("Location")}</span>
             </span>
           </span>
         )}
@@ -172,7 +174,7 @@ export function RoleplayRail({ statusLabel, processing, pendingCount, calendar, 
         </button>
       </Tooltip>
       <span className="flex-1" />
-      <Tooltip side="left" content={<span><span className="font-semibold text-text-primary">Inventory</span> · {inventoryCount} {inventoryCount === 1 ? 'item' : 'items'}</span>}>
+      <Tooltip side="left" content={<span><span className="font-semibold text-text-primary">{t("Inventory")}</span> · {inventoryCount} {inventoryCount === 1 ? t("item") : t("items")}</span>}>
         <button type="button" onClick={() => onOpen('inventory')} aria-label={`Inventory, ${inventoryCount} items`} className={`${railButton} relative h-10 w-10 text-text-muted hover:text-text-primary`}>
           <Backpack aria-hidden="true" className="h-[1.125rem] w-[1.125rem]" />
           {inventoryCount > 0 && <span className="absolute right-0 top-0.5 flex h-4 min-w-[1.125rem] items-center justify-center rounded-full bg-surface-hover px-1 text-[0.625rem] font-semibold text-text-secondary">{inventoryCount}</span>}
@@ -211,13 +213,14 @@ export function PanelClock({ calendar, clock, onEdit }) {
 }
 
 export function PanelTabs({ tab, onChange, inventoryCount }) {
+  const { t } = useI18n();
   const tabs = [
     ['scene', 'Scene', Clapperboard],
     ['inventory', 'Inventory', Backpack]
   ];
   return (
     <div className="px-3 pb-1 pt-3">
-      <div role="tablist" aria-label="Roleplay panel" className="ws-well flex gap-0.5 rounded-card border border-tint/[0.06] bg-shade/25 p-[3px]">
+      <div role="tablist" aria-label={t("Roleplay panel")} className="ws-well flex gap-0.5 rounded-card border border-tint/[0.06] bg-shade/25 p-[3px]">
         {tabs.map(([id, label, Icon]) => (
           <button
             key={id}
@@ -247,6 +250,7 @@ export function SectionHead({ title, children }) {
 }
 
 function LocationPicker({ anchorRef, open, onClose, options, currentId, onSelect }) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const listId = useId();
@@ -286,16 +290,16 @@ function LocationPicker({ anchorRef, open, onClose, options, currentId, onSelect
           value={query}
           onChange={event => { setQuery(event.target.value); setActiveIndex(0); }}
           onKeyDown={onKeyDown}
-          placeholder="Search locations"
+          placeholder={t("Search locations")}
           role="combobox"
-          aria-label="Search locations"
+          aria-label={t("Search locations")}
           aria-expanded="true"
           aria-controls={listId}
           aria-activedescendant={filtered[activeIndex] ? `${listId}-${filtered[activeIndex].id}` : undefined}
           className="h-11 min-w-0 flex-1 bg-transparent text-sm text-text-primary outline-none placeholder:text-text-subtle"
         />
       </div>
-      <div id={listId} role="listbox" aria-label="Locations" className="max-h-72 overflow-y-auto overscroll-contain p-1.5 custom-scrollbar">
+      <div id={listId} role="listbox" aria-label={t("Locations")} className="max-h-72 overflow-y-auto overscroll-contain p-1.5 custom-scrollbar">
         {filtered.map((option, index) => {
           const Icon = option.icon || MapPin;
           const selected = option.id === currentId;
@@ -317,7 +321,7 @@ function LocationPicker({ anchorRef, open, onClose, options, currentId, onSelect
             </button>
           );
         })}
-        {!filtered.length && <p className="px-3 py-5 text-center text-sm text-text-subtle">No matching locations.</p>}
+        {!filtered.length && <p className="px-3 py-5 text-center text-sm text-text-subtle">{t("No matching locations.")}</p>}
       </div>
     </Popover>
   );
@@ -325,6 +329,7 @@ function LocationPicker({ anchorRef, open, onClose, options, currentId, onSelect
 
 /** The current location as the scene's hero: its background, its name, and the way to change either. */
 export function LocationHero({ locationId, locationName, locationOptions, onChangeLocation, background, onChooseBackground, onRemoveBackground, inheritedFrom }) {
+  const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const menuRef = useRef(null);
@@ -337,7 +342,7 @@ export function LocationHero({ locationId, locationName, locationOptions, onChan
       <button
         ref={menuRef}
         type="button"
-        aria-label="Location background"
+        aria-label={t("Location background")}
         aria-haspopup="menu"
         aria-expanded={menuOpen}
         disabled={!locationId}
@@ -346,12 +351,12 @@ export function LocationHero({ locationId, locationName, locationOptions, onChan
       >
         <ImageIcon aria-hidden="true" className="h-4 w-4" />
       </button>
-      <Menu anchorRef={menuRef} open={menuOpen} onClose={() => setMenuOpen(false)} label="Location background" className="w-60">
-        <MenuItem icon={ImageIcon} label={imageUrl ? 'Change background' : 'Choose background'} description={inheritedFrom ? `Now inherited from ${inheritedFrom}.` : undefined} onSelect={() => { setMenuOpen(false); onChooseBackground(); }} />
+      <Menu anchorRef={menuRef} open={menuOpen} onClose={() => setMenuOpen(false)} label={t("Location background")} className="w-60">
+        <MenuItem icon={ImageIcon} label={imageUrl ? t("Change background") : t("Choose background")} description={inheritedFrom ? `Now inherited from ${inheritedFrom}.` : undefined} onSelect={() => { setMenuOpen(false); onChooseBackground(); }} />
         {imageUrl && !inheritedFrom && (
           <>
             <MenuSeparator />
-            <MenuItem icon={Trash2} label="Remove background" danger onSelect={() => { setMenuOpen(false); onRemoveBackground(); }} />
+            <MenuItem icon={Trash2} label={t("Remove background")} danger onSelect={() => { setMenuOpen(false); onRemoveBackground(); }} />
           </>
         )}
       </Menu>
@@ -366,8 +371,8 @@ export function LocationHero({ locationId, locationName, locationOptions, onChan
           <MapPin aria-hidden="true" className="h-4 w-4" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[0.9375rem] font-semibold text-text-primary">{locationName || 'Choose a location'}</span>
-          <span className="block truncate text-xs text-entity-location">{inheritedFrom ? `Background from ${inheritedFrom}` : 'Current location'}</span>
+          <span className="block truncate text-[0.9375rem] font-semibold text-text-primary">{locationName || t("Choose a location")}</span>
+          <span className="block truncate text-xs text-entity-location">{inheritedFrom ? `Background from ${inheritedFrom}` : t("Current location")}</span>
         </span>
         <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-tint/15 bg-surface-canvas/55 text-text-primary backdrop-blur-md transition-colors group-hover/place:bg-surface-canvas/80">
           <ChevronDown aria-hidden="true" className={`h-4 w-4 transition-transform ${pickerOpen ? 'rotate-180' : ''}`} />
@@ -443,6 +448,7 @@ function readCardOpen(entityId) {
 }
 
 export function PlayerCard({ entity, typeLabel, resources = [], progress = null }) {
+  const { t } = useI18n();
   const levels = progress?.progresses && progress.mode === 'levels';
   const hasVitals = resources.length > 0 || levels;
   const [open, setOpen] = useState(() => readCardOpen(entity.id));
@@ -460,7 +466,7 @@ export function PlayerCard({ entity, typeLabel, resources = [], progress = null 
           <span className="flex items-center gap-1.5 text-xs">
             <span className={`font-medium ${meta(entity.type).soft}`}>{typeLabel || meta(entity.type).label}</span>
             <span aria-hidden="true" className="text-text-disabled">·</span>
-            <span className="inline-flex items-center gap-1 text-accent/90"><Gamepad2 aria-hidden="true" className="h-3.5 w-3.5" />You play them</span>
+            <span className="inline-flex items-center gap-1 text-accent/90"><Gamepad2 aria-hidden="true" className="h-3.5 w-3.5" />{t("You play them")}</span>
           </span>
         </span>
         {hasVitals && (
@@ -469,7 +475,7 @@ export function PlayerCard({ entity, typeLabel, resources = [], progress = null 
               type="button"
               onClick={toggle}
               aria-expanded={open}
-              aria-label={open ? 'Hide details' : 'Show details'}
+              aria-label={open ? t("Hide details") : t("Show details")}
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tint/[0.04] text-text-muted transition-colors hover:bg-tint/[0.08] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
               {open ? <ChevronUp aria-hidden="true" className="h-4 w-4" /> : <ChevronDown aria-hidden="true" className="h-4 w-4" />}
@@ -494,8 +500,8 @@ export function PlayerCard({ entity, typeLabel, resources = [], progress = null 
           {levels && (
             <div>
               <div className="flex items-baseline gap-2 text-[0.8125rem]">
-                <span className="font-semibold text-text-secondary">XP</span>
-                <span className="flex-1 text-xs font-semibold text-entity-event">Level {progress.level}</span>
+                <span className="font-semibold text-text-secondary">{t("XP")}</span>
+                <span className="flex-1 text-xs font-semibold text-entity-event">{t("Level")}{' '}{progress.level}</span>
                 <span className="shrink-0 whitespace-nowrap tabular-nums text-text-muted">{amount(progress.xp)} / {progress.goal == null ? '—' : amount(progress.goal)}</span>
               </div>
               <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-tint/[0.08]">
@@ -522,6 +528,7 @@ export function PlayerCard({ entity, typeLabel, resources = [], progress = null 
 }
 
 export function CastRow({ entity, typeLabel, presence, resources = [], onPlay, onPresence, onRemove }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   const typeMeta = meta(entity.type);
@@ -557,12 +564,12 @@ export function CastRow({ entity, typeLabel, presence, resources = [], onPlay, o
       <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={`Actions for ${entity.canonicalName}`} className="w-64">
         <MenuItem icon={Gamepad2} iconClassName="text-accent" label={`Play as ${entity.canonicalName}`} onSelect={choose(onPlay)} />
         <MenuSeparator />
-        <MenuLabel>Presence</MenuLabel>
+        <MenuLabel>{t("Presence")}</MenuLabel>
         {Object.entries(PRESENCE).map(([key, value]) => (
           <MenuItem key={key} icon={value.icon} label={value.label} description={value.hint} checked={presence === key} onSelect={choose(() => onPresence(key))} />
         ))}
         <MenuSeparator />
-        <MenuItem icon={X} label="Remove from scene" danger onSelect={choose(onRemove)} />
+        <MenuItem icon={X} label={t("Remove from scene")} danger onSelect={choose(onRemove)} />
       </Menu>
     </div>
     <SlimBars resources={resources} className="mt-1 pl-[2.875rem] pr-9" />
@@ -592,15 +599,16 @@ function ItemTile({ item, large = false }) {
 }
 
 function ItemMenu({ item, anchorRef, open, onClose, onToggle, onTransfer }) {
+  const { t } = useI18n();
   const choose = action => () => {
     onClose();
     action();
   };
   return (
     <Menu anchorRef={anchorRef} open={open} onClose={onClose} label={`Actions for ${item.name}`} className="w-56">
-      <MenuItem icon={Swords} label={item.equipped ? 'Unequip' : 'Equip'} onSelect={choose(() => onToggle(item))} />
-      <MenuItem icon={MapPin} label="Drop or move" onSelect={choose(() => onTransfer({ itemId: item.itemId, mode: 'location', targetId: '', quantity: 1 }))} />
-      <MenuItem icon={HandHelping} label="Give to character" onSelect={choose(() => onTransfer({ itemId: item.itemId, mode: 'character', targetId: '', quantity: 1 }))} />
+      <MenuItem icon={Swords} label={item.equipped ? t("Unequip") : t("Equip")} onSelect={choose(() => onToggle(item))} />
+      <MenuItem icon={MapPin} label={t("Drop or move")} onSelect={choose(() => onTransfer({ itemId: item.itemId, mode: 'location', targetId: '', quantity: 1 }))} />
+      <MenuItem icon={HandHelping} label={t("Give to character")} onSelect={choose(() => onTransfer({ itemId: item.itemId, mode: 'character', targetId: '', quantity: 1 }))} />
     </Menu>
   );
 }
@@ -638,6 +646,7 @@ function EquippedSlot({ item, onToggle, onTransfer }) {
 
 // One row that scrolls sideways, so a long loadout never pushes the carried list down.
 function EquippedCarousel({ items, onToggle, onTransfer }) {
+  const { t } = useI18n();
   const trackRef = useRef(null);
   const [edges, setEdges] = useState({ start: true, end: true });
   const measure = useCallback(() => {
@@ -667,13 +676,13 @@ function EquippedCarousel({ items, onToggle, onTransfer }) {
       {!edges.start && (
         <>
           <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-surface-sidebar to-transparent" />
-          <button type="button" aria-label="Previous equipped items" onClick={() => page(-1)} className={`${arrow} -left-1`}><ChevronLeft aria-hidden="true" className="h-4 w-4" /></button>
+          <button type="button" aria-label={t("Previous equipped items")} onClick={() => page(-1)} className={`${arrow} -left-1`}><ChevronLeft aria-hidden="true" className="h-4 w-4" /></button>
         </>
       )}
       {!edges.end && (
         <>
           <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-surface-sidebar to-transparent" />
-          <button type="button" aria-label="More equipped items" onClick={() => page(1)} className={`${arrow} -right-1`}><ChevronRight aria-hidden="true" className="h-4 w-4" /></button>
+          <button type="button" aria-label={t("More equipped items")} onClick={() => page(1)} className={`${arrow} -right-1`}><ChevronRight aria-hidden="true" className="h-4 w-4" /></button>
         </>
       )}
     </div>
@@ -709,6 +718,7 @@ function CarriedRow({ item, onToggle, onTransfer }) {
 }
 
 export function InventoryTab({ player, inventory, onToggle, onTransfer }) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const equipped = inventory.filter(item => item.equipped);
   const carried = inventory.filter(item => !item.equipped);
@@ -722,29 +732,29 @@ export function InventoryTab({ player, inventory, onToggle, onTransfer }) {
       <div className="flex items-center gap-2.5 rounded-card border border-accent/30 bg-gradient-to-br from-accent/12 to-accent/[0.03] p-2.5">
         <Avatar entity={player} player />
         <span className="min-w-0">
-          <span className="block truncate text-sm font-semibold text-text-primary">{player?.canonicalName || 'No controlled character'}</span>
-          <span className="block text-xs text-accent/90">{player ? `Carrying ${totalCount} ${totalCount === 1 ? 'item' : 'items'}` : 'Choose one in Roleplay settings.'}</span>
+          <span className="block truncate text-sm font-semibold text-text-primary">{player?.canonicalName || t("No controlled character")}</span>
+          <span className="block text-xs text-accent/90">{player ? `Carrying ${totalCount} ${totalCount === 1 ? 'item' : 'items'}` : t("Choose one in Roleplay settings.")}</span>
         </span>
       </div>
       <section>
-        <SectionHead title="Equipped"><span className="text-xs text-text-subtle tabular-nums">{equipped.length}</span></SectionHead>
+        <SectionHead title={t("Equipped")}><span className="text-xs text-text-subtle tabular-nums">{equipped.length}</span></SectionHead>
         {equipped.length
           ? <EquippedCarousel items={equipped} onToggle={onToggle} onTransfer={onTransfer} />
-          : <p className="rounded-card border border-dashed border-border-subtle px-3 py-4 text-center text-xs text-text-disabled">Nothing is equipped.</p>}
+          : <p className="rounded-card border border-dashed border-border-subtle px-3 py-4 text-center text-xs text-text-disabled">{t("Nothing is equipped.")}</p>}
       </section>
       <section>
-        <SectionHead title="Carried"><span className="text-xs text-text-subtle tabular-nums">{carried.length}</span></SectionHead>
+        <SectionHead title={t("Carried")}><span className="text-xs text-text-subtle tabular-nums">{carried.length}</span></SectionHead>
         {carried.length >= INVENTORY_FILTER_FROM && (
           <label className="mb-1.5 flex h-9 items-center gap-2 rounded-control border border-border-subtle bg-surface-input/50 px-3 text-text-subtle focus-within:border-accent/50">
             <Search aria-hidden="true" className="h-4 w-4 shrink-0" />
-            <span className="sr-only">Filter items</span>
-            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Filter items" className="h-full min-w-0 flex-1 bg-transparent text-[0.8125rem] text-text-primary outline-none placeholder:text-text-subtle" />
+            <span className="sr-only">{t("Filter items")}</span>
+            <input value={query} onChange={event => setQuery(event.target.value)} placeholder={t("Filter items")} className="h-full min-w-0 flex-1 bg-transparent text-[0.8125rem] text-text-primary outline-none placeholder:text-text-subtle" />
           </label>
         )}
         <div>
           {visibleCarried.map(item => <CarriedRow key={item.itemId} item={item} onToggle={onToggle} onTransfer={onTransfer} />)}
-          {!carried.length && <p className="rounded-card border border-dashed border-border-subtle px-3 py-4 text-center text-xs text-text-disabled">This character carries nothing else.</p>}
-          {carried.length > 0 && !visibleCarried.length && <p className="px-3 py-4 text-center text-xs text-text-disabled">No items match.</p>}
+          {!carried.length && <p className="rounded-card border border-dashed border-border-subtle px-3 py-4 text-center text-xs text-text-disabled">{t("This character carries nothing else.")}</p>}
+          {carried.length > 0 && !visibleCarried.length && <p className="px-3 py-4 text-center text-xs text-text-disabled">{t("No items match.")}</p>}
         </div>
       </section>
     </div>

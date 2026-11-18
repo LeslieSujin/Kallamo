@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 import Button from '../../components/ui/Button';
@@ -7,6 +8,7 @@ import { entityMeta } from './worldbuildConfig';
 import { locationSizeLabel, locationSizeOf } from '../../../shared/location-sizes';
 
 export default function EntityPickerButton({ label = 'Add', title, options, onPick, icon = Plus }) {
+  const { t } = useI18n();
   const [isOpen, setOpen] = useState(false);
   const selectOptions = options.map((option) => {
     const metadata = option.type ? entityMeta(option) : null;
@@ -25,21 +27,21 @@ export default function EntityPickerButton({ label = 'Add', title, options, onPi
     <>
       <Button size="sm" variant="ghost" icon={icon} onClick={() => setOpen(true)}>{label}</Button>
       {isOpen ? (
-        <Modal size="md" title={title || 'Choose'} icon={Search} iconClassName="text-text-muted" onClose={() => setOpen(false)}>
+        <Modal size="md" title={title || t("Choose")} icon={Search} iconClassName="text-text-muted" onClose={() => setOpen(false)}>
           <div className="p-4">
             {selectOptions.length ? (
               <SearchableSelect
                 value=""
                 onChange={(id) => { onPick(id); setOpen(false); }}
                 options={selectOptions}
-                placeholder="Search and choose…"
-                searchPlaceholder="Search by name or alias…"
+                placeholder={t("Search and choose…")}
+                searchPlaceholder={t("Search by name or alias…")}
                 clearable={false}
                 autoOpen
-                ariaLabel={title || 'Choose entity'}
+                ariaLabel={title || t("Choose entity")}
               />
             ) : (
-              <p className="rounded-control border border-dashed border-border-default px-4 py-6 text-center text-sm text-text-muted">Nothing to add. Create one first.</p>
+              <p className="rounded-control border border-dashed border-border-default px-4 py-6 text-center text-sm text-text-muted">{t("Nothing to add. Create one first.")}</p>
             )}
           </div>
         </Modal>

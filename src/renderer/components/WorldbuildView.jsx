@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -58,7 +59,7 @@ import {
 import { isInvertedNesting, locationSizeGuide, locationSizeLabel, locationSizeOf, locationSizeRank } from '../../shared/location-sizes';
 import SegmentedControl from './ui/SegmentedControl';
 import SelectMenu from './ui/SelectMenu';
-import { normalizeTemplateSections, sheetTabs as sheetTabsFor, tabLabel } from '../features/worldbuild/worldbuildSections';
+import { nativeSections, normalizeTemplateSections, sheetTabs as sheetTabsFor, tabLabel } from '../features/worldbuild/worldbuildSections';
 import { FieldEye, SpoilerCover, SpoilerRow, SpoilerScope, SpoilerText, SpoilerTextArea } from '../features/worldbuild/Spoilers';
 import { hiddenFields, withFieldHidden } from '../../shared/spoilers';
 
@@ -103,11 +104,13 @@ const matchesReviewFilter = (entity, filter, { nameReview, reviewCounts }) => {
 
 // A state read as a dot and a word (life status, disposition). `map` is STATUS or DISPOSITION.
 const StateTag = ({ map, value }) => {
+  const { t } = useI18n();
   const s = map[value]; if (!s) return null;
-  return <span className="inline-flex items-center gap-1.5 text-sm font-medium text-text-secondary"><span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${s.dot}`} />{s.label}</span>;
+  return <span className="inline-flex items-center gap-1.5 text-sm font-medium text-text-secondary"><span aria-hidden="true" className={`h-2 w-2 shrink-0 rounded-full ${s.dot}`} />{t(s.label)}</span>;
 };
 
 const EvidenceReferences = ({ excerpts, support = '', label }) => {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const references = excerpts.filter(Boolean);
   if (!references.length && !support) return null;
@@ -115,7 +118,7 @@ const EvidenceReferences = ({ excerpts, support = '', label }) => {
     <div className="mt-2">
       <button type="button" aria-expanded={open} onClick={() => setOpen(value => !value)} className="inline-flex items-center gap-1 rounded text-xs font-medium text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
         <ChevronRight className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-90' : ''}`} />
-        {open ? 'Hide passages' : label || (references.length ? `From the story, ${references.length} ${references.length === 1 ? 'passage' : 'passages'}` : 'Why')}
+        {open ? t("Hide passages") : label || (references.length ? `From the story, ${references.length} ${references.length === 1 ? 'passage' : 'passages'}` : 'Why')}
       </button>
       {open && <div className="mt-2 max-h-56 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
         {support && <p className="caption">{support}</p>}
@@ -138,6 +141,7 @@ const AI_POLICY = {
 };
 // One named button instead of three near-identical icons: the choice is read, not decoded.
 const AiPolicyControl = ({ value, onChange, className = '' }) => {
+  const { t } = useI18n();
   const cur = AI_POLICY[value] ? value : 'review';
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
@@ -146,12 +150,12 @@ const AiPolicyControl = ({ value, onChange, className = '' }) => {
     <>
       <button ref={anchorRef} type="button" data-tour="wb-policy" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(v => !v)}
         className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-control border border-border-default bg-surface-canvas/60 px-2.5 backdrop-blur-sm text-xs font-medium text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${className}`}>
-        <Icon className="h-3.5 w-3.5" aria-hidden="true" /><span className="text-text-subtle">AI</span>{AI_POLICY[cur].label}<ChevronDown className="h-3.5 w-3.5 text-text-subtle" aria-hidden="true" />
+        <Icon className="h-3.5 w-3.5" aria-hidden="true" /><span className="text-text-subtle">AI</span>{t(AI_POLICY[cur].label)}<ChevronDown className="h-3.5 w-3.5 text-text-subtle" aria-hidden="true" />
       </button>
-      <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label="AI policy" className="w-72">
-        <MenuLabel>What the AI may do here</MenuLabel>
+      <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={t("AI policy")} className="w-72">
+        <MenuLabel>{t("What the AI may do here")}</MenuLabel>
         {Object.entries(AI_POLICY).map(([key, policy]) => (
-          <MenuItem key={key} icon={policy.icon} label={policy.label} description={policy.tip} checked={key === cur}
+          <MenuItem key={key} icon={policy.icon} label={t(policy.label)} description={t(policy.tip)} checked={key === cur}
             onSelect={() => { setOpen(false); if (key !== cur) onChange(key); }} />
         ))}
       </Menu>
@@ -159,14 +163,16 @@ const AiPolicyControl = ({ value, onChange, className = '' }) => {
   );
 };
 
-const StateSelect = ({ map, value, onChange, label }) => (
-  <SelectMenu ariaLabel={label} value={value || 'unknown'} onChange={(next) => onChange({ target: { value: next } })}
-    options={Object.entries(map).map(([k, v]) => ({ value: k, label: v.label }))} />
-);
-const ChoiceSelect = ({ value, onChange, options, label, empty = 'Not set' }) => (
-  <SelectMenu ariaLabel={label} value={value || ''} onChange={(next) => onChange({ target: { value: next } })}
-    options={[{ value: '', label: empty }, ...options.map(option => ({ value: option, label: option }))]} />
-);
+const StateSelect = ({ map, value, onChange, label }) => {
+  const { t } = useI18n();
+  return <SelectMenu ariaLabel={label} value={value || 'unknown'} onChange={(next) => onChange({ target: { value: next } })}
+    options={Object.entries(map).map(([k, v]) => ({ value: k, label: t(v.label) }))} />;
+};
+const ChoiceSelect = ({ value, onChange, options, label, empty = 'Not set' }) => {
+  const { t } = useI18n();
+  return <SelectMenu ariaLabel={label} value={value || ''} onChange={(next) => onChange({ target: { value: next } })}
+    options={[{ value: '', label: t(empty) }, ...options.map(option => ({ value: option, label: t(option) }))]} />;
+};
 
 // No native datalist: its popup can't be themed. onChange receives an event-like object.
 const FreeDatalist = ({ value, onChange, options, placeholder }) => {
@@ -192,6 +198,7 @@ const FreeDatalist = ({ value, onChange, options, placeholder }) => {
 
 // A small "?" that reveals a themed legend on hover, matching the app's tooltips.
 const InfoPopover = ({ items }) => {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   return (
@@ -199,7 +206,7 @@ const InfoPopover = ({ items }) => {
       <Info className="w-3 h-3 text-text-subtle hover:text-accent cursor-help" />
       <Popover anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} matchAnchorWidth={false} scroll={false} className="w-60 border-border-default bg-surface-panel-muted p-3 normal-case tracking-normal">
         <div className="space-y-1.5">
-          {items.map(([k, v]) => <div key={k} className="text-xs leading-snug"><span className="font-semibold text-text-primary">{k}</span> <span className="text-text-muted">{v}</span></div>)}
+          {items.map(([k, v]) => <div key={k} className="text-xs leading-snug"><span className="font-semibold text-text-primary">{t(k)}</span> <span className="text-text-muted">{t(v)}</span></div>)}
         </div>
       </Popover>
     </span>
@@ -240,12 +247,13 @@ const FactGrid = ({ children, columns = 3 }) => (
 const ALWAYS_IN_CONTEXT_WARN_TOKENS = 1500;
 
 const AlwaysInContextControl = ({ checked, content, onChange }) => {
+  const { t } = useI18n();
   const tokens = Math.ceil(String(content || '').length / 4);
   const large = tokens >= ALWAYS_IN_CONTEXT_WARN_TOKENS;
   return (
     <div className="mt-4 border-t border-border-subtle pt-4">
-      <Toggle checked={checked} onChange={onChange} label="Always in the AI's context"
-        description="Off: these rules reach the AI when the story touches them. On: they go with every message." />
+      <Toggle checked={checked} onChange={onChange} label={t("Always in the AI's context")}
+        description={t("Off: these rules reach the AI when the story touches them. On: they go with every message.")} />
       {checked && tokens > 0 && (
         <p className={`caption mt-2 flex items-center gap-1.5 ${large ? 'text-status-warning' : ''}`}>
           {large && <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
@@ -259,6 +267,7 @@ const AlwaysInContextControl = ({ checked, content, onChange }) => {
 };
 
 const Prose = ({ text, empty = 'Not written yet', clamp = true, spoiler }) => {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const value = String(text || '').trim();
   if (!value) return <p className="text-sm text-text-disabled">{empty}</p>;
@@ -267,7 +276,7 @@ const Prose = ({ text, empty = 'Not written yet', clamp = true, spoiler }) => {
     <SpoilerCover field={spoiler}><div>
       <p className={`text-sm leading-relaxed text-text-secondary whitespace-pre-wrap ${long && !open ? 'line-clamp-5' : ''}`}><SpoilerText text={value} /></p>
       {long && <button type="button" onClick={() => setOpen(v => !v)} className="mt-2 inline-flex items-center gap-1 rounded text-xs font-semibold text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-        {open ? 'Show less' : 'Show all'}<ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+        {open ? t("Show less") : t("Show all")}<ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>}
     </div></SpoilerCover>
   );
@@ -303,12 +312,13 @@ function injectIntoGrid(view, cells) {
 
 // Warns without blocking: some fiction nests a world inside a bottle on purpose.
 function NestingWarning({ size, parent }) {
+  const { t } = useI18n();
   const parentSize = locationSizeOf(parent);
   if (!parent || !isInvertedNesting(size, parentSize)) return null;
   return (
     <p className="flex items-start gap-2 rounded-control border border-status-warning/30 bg-status-warning/10 px-3 py-2 text-xs leading-relaxed text-status-warning">
       <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-      <span>This {locationSizeLabel(size).toLowerCase()} sits inside {parent.canonicalName}, which is a {locationSizeLabel(parentSize).toLowerCase()}. A container is usually larger than what it holds.</span>
+      <span>{t("This")}{' '}{locationSizeLabel(size).toLowerCase()}{' '}{t("sits inside")}{' '}{parent.canonicalName}{t(", which is a")}{' '}{locationSizeLabel(parentSize).toLowerCase()}{t(". A container is usually larger than what it holds.")}</span>
     </p>
   );
 }
@@ -326,6 +336,7 @@ const Chip = ({ children }) => (
 // A sheet section: titled card with one Edit for everything inside, template fields
 // included. `empty` folds an unwritten section to one line that keeps its place.
 function Section({ icon, title, count, editing, onEdit, showPencil, right, empty = false, emptyVerb = 'Write', emptyNote = 'Not written yet', quiet = false, children }) {
+  const { t } = useI18n();
   const Icon = icon || BookOpen;
   if (empty && !editing) {
     return (
@@ -347,14 +358,13 @@ function Section({ icon, title, count, editing, onEdit, showPencil, right, empty
         {!quiet && <Icon className="h-4 w-4 shrink-0 text-text-muted" aria-hidden="true" />}
         <h2 className={`min-w-0 truncate ${quiet ? 'text-xs font-medium text-text-subtle' : 'text-sm font-semibold text-text-primary'}`}>{title}</h2>
         {count != null && <span className="text-xs tabular-nums text-text-subtle">{count}</span>}
-        {editing && <span className="text-xs text-text-subtle">Editing</span>}
+        {editing && <span className="text-xs text-text-subtle">{t("Editing")}</span>}
         <span className="flex-1" />
         {right}
         {showPencil && !editing && (
           <button type="button" onClick={onEdit} aria-label={`Edit ${title || 'section'}`}
             className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-muted transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-            <Pencil className="h-3.5 w-3.5" aria-hidden="true" />Edit
-          </button>
+            <Pencil className="h-3.5 w-3.5" aria-hidden="true" />{t("Edit")}</button>
         )}
       </header>
       <div className={`space-y-4 px-4 ${quiet ? 'pb-4 pt-1' : 'py-4'}`}>{children}</div>
@@ -378,19 +388,20 @@ function SheetNotice({ icon: Icon, title, text, busy = false, children }) {
 
 // The sheet's own actions. Delete lives here, never at the foot of every tab.
 function SheetActionsMenu({ onPortrait, hasPortrait, onEditName, onMerge, onReprocess, onDelete }) {
+  const { t } = useI18n();
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
   const run = (action) => () => { setOpen(false); action(); };
   return (
     <>
-      <IconButton ref={anchorRef} data-tour="wb-sheet-actions" icon={MoreHorizontal} label="Sheet actions" size="sm" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(v => !v)} />
-      <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label="Sheet actions" className="w-64">
-        <MenuItem icon={PencilLine} label="Edit name and aliases" onSelect={run(onEditName)} />
-        {onPortrait && <MenuItem data-tour="wb-add-portrait" icon={ImagePlus} label={hasPortrait ? 'Change portrait' : 'Add portrait'} description="Also shown beside them in roleplay." onSelect={run(onPortrait)} />}
-        <MenuItem icon={Merge} label="Merge into another entity" description="Keeps this name as an alias." onSelect={run(onMerge)} />
-        {onReprocess && <MenuItem icon={RefreshCw} label="Read the story again" description="The next update rereads its passages." onSelect={run(onReprocess)} />}
+      <IconButton ref={anchorRef} data-tour="wb-sheet-actions" icon={MoreHorizontal} label={t("Sheet actions")} size="sm" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(v => !v)} />
+      <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={t("Sheet actions")} className="w-64">
+        <MenuItem icon={PencilLine} label={t("Edit name and aliases")} onSelect={run(onEditName)} />
+        {onPortrait && <MenuItem data-tour="wb-add-portrait" icon={ImagePlus} label={hasPortrait ? t("Change portrait") : t("Add portrait")} description={t("Also shown beside them in roleplay.")} onSelect={run(onPortrait)} />}
+        <MenuItem icon={Merge} label={t("Merge into another entity")} description={t("Keeps this name as an alias.")} onSelect={run(onMerge)} />
+        {onReprocess && <MenuItem icon={RefreshCw} label={t("Read the story again")} description={t("The next update rereads its passages.")} onSelect={run(onReprocess)} />}
         <MenuSeparator />
-        <MenuItem icon={Trash2} label="Delete entity" danger onSelect={run(onDelete)} />
+        <MenuItem icon={Trash2} label={t("Delete entity")} danger onSelect={run(onDelete)} />
       </Menu>
     </>
   );
@@ -400,11 +411,12 @@ function SheetActionsMenu({ onPortrait, hasPortrait, onEditName, onMerge, onRepr
 const canHavePortrait = (entity) => entity?.type === 'Characters' || (entity?.type === 'Creatures' && (entity.data?.scope || 'individual') !== 'group');
 
 function SheetMedallion({ meta, portrait, onPortrait }) {
+  const { t } = useI18n();
   const style = framedImageStyle(portrait);
   const label = portrait ? 'Change portrait' : 'Add portrait';
   // A portrait is the sheet's face, so it is shown large; the type icon keeps its usual size.
   const tile = style
-    ? <span role="img" aria-label="Portrait" className="block h-[6.5rem] w-[6.5rem] shrink-0 rounded-card border border-border-default" style={style} />
+    ? <span role="img" aria-label={t("Portrait")} className="block h-[6.5rem] w-[6.5rem] shrink-0 rounded-card border border-border-default" style={style} />
     : <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-card border ${meta.medallion}`}>{React.createElement(meta.icon, { className: 'h-7 w-7' })}</span>;
   if (!onPortrait) return tile;
   return (
@@ -421,29 +433,30 @@ function SheetMedallion({ meta, portrait, onPortrait }) {
 // The scene background a place shows in roleplay. A place without its own inherits the
 // one of the place it sits in, and only its own image can be framed or removed.
 function LocationCoverMenu({ cover, childNames = [], parentName, onChoose, onFrame, onRemove }) {
+  const { t } = useI18n();
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
   const run = (action) => () => { setOpen(false); action(); };
   const own = !!cover && !cover.inherited;
   const buttonClass = 'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-control border border-border-default bg-surface-canvas/60 px-2.5 backdrop-blur-sm text-xs font-semibold text-text-secondary transition-colors hover:border-border-strong hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40';
   if (!cover) {
-    return <button type="button" onClick={onChoose} className={buttonClass}><ImageIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />Add background</button>;
+    return <button type="button" onClick={onChoose} className={buttonClass}><ImageIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{t("Add background")}</button>;
   }
   return (
     <>
       <button ref={anchorRef} type="button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(v => !v)} className={buttonClass}>
-        <ImageIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />Background<ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
+        <ImageIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{t("Background")}<ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
       </button>
-      <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label="Scene background" className="w-80">
-        <MenuItem icon={Upload} label={own ? 'Choose another image' : 'Choose its own image'} description="PNG, JPG or WebP." onSelect={run(onChoose)} />
-        {own && <MenuItem icon={Crop} label="Adjust the framing" description="Where the header crops it." onSelect={run(onFrame)} />}
+      <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={t("Scene background")} className="w-80">
+        <MenuItem icon={Upload} label={own ? t("Choose another image") : t("Choose its own image")} description={t("PNG, JPG or WebP.")} onSelect={run(onChoose)} />
+        {own && <MenuItem icon={Crop} label={t("Adjust the framing")} description={t("Where the header crops it.")} onSelect={run(onFrame)} />}
         {own && childNames.length > 0 && <>
           <MenuSeparator />
-          <p className="px-2.5 py-1.5 text-xs leading-relaxed text-text-muted">Places inside it without their own image use this one too: <span className="text-text-secondary">{childNames.join(', ')}</span>.</p>
+          <p className="px-2.5 py-1.5 text-xs leading-relaxed text-text-muted">{t("Places inside it without their own image use this one too:")}{' '}<span className="text-text-secondary">{childNames.join(', ')}</span>.</p>
         </>}
         {own && <>
           <MenuSeparator />
-          <MenuItem icon={Trash2} label="Remove background" danger description={parentName ? `The scene falls back to ${parentName}.` : 'Roleplay shows no background here.'} onSelect={run(onRemove)} />
+          <MenuItem icon={Trash2} label={t("Remove background")} danger description={parentName ? `The scene falls back to ${parentName}.` : t("Roleplay shows no background here.")} onSelect={run(onRemove)} />
         </>}
       </Menu>
     </>
@@ -452,6 +465,7 @@ function LocationCoverMenu({ cover, childNames = [], parentName, onChoose, onFra
 
 // Other names as chips. The sheet still stores them as one comma-separated string.
 function AliasInput({ value, onChange, placeholder, withEyes = false }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState('');
   const names = String(value || '').split(',').map(name => name.trim()).filter(Boolean);
   const commit = (list) => onChange(list.join(', '));
@@ -469,7 +483,7 @@ function AliasInput({ value, onChange, placeholder, withEyes = false }) {
           <button type="button" aria-label={`Remove ${name}`} onClick={() => commit(names.filter(item => item !== name))} className="rounded p-0.5 text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><X className="h-3 w-3" /></button>
         </span>
       ))}
-      <input value={draft} aria-label="Add another name" placeholder={names.length ? 'Type and press Enter' : placeholder}
+      <input value={draft} aria-label={t("Add another name")} placeholder={names.length ? t("Type and press Enter") : placeholder}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ',') { event.preventDefault(); add(); }
@@ -485,6 +499,7 @@ const draftFor = (type, data = {}) => ({ id: null, type, canonicalName: '', alia
 
 // Links need a saved entity id, so these render nothing before the first save.
 function SingleRelation({ label, hint, current, options, onSet, disabled, spoiler }) {
+  const { t } = useI18n();
   if (disabled) return null;
   const currentName = options.find(o => o.id === current)?.canonicalName;
   return (
@@ -495,8 +510,8 @@ function SingleRelation({ label, hint, current, options, onSet, disabled, spoile
               <span>{currentName}</span>
               <button type="button" aria-label={`Clear ${label}`} onClick={() => onSet(null)} className="inline-flex h-7 w-7 items-center justify-center rounded-md text-text-muted hover:bg-status-danger/10 hover:text-status-danger"><X className="w-3.5 h-3.5" /></button>
             </div>
-          : <span className="inline-flex min-h-9 items-center rounded-control border border-dashed border-border-default px-3 text-sm text-text-subtle">None set</span>}
-        <EntityPickerButton icon={currentName ? Replace : Plus} label={currentName ? 'Change' : 'Set'} title={label} options={options} onPick={(id) => onSet(id)} />
+          : <span className="inline-flex min-h-9 items-center rounded-control border border-dashed border-border-default px-3 text-sm text-text-subtle">{t("None set")}</span>}
+        <EntityPickerButton icon={currentName ? Replace : Plus} label={currentName ? t("Change") : t("Set")} title={label} options={options} onPick={(id) => onSet(id)} />
       </div>
     </Edit>
   );
@@ -525,6 +540,7 @@ function MultiRelation({ label, hint, links, options, onAdd, onRemove, disabled,
 // from the open sheet's point of view; incoming edges are shown as the other
 // character's perspective and remain read-only here.
 function LabeledRelation({ subjectName, links, options, priorLabels, onAdd, onRemove, disabled }) {
+  const { t } = useI18n();
   const [toId, setToId] = useState('');
   const [role, setRole] = useState('');
   if (disabled) return null;
@@ -535,27 +551,27 @@ function LabeledRelation({ subjectName, links, options, priorLabels, onAdd, onRe
   const pickedName = options.find(o => o.id === toId)?.canonicalName;
   const submit = () => { if (!toId) return; onAdd(toId, role.trim()); setToId(''); setRole(''); };
   return (
-    <Edit label="Relationships">
-      <Hint>Pick a character and say what they are to {who}. For example, choose "John" and type "father" to record that John is {who}'s father.</Hint>
+    <Edit label={t("Relationships")}>
+      <Hint>{t("Pick a character and say what they are to")}{' '}{who}{t(". For example, choose \"John\" and type \"father\" to record that John is")}{' '}{who}{t("'s father.")}</Hint>
       <div className="flex flex-wrap gap-1.5 my-2">
-        {(!links || links.length === 0) && <span className="caption">None yet.</span>}
+        {(!links || links.length === 0) && <span className="caption">{t("None yet.")}</span>}
         {(links || []).map(l => (
           <span key={l.linkId} className="inline-flex min-h-6 items-center gap-1 text-xs font-medium text-text-primary bg-surface-hover/65 border border-border-default rounded-full pl-2.5 pr-1 py-0.5">
-            <span className="text-text-muted">{l.label || 'related'}</span> · {l.entity.canonicalName}
+            <span className="text-text-muted">{l.label || t("related")}</span> · {l.entity.canonicalName}
             <button type="button" onClick={() => onRemove(l.linkId)} aria-label={`Remove ${l.entity.canonicalName}`} className="text-text-muted hover:text-status-danger cursor-pointer p-0.5"><X className="w-3 h-3" /></button>
           </span>
         ))}
       </div>
       {remaining.length === 0
-        ? <span className="caption">Everyone is already linked.</span>
+        ? <span className="caption">{t("Everyone is already linked.")}</span>
         : toId
           ? <div className="flex items-center gap-1.5">
-              <span className="caption shrink-0"><span className="text-text-secondary font-medium">{pickedName}</span> is {who}'s</span>
-              <div className="flex-1"><FreeDatalist value={role} onChange={(e) => setRole(e.target.value)} options={suggestions} placeholder="e.g. father, rival, mentor (optional)" /></div>
-              <Button size="sm" icon={Check} onClick={submit}>Add</Button>
-              <Button size="sm" variant="ghost" onClick={() => { setToId(''); setRole(''); }}>Cancel</Button>
+              <span className="caption shrink-0"><span className="text-text-secondary font-medium">{pickedName}</span>{' '}{t("is")}{' '}{who}'s</span>
+              <div className="flex-1"><FreeDatalist value={role} onChange={(e) => setRole(e.target.value)} options={suggestions} placeholder={t("e.g. father, rival, mentor (optional)")} /></div>
+              <Button size="sm" icon={Check} onClick={submit}>{t("Add")}</Button>
+              <Button size="sm" variant="ghost" onClick={() => { setToId(''); setRole(''); }}>{t("Cancel")}</Button>
             </div>
-          : <EntityPickerButton label="Add relationship" title="Choose a character" options={remaining} onPick={(id) => setToId(id)} />}
+          : <EntityPickerButton label={t("Add relationship")} title={t("Choose a character")} options={remaining} onPick={(id) => setToId(id)} />}
     </Edit>
   );
 }
@@ -571,6 +587,7 @@ const MemberFlag = ({ icon: Icon, label, tone }) => (
 // and the dates of the tenure underneath. The same row serves both lists so a departure
 // changes only the wording, never the shape of what you are reading.
 function MemberRow({ link, calendar, kind, isLeader, editing, onOpen, onSetRole, onSetMeta, onSetFormer, onRestore, onRemove }) {
+  const { t } = useI18n();
   const [role, setRole] = useState(link.label || '');
   const [datesOpen, setDatesOpen] = useState(false);
   useEffect(() => { setRole(link.label || ''); }, [link.label]);
@@ -598,15 +615,15 @@ function MemberRow({ link, calendar, kind, isLeader, editing, onOpen, onSetRole,
             {onOpen
               ? <button type="button" onClick={() => onOpen(link.entity.id)} data-tooltip={`Open ${link.entity.canonicalName}`} className="min-w-0 truncate text-left text-sm font-semibold text-text-primary transition-colors hover:underline underline-offset-4 cursor-pointer">{link.entity.canonicalName}</button>
               : <span className="min-w-0 truncate text-sm font-semibold text-text-primary">{link.entity.canonicalName}</span>}
-            {isLeader && <MemberFlag icon={Crown} label="Leader" tone="border-accent/30 bg-accent/10 text-accent" />}
-            {meta.founder && <MemberFlag icon={Landmark} label="Founder" tone="border-entity-faction/30 bg-entity-faction/10 text-entity-faction" />}
+            {isLeader && <MemberFlag icon={Crown} label={t("Leader")} tone="border-accent/30 bg-accent/10 text-accent" />}
+            {meta.founder && <MemberFlag icon={Landmark} label={t("Founder")} tone="border-entity-faction/30 bg-entity-faction/10 text-entity-faction" />}
           </div>
           {tenure && <p className="caption mt-0.5">{tenure}</p>}
         </div>
         {editing ? (
           <>
             <input value={role} onChange={(e) => setRole(e.target.value)} onBlur={commitRole} onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
-              placeholder={isFormer ? 'Last rank' : 'Rank'} aria-label={`Rank of ${link.entity.canonicalName}`}
+              placeholder={isFormer ? t("Last rank") : t("Rank")} aria-label={`Rank of ${link.entity.canonicalName}`}
               className="wb-input h-9 w-56 shrink-0 rounded-control border border-border-default bg-surface-input/90 px-2.5 text-sm text-text-primary placeholder:text-text-subtle focus:border-accent/70 focus:outline-none" />
             <IconButton icon={MoreHorizontal} size="sm" label={`${link.entity.canonicalName} membership`} aria-expanded={datesOpen} className={datesOpen ? '!bg-surface-hover !text-text-primary' : ''} onClick={() => setDatesOpen(open => !open)} />
           </>
@@ -619,19 +636,19 @@ function MemberRow({ link, calendar, kind, isLeader, editing, onOpen, onSetRole,
         <div className="ml-9 mt-2.5 space-y-3 rounded-control border border-border-subtle bg-surface-canvas/30 p-3">
           {calendar ? (
             <div className="grid gap-3 sm:grid-cols-2">
-              <Edit label="Joined"><WorldDateInput label="Joined" emptyLabel="Set the date they joined" calendar={calendar} value={meta.joined} onChange={joinedDate => onSetMeta(link, { joined: joinedDate })} /></Edit>
-              {isFormer && <Edit label="Left"><WorldDateInput label="Left" emptyLabel="Set the date they left" calendar={calendar} value={meta.left} onChange={leftDate => onSetMeta(link, { left: leftDate })} /></Edit>}
-              {isLeader && <Edit label="Leading since"><WorldDateInput label="Leading since" emptyLabel="Set the date they took charge" calendar={calendar} value={meta.leaderSince} onChange={since => onSetMeta(link, { leaderSince: since })} /></Edit>}
+              <Edit label={t("Joined")}><WorldDateInput label={t("Joined")} emptyLabel="Set the date they joined" calendar={calendar} value={meta.joined} onChange={joinedDate => onSetMeta(link, { joined: joinedDate })} /></Edit>
+              {isFormer && <Edit label={t("Left")}><WorldDateInput label={t("Left")} emptyLabel="Set the date they left" calendar={calendar} value={meta.left} onChange={leftDate => onSetMeta(link, { left: leftDate })} /></Edit>}
+              {isLeader && <Edit label={t("Leading since")}><WorldDateInput label={t("Leading since")} emptyLabel="Set the date they took charge" calendar={calendar} value={meta.leaderSince} onChange={since => onSetMeta(link, { leaderSince: since })} /></Edit>}
             </div>
-          ) : <p className="caption">Set up the world calendar to record dates.</p>}
+          ) : <p className="caption">{t("Set up the world calendar to record dates.")}</p>}
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" variant="ghost" icon={Landmark} aria-pressed={Boolean(meta.founder)} className={meta.founder ? '!border-entity-faction/40 !text-entity-faction' : ''} onClick={() => onSetMeta(link, { founder: !meta.founder })}>Founder</Button>
-            {onSetFormer && <Button size="sm" variant="ghost" icon={LogOut} onClick={() => onSetFormer(link)}>Moved on</Button>}
-            {onRestore && <Button size="sm" variant="ghost" icon={Undo2} onClick={() => onRestore(link)}>Back on the roster</Button>}
+            <Button size="sm" variant="ghost" icon={Landmark} aria-pressed={Boolean(meta.founder)} className={meta.founder ? '!border-entity-faction/40 !text-entity-faction' : ''} onClick={() => onSetMeta(link, { founder: !meta.founder })}>{t("Founder")}</Button>
+            {onSetFormer && <Button size="sm" variant="ghost" icon={LogOut} onClick={() => onSetFormer(link)}>{t("Moved on")}</Button>}
+            {onRestore && <Button size="sm" variant="ghost" icon={Undo2} onClick={() => onRestore(link)}>{t("Back on the roster")}</Button>}
             <span className="flex-1" />
-            <Button size="sm" variant="subtle" icon={Trash2} className="!text-status-danger" onClick={() => onRemove(link.linkId)}>{isFormer ? 'Drop this record' : 'Remove from roster'}</Button>
+            <Button size="sm" variant="subtle" icon={Trash2} className="!text-status-danger" onClick={() => onRemove(link.linkId)}>{isFormer ? t("Drop this record") : t("Remove from roster")}</Button>
           </div>
-          <p className="caption">{isFormer ? 'Dropping the record erases this tenure entirely.' : 'Moved on keeps what they knew and stops what the faction shares from now on. Remove erases the record.'}</p>
+          <p className="caption">{isFormer ? t("Dropping the record erases this tenure entirely.") : t("Moved on keeps what they knew and stops what the faction shares from now on. Remove erases the record.")}</p>
         </div>
       )}
     </div>
@@ -641,6 +658,7 @@ function MemberRow({ link, calendar, kind, isLeader, editing, onOpen, onSetRole,
 // The roster. The leader sits at the top: they are a member like any other, and reading
 // a faction should start with who answers for it.
 function MemberList({ links, calendar, kind = 'member', leaderId, editing, options, onOpen, onAdd, onSetRole, onSetMeta, onSetFormer, onRestore, onRemove, empty }) {
+  const { t } = useI18n();
   const rows = [...(links || [])].sort((a, b) => {
     if (a.entity.id === leaderId) return -1;
     if (b.entity.id === leaderId) return 1;
@@ -652,7 +670,7 @@ function MemberList({ links, calendar, kind = 'member', leaderId, editing, optio
   const shown = editing || showAll || rows.length <= 6 ? rows : rows.slice(0, 5);
   return (
     <div>
-      {editing && kind === 'member' && <p className="caption mb-2">Add anyone who belongs here, give each a rank, and record when they joined.</p>}
+      {editing && kind === 'member' && <p className="caption mb-2">{t("Add anyone who belongs here, give each a rank, and record when they joined.")}</p>}
       {rows.length === 0
         ? <p className="text-sm text-text-disabled">{empty}</p>
         : <div className="divide-y divide-border-subtle">
@@ -664,8 +682,8 @@ function MemberList({ links, calendar, kind = 'member', leaderId, editing, optio
               </SpoilerRow>
             ))}
           </div>}
-      {shown.length < rows.length && <button type="button" onClick={() => setShowAll(true)} className="mt-1 inline-flex items-center gap-1 rounded text-xs font-semibold text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">Show {rows.length - shown.length} more<ChevronDown className="h-3.5 w-3.5" aria-hidden="true" /></button>}
-      {editing && onAdd && <div className="mt-2"><EntityPickerButton label="Add member" title="Add member" options={remaining} onPick={onAdd} /></div>}
+      {shown.length < rows.length && <button type="button" onClick={() => setShowAll(true)} className="mt-1 inline-flex items-center gap-1 rounded text-xs font-semibold text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{t("Show")}{' '}{rows.length - shown.length}{' '}{t("more")}<ChevronDown className="h-3.5 w-3.5" aria-hidden="true" /></button>}
+      {editing && onAdd && <div className="mt-2"><EntityPickerButton label={t("Add member")} title={t("Add member")} options={remaining} onPick={onAdd} /></div>}
     </div>
   );
 }
@@ -676,6 +694,7 @@ const registryCache = new Map();
 const viewCache = worldbuildViewCache;
 
 export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFocusHandled, focusSurface, onSurfaceHandled }) {
+  const { t } = useI18n();
   const { showToast, settings, openSettings, setActiveWorkspaceView } = useApp();
   const { startTour } = useTour();
   useFirstVisitTour('worldbuild', 'worldbuildTourSeen');
@@ -941,17 +960,17 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
   const sheetVariant = selected?.type === 'Creatures' ? (isIndividualCreature ? 'individual' : 'group') : isSharingLocation ? 'shared' : null;
   const visibleSheetTabs = sheetTabsFor(selected?.type, sheetVariant);
   if (hasReview && !isNew) visibleSheetTabs.push('review');
-  const sheetTabLabel = (tab) => tab === 'review' ? 'Review' : tabLabel(selected?.type, sheetVariant, tab);
+  const sheetTabLabel = (tab) => tab === 'review' ? t('Review') : t(tabLabel(selected?.type, sheetVariant, tab));
   // A template's display name renames the type; left at its default plural, the singular stays.
   const typeMeta = (type) => {
     const base = meta(type);
     const displayName = templates.find(template => template.typeId === type)?.displayName;
-    return displayName && displayName !== base.plural ? { ...base, label: displayName, plural: displayName } : base;
+    return displayName && displayName !== base.plural ? { ...base, label: displayName, plural: displayName } : { ...base, label: t(base.label), plural: t(base.plural) };
   };
   const concreteEntityMeta = (entity) => {
     const base = entityMeta(entity);
     const displayName = templates.find(template => template.typeId === entity?.type)?.displayName;
-    return displayName && displayName !== base.plural ? { ...base, label: displayName, plural: displayName } : base;
+    return displayName && displayName !== base.plural ? { ...base, label: displayName, plural: displayName } : { ...base, label: t(base.label), plural: t(base.plural) };
   };
   const docTitle = (id) => documents.find(d => d.id === id)?.title;
   // A creature is either one being or a whole species, and the two get different sheets.
@@ -959,18 +978,18 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
   // right shape opens from the start.
   const createOptions = TYPE_ORDER.flatMap(type => type === 'Creatures'
     ? [
-        { id: 'Creatures:individual', type, label: 'Creature', note: 'A specific being', data: { scope: 'individual' } },
-        { id: 'Creatures:group', type, label: 'Species', note: 'A group or kind of creature', data: { scope: 'group' } },
+        { id: 'Creatures:individual', type, label: t("Creature"), note: t("A specific being"), data: { scope: 'individual' } },
+        { id: 'Creatures:group', type, label: t("Species"), note: t("A group or kind of creature"), data: { scope: 'group' } },
       ]
     : type === 'Items'
       ? [
-          { id: 'Items', type, label: 'Item type', note: 'Can exist in quantities', data: {} },
-          { id: 'Items:unique', type, label: 'Unique item', note: 'Exists only once', data: { itemNature: 'unique' } },
+          { id: 'Items', type, label: t("Item type"), note: t("Can exist in quantities"), data: {} },
+          { id: 'Items:unique', type, label: t("Unique item"), note: t("Exists only once"), data: { itemNature: 'unique' } },
         ]
       : [{ id: type, type, data: {} }]);
 
   const byType = useMemo(() => {
-    const m = {}; for (const t of Object.keys(TYPES)) m[t] = [];
+    const m = {}; for (const localValue of Object.keys(TYPES)) m[localValue] = [];
     for (const e of entities) (m[e.type] = m[e.type] || []).push(e);
     return m;
   }, [entities]);
@@ -1089,7 +1108,7 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
     ready: savedView?.entityId ? selected?.id === savedView.entityId : !!savedView && surface === savedView.surface,
   });
   // In-world texts belong to an item's pages, never to a sheet's background chapters.
-  useEffect(() => { electronAPI.getWritingTree(workspaceId).then(t => setDocuments((t?.documents || []).filter(d => !d.inWorld))).catch(() => setDocuments([])); }, [workspaceId, electronAPI]);
+  useEffect(() => { electronAPI.getWritingTree(workspaceId).then(localValue => setDocuments((localValue?.documents || []).filter(d => !d.inWorld))).catch(() => setDocuments([])); }, [workspaceId, electronAPI]);
   useEffect(() => {
     if (!workspaceId || !electronAPI.listWorldbuildEntityTemplates) return;
     electronAPI.listWorldbuildEntityTemplates(workspaceId).then(result => setTemplates(result?.templates || [])).catch(() => setTemplates([]));
@@ -1302,8 +1321,8 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
   // Picking a merge target: an imported entity carries its own data, so ask which side wins
   // on conflicts; a bare AI proposal has nothing to weigh, so merge straight into the target.
   const startMerge = (targetId) => {
-    const t = entities.find(e => e.id === targetId);
-    if (selected?.data?._imported) setMergePrompt({ id: targetId, name: t?.canonicalName || 'that entity' });
+    const localValue = entities.find(e => e.id === targetId);
+    if (selected?.data?._imported) setMergePrompt({ id: targetId, name: localValue?.canonicalName || 'that entity' });
     else mergeInto(targetId, 'target');
   };
   // Candidates a proposal can fold into: every other real (non-proposed) entity.
@@ -1723,19 +1742,19 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
   const remainingDocs = documents.filter(d => !linkedDocs.includes(d.id));
   const loreEdit = (
     <>
-      <Edit><SpoilerTextArea aria-label="Lore" rows={5} placeholder="History, secrets, texture." value={selected?.lore || ''} onChange={(e) => patch({ lore: e.target.value })} /></Edit>
+      <Edit><SpoilerTextArea aria-label={t("Lore")} rows={5} placeholder={t("History, secrets, texture.")} value={selected?.lore || ''} onChange={(e) => patch({ lore: e.target.value })} /></Edit>
       <div className="border-t border-border-subtle pt-3">
         <div className="flex items-center gap-2.5">
           <BookOpen className="h-4 w-4 shrink-0 text-text-subtle" aria-hidden="true" />
-          <span className="text-sm text-text-secondary">Writing Desk chapters</span>
-          <span data-tooltip="Chapters written as canonical background. Ordinary mentions still reach the AI through the World Index." className="inline-flex text-text-subtle"><Info className="h-3.5 w-3.5" aria-label="About Writing Desk chapters" /></span>
+          <span className="text-sm text-text-secondary">{t("Writing Desk chapters")}</span>
+          <span data-tooltip={t("Chapters written as canonical background. Ordinary mentions still reach the AI through the World Index.")} className="inline-flex text-text-subtle"><Info className="h-3.5 w-3.5" aria-label={t("About Writing Desk chapters")} /></span>
           <span className="flex-1" />
-          <EntityPickerButton label="Link chapter" title="Link a chapter" options={remainingDocs.map(d => ({ id: d.id, canonicalName: d.title }))} onPick={addLoreDoc} />
+          <EntityPickerButton label={t("Link chapter")} title={t("Link a chapter")} options={remainingDocs.map(d => ({ id: d.id, canonicalName: d.title }))} onPick={addLoreDoc} />
         </div>
         {linkedDocs.length > 0 && <div className="mt-2.5 flex flex-wrap gap-1.5">
           {linkedDocs.map(id => (
             <span key={id} className="inline-flex min-h-6 items-center gap-1.5 rounded-full border border-border-subtle bg-surface-hover/35 py-0.5 pl-2.5 pr-1 text-xs font-medium text-text-secondary">
-              <ScrollText className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />{docTitle(id) || 'Untitled'}
+              <ScrollText className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />{docTitle(id) || t("Untitled")}
               <button type="button" aria-label={`Unlink ${docTitle(id) || 'chapter'}`} onClick={() => removeLoreDoc(id)} className="rounded p-0.5 text-text-muted hover:text-status-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><X className="h-3 w-3" /></button>
             </span>
           ))}
@@ -1762,9 +1781,9 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
     const S = [];
     if (type === 'System') {
       const always = <AlwaysInContextControl checked={selected.data.alwaysInContext === true} content={selected.data.content} onChange={setAlwaysInContext} />;
-      S.push({ key: 'concept', spoiler: 'content', title: 'Rules and concepts', quiet: true, icon: AiGlyph, scalar: true, empty: !String(selected.data.content || '').trim(),
+      S.push({ key: 'concept', spoiler: 'content', title: t("Rules and concepts"), quiet: true, icon: AiGlyph, scalar: true, empty: !String(selected.data.content || '').trim(),
         view: <><Prose text={selected.data.content} empty="No rules written yet." />{always}</>,
-        edit: <><Edit label="Content"><SpoilerTextArea rows={10} placeholder="Rules and concepts of this universe the AI should honor." value={selected.data.content || ''} onChange={(e) => patchData({ content: e.target.value })} /></Edit>{always}</> });
+        edit: <><Edit label={t("Content")}><SpoilerTextArea rows={10} placeholder={t("Rules and concepts of this universe the AI should honor.")} value={selected.data.content || ''} onChange={(e) => patchData({ content: e.target.value })} /></Edit>{always}</> });
     }
     if (type === 'Locations') {
       const size = locationSizeOf(selected);
@@ -1773,33 +1792,33 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
       const parentOptions = byType.Locations
         .filter(o => o.id !== selected.id)
         .sort((a, b) => locationSizeRank(locationSizeOf(b)) - locationSizeRank(locationSizeOf(a)) || String(a.canonicalName).localeCompare(String(b.canonicalName)));
-      S.push({ key: 'overview', title: 'Overview', icon: locationSizeIcon(size), scalar: true,
+      S.push({ key: 'overview', title: t("Overview"), icon: locationSizeIcon(size), scalar: true,
         view: <>
           <FactGrid columns={4}>
-            <ViewField label="Size" spoiler="size" value={size ? <LocationSizeValue size={size} /> : null} />
-            <ViewField label="Type" spoiler="locationType" value={selected.data.locationType} />
-            <ViewField label="Inside" spoiler="inside" value={rel.inside?.entity ? <EntityChip entity={rel.inside.entity} onOpen={openEntityById} /> : null} />
-            <ViewField label="Owner or leader" spoiler="leader" value={rel.leader?.entity ? <EntityChip entity={rel.leader.entity} onOpen={openEntityById} /> : null} />
+            <ViewField label={t("Size")} spoiler="size" value={size ? <LocationSizeValue size={size} /> : null} />
+            <ViewField label={t("Type")} spoiler="locationType" value={selected.data.locationType} />
+            <ViewField label={t("Inside")} spoiler="inside" value={rel.inside?.entity ? <EntityChip entity={rel.inside.entity} onOpen={openEntityById} /> : null} />
+            <ViewField label={t("Owner or leader")} spoiler="leader" value={rel.leader?.entity ? <EntityChip entity={rel.leader.entity} onOpen={openEntityById} /> : null} />
           </FactGrid>
           <NestingWarning size={size} parent={parent} />
-          <LongField label="Description" spoiler="description" text={selected.data.description} />
+          <LongField label={t("Description")} spoiler="description" text={selected.data.description} />
         </>,
         edit: <>
-          <Edit label="Size" spoiler="size" hint={size ? `${locationSizeGuide(size)} Select it again to clear.` : 'How this place relates to a scene. Leave it empty if you are unsure.'}>
+          <Edit label={t("Size")} spoiler="size" hint={size ? `${locationSizeGuide(size)} Select it again to clear.` : t("How this place relates to a scene. Leave it empty if you are unsure.")}>
             <SegmentedControl
-              label="Size"
+              label={t("Size")}
               value={size}
-              options={LOCATION_SIZE_OPTIONS.map(option => ({ value: option.value, label: option.label, icon: option.icon, tooltip: option.guide }))}
+              options={LOCATION_SIZE_OPTIONS.map(option => ({ value: option.value, label: t(option.label), icon: option.icon, tooltip: t(option.guide) }))}
               onChange={(value) => patchData({ size: value === size ? null : value })}
             />
           </Edit>
-          <Edit label="Type" spoiler="locationType" hint="Its kind in your own words."><LInput placeholder="e.g. kingdom, space station, tavern, bridge" value={selected.data.locationType || ''} onChange={(e) => patchData({ locationType: e.target.value })} /></Edit>
-          <Edit label="Description" spoiler="description"><SpoilerTextArea rows={5} placeholder="What this place looks and feels like, including its defining features." value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit>
-          <SingleRelation label="Inside another place" spoiler="inside" hint="Nest this within a larger location." disabled={unsaved} current={rel.inside?.entity?.id} options={parentOptions} onSet={(id) => setSingle('inside', id)} />
+          <Edit label={t("Type")} spoiler="locationType" hint={t("Its kind in your own words.")}><LInput placeholder={t("e.g. kingdom, space station, tavern, bridge")} value={selected.data.locationType || ''} onChange={(e) => patchData({ locationType: e.target.value })} /></Edit>
+          <Edit label={t("Description")} spoiler="description"><SpoilerTextArea rows={5} placeholder={t("What this place looks and feels like, including its defining features.")} value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit>
+          <SingleRelation label={t("Inside another place")} spoiler="inside" hint={t("Nest this within a larger location.")} disabled={unsaved} current={rel.inside?.entity?.id} options={parentOptions} onSet={(id) => setSingle('inside', id)} />
           <NestingWarning size={size} parent={parent} />
-          <SingleRelation label="Owner or leader" spoiler="leader" hint="Who holds or rules this place, if anyone." disabled={unsaved} current={rel.leader?.entity?.id} options={byType.Characters} onSet={(id) => setSingle('led_by', id)} />
+          <SingleRelation label={t("Owner or leader")} spoiler="leader" hint={t("Who holds or rules this place, if anyone.")} disabled={unsaved} current={rel.leader?.entity?.id} options={byType.Characters} onSet={(id) => setSingle('led_by', id)} />
         </> });
-      S.push({ key: 'lore', title: 'Lore', icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
+      S.push({ key: 'lore', title: t("Lore"), icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
       const childIds = new Set(insideLinks.filter(link => link.toId === selected.id).map(link => link.fromId));
       const children = byType.Locations
         .filter(o => childIds.has(o.id))
@@ -1807,33 +1826,33 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
       // Each child keeps its own "Inside another place"; adding here writes that link.
       const insideCandidates = byType.Locations.filter(o => o.id !== selected.id && !childIds.has(o.id));
       if (!unsaved) {
-        S.push({ key: 'inside', title: 'Places inside', icon: ListTree, count: children.length || null, derived: true, relationalOnly: true,
+        S.push({ key: 'inside', title: t("Places inside"), icon: ListTree, count: children.length || null, derived: true, relationalOnly: true,
           empty: !children.length, emptyNote: 'No places inside yet', emptyVerb: 'Add',
-          right: <EntityPickerButton icon={Plus} label="Add" title="Put a place inside" options={insideCandidates} onPick={putPlaceInside} />,
+          right: <EntityPickerButton icon={Plus} label={t("Add")} title={t("Put a place inside")} options={insideCandidates} onPick={putPlaceInside} />,
           view: <div className="flex flex-wrap gap-1.5">{children.map(child => <EntityChip key={child.id} entity={child} onOpen={openEntityById} />)}</div> });
       }
     }
     if (type === 'Items') {
-      S.push({ key: 'details', title: 'Details', icon: itemMeta(selected.data.itemType).icon, scalar: true,
+      S.push({ key: 'details', title: t("Details"), icon: itemMeta(selected.data.itemType).icon, scalar: true,
         view: <>
           <FactGrid>
-            <ViewField label="Nature" spoiler="itemNature" value={isUniqueItem ? 'Unique item' : 'Item type'} />
-            <ViewField label="Category" spoiler="itemType" value={selected.data.itemType ? <span className="inline-flex items-center gap-1.5 text-sm text-text-primary">{React.createElement(itemMeta(selected.data.itemType).icon, { className: 'h-3.5 w-3.5 text-entity-item', 'aria-hidden': true })}{selected.data.itemType}</span> : null} />
-            {isUniqueItem && <ViewField label="Owner" spoiler="owner" value={rel.ownedBy ? <EntityChip entity={rel.ownedBy.entity} onOpen={openEntityById} /> : <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">{selected?.data?.ownership === 'lost' ? <CircleHelp className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" /> : <AiGlyph className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />}{ownerLabel}</span>} />}
-            {isUniqueItem && <ViewField label="Where it is" spoiler="location" value={rel.locatedIn?.entity?.canonicalName} empty={rel.ownedBy ? `In ${rel.ownedBy.entity.canonicalName}'s inventory` : 'Not set'} />}
-            <ViewField label="Creator" spoiler="creator" value={rel.createdBy?.entity ? <EntityChip entity={rel.createdBy.entity} onOpen={openEntityById} /> : null} empty="Unknown" />
-            {isItemType && <ViewField label="How common" spoiler="abundance" value={selected.data.abundance} />}
-            {isItemType && <ViewField full label="Where found" spoiler="foundIn" value={<ChipList onOpen={openEntityById} links={rel.foundIn} empty="Not set" />} />}
-            {isItemType && <ViewField full label="Where sold" spoiler="soldIn" value={<ChipList onOpen={openEntityById} links={rel.soldIn} empty="Not set" />} />}
+            <ViewField label={t("Nature")} spoiler="itemNature" value={isUniqueItem ? 'Unique item' : 'Item type'} />
+            <ViewField label={t("Category")} spoiler="itemType" value={selected.data.itemType ? <span className="inline-flex items-center gap-1.5 text-sm text-text-primary">{React.createElement(itemMeta(selected.data.itemType).icon, { className: 'h-3.5 w-3.5 text-entity-item', 'aria-hidden': true })}{selected.data.itemType}</span> : null} />
+            {isUniqueItem && <ViewField label={t("Owner")} spoiler="owner" value={rel.ownedBy ? <EntityChip entity={rel.ownedBy.entity} onOpen={openEntityById} /> : <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">{selected?.data?.ownership === 'lost' ? <CircleHelp className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" /> : <AiGlyph className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />}{ownerLabel}</span>} />}
+            {isUniqueItem && <ViewField label={t("Where it is")} spoiler="location" value={rel.locatedIn?.entity?.canonicalName} empty={rel.ownedBy ? `In ${rel.ownedBy.entity.canonicalName}'s inventory` : 'Not set'} />}
+            <ViewField label={t("Creator")} spoiler="creator" value={rel.createdBy?.entity ? <EntityChip entity={rel.createdBy.entity} onOpen={openEntityById} /> : null} empty="Unknown" />
+            {isItemType && <ViewField label={t("How common")} spoiler="abundance" value={selected.data.abundance} />}
+            {isItemType && <ViewField full label={t("Where found")} spoiler="foundIn" value={<ChipList onOpen={openEntityById} links={rel.foundIn} empty="Not set" />} />}
+            {isItemType && <ViewField full label={t("Where sold")} spoiler="soldIn" value={<ChipList onOpen={openEntityById} links={rel.soldIn} empty="Not set" />} />}
           </FactGrid>
-          <LongField label="Description" spoiler="description" text={selected.data.description} />
+          <LongField label={t("Description")} spoiler="description" text={selected.data.description} />
         </>,
         edit: <>
-          <Edit label="Nature" spoiler="itemNature" hint={(selected.data.itemNature || 'type') === 'unique' ? 'A unique item exists only once, in one inventory or one place.' : 'An item type can exist in quantities.'}>
-            <SegmentedControl label="Item nature" value={selected.data.itemNature || 'type'} onChange={(itemNature) => patchData({ itemNature })} options={[{ value: 'type', label: 'Item type' }, { value: 'unique', label: 'Unique item' }]} />
+          <Edit label={t("Nature")} spoiler="itemNature" hint={(selected.data.itemNature || 'type') === 'unique' ? t("A unique item exists only once, in one inventory or one place.") : t("An item type can exist in quantities.")}>
+            <SegmentedControl label={t("Item nature")} value={selected.data.itemNature || 'type'} onChange={(itemNature) => patchData({ itemNature })} options={[{ value: 'type', label: t("Item type") }, { value: 'unique', label: t("Unique item") }]} />
           </Edit>
           <div className={`grid grid-cols-1 gap-3 ${isItemType ? 'sm:grid-cols-2' : ''}`}>
-          <Edit label="Category" spoiler="itemType">
+          <Edit label={t("Category")} spoiler="itemType">
             <SearchableSelect
               value={selected.data.itemType || ''}
               onChange={(itemType) => patchData({ itemType })}
@@ -1843,94 +1862,94 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                 icon: itemMeta(itemType).icon,
                 description: itemType === 'Resource' ? 'Natural resources and creature drops' : undefined,
               }))}
-              placeholder="Choose a category…"
-              searchPlaceholder="Filter item categories…"
-              ariaLabel="Item category"
+              placeholder={t("Choose a category…")}
+              searchPlaceholder={t("Filter item categories…")}
+              ariaLabel={t("Item category")}
             />
           </Edit>
-          {isItemType && <Edit label={<>How common <InfoPopover items={ABUNDANCE_HELP} /></>} spoiler="abundance"><ChoiceSelect label="How common" value={selected.data.abundance} onChange={(e) => patchData({ abundance: e.target.value })} options={RARITY} /></Edit>}
+          {isItemType && <Edit label={<>{t("How common")}{' '}<InfoPopover items={ABUNDANCE_HELP} /></>} spoiler="abundance"><ChoiceSelect label={t("How common")} value={selected.data.abundance} onChange={(e) => patchData({ abundance: e.target.value })} options={RARITY} /></Edit>}
           </div>
-          <SingleRelation label="Creator" spoiler="creator" hint="Leave blank if unknown." disabled={unsaved} current={rel.createdBy?.entity?.id} options={byType.Characters} onSet={(id) => setSingle('created_by', id)} />
-          {isUniqueItem && !unsaved && <Edit label="Owner" spoiler="owner" hint="A unique item can be in one inventory or one world location.">
+          <SingleRelation label={t("Creator")} spoiler="creator" hint={t("Leave blank if unknown.")} disabled={unsaved} current={rel.createdBy?.entity?.id} options={byType.Characters} onSet={(id) => setSingle('created_by', id)} />
+          {isUniqueItem && !unsaved && <Edit label={t("Owner")} spoiler="owner" hint={t("A unique item can be in one inventory or one world location.")}>
             <div className="flex items-center gap-2 flex-wrap">
-              <button type="button" onClick={() => setOwner('ai')} aria-pressed={ownerVal === 'ai'} className={`inline-flex min-h-9 items-center gap-2 rounded-control border px-3 py-2 text-xs font-semibold transition-colors ${ownerVal === 'ai' ? 'border-border-strong bg-surface-hover text-text-primary' : 'border-border-default bg-surface-input/70 text-text-muted hover:border-border-strong hover:text-text-primary'}`}><AiGlyph className="h-3.5 w-3.5" />Decided by the AI</button>
-              <button type="button" onClick={() => setOwner('lost')} aria-pressed={ownerVal === 'lost'} className={`inline-flex min-h-9 items-center gap-2 rounded-control border px-3 py-2 text-xs font-semibold transition-colors ${ownerVal === 'lost' ? 'border-border-strong bg-surface-hover text-text-primary' : 'border-border-default bg-surface-input/70 text-text-muted hover:border-border-strong hover:text-text-primary'}`}><CircleHelp className="h-3.5 w-3.5" />Unknown or lost</button>
+              <button type="button" onClick={() => setOwner('ai')} aria-pressed={ownerVal === 'ai'} className={`inline-flex min-h-9 items-center gap-2 rounded-control border px-3 py-2 text-xs font-semibold transition-colors ${ownerVal === 'ai' ? 'border-border-strong bg-surface-hover text-text-primary' : 'border-border-default bg-surface-input/70 text-text-muted hover:border-border-strong hover:text-text-primary'}`}><AiGlyph className="h-3.5 w-3.5" />{t("Decided by the AI")}</button>
+              <button type="button" onClick={() => setOwner('lost')} aria-pressed={ownerVal === 'lost'} className={`inline-flex min-h-9 items-center gap-2 rounded-control border px-3 py-2 text-xs font-semibold transition-colors ${ownerVal === 'lost' ? 'border-border-strong bg-surface-hover text-text-primary' : 'border-border-default bg-surface-input/70 text-text-muted hover:border-border-strong hover:text-text-primary'}`}><CircleHelp className="h-3.5 w-3.5" />{t("Unknown or lost")}</button>
               {rel.ownedBy && <div className="inline-flex min-h-9 items-center gap-2 rounded-control border border-border-strong bg-surface-hover px-3 py-2 text-xs font-semibold text-text-primary"><UserRound className="h-3.5 w-3.5" />{rel.ownedBy.entity.canonicalName}</div>}
-              <EntityPickerButton icon={rel.ownedBy ? Replace : Plus} label={rel.ownedBy ? 'Change' : 'Choose entity'} title="Choose owner" options={ownerOptions} onPick={setOwner} />
+              <EntityPickerButton icon={rel.ownedBy ? Replace : Plus} label={rel.ownedBy ? t("Change") : t("Choose entity")} title={t("Choose owner")} options={ownerOptions} onPick={setOwner} />
             </div>
           </Edit>}
-          {isUniqueItem && <SingleRelation label="Current location" spoiler="location" hint="Setting a location removes this item from its current inventory." disabled={unsaved} current={rel.locatedIn?.entity?.id} options={presenceLocations} onSet={setItemLocation} />}
-          {isItemType && <MultiRelation label="Where found" spoiler="foundIn" hint="Places where this item type can be found, gathered, or obtained." disabled={unsaved} links={rel.foundIn || []} options={byType.Locations} onAdd={(id) => addMulti('found_in', id)} onRemove={removeLink} />}
-          {isItemType && <MultiRelation label="Where sold" spoiler="soldIn" hint="Places where this item type can normally be purchased." disabled={unsaved} links={rel.soldIn || []} options={byType.Locations} onAdd={(id) => addMulti('sold_in', id)} onRemove={removeLink} />}
-          <Edit label="Description" spoiler="description"><SpoilerTextArea rows={4} placeholder="What it looks like and does." value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit>
+          {isUniqueItem && <SingleRelation label={t("Current location")} spoiler="location" hint={t("Setting a location removes this item from its current inventory.")} disabled={unsaved} current={rel.locatedIn?.entity?.id} options={presenceLocations} onSet={setItemLocation} />}
+          {isItemType && <MultiRelation label={t("Where found")} spoiler="foundIn" hint={t("Places where this item type can be found, gathered, or obtained.")} disabled={unsaved} links={rel.foundIn || []} options={byType.Locations} onAdd={(id) => addMulti('found_in', id)} onRemove={removeLink} />}
+          {isItemType && <MultiRelation label={t("Where sold")} spoiler="soldIn" hint={t("Places where this item type can normally be purchased.")} disabled={unsaved} links={rel.soldIn || []} options={byType.Locations} onAdd={(id) => addMulti('sold_in', id)} onRemove={removeLink} />}
+          <Edit label={t("Description")} spoiler="description"><SpoilerTextArea rows={4} placeholder={t("What it looks like and does.")} value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit>
         </> });
-      S.push({ key: 'lore', title: 'Lore', icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
+      S.push({ key: 'lore', title: t("Lore"), icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
     }
     if (type === 'Races') {
-      S.push({ key: 'desc', title: 'Description', icon: AlignLeft, scalar: true, spoiler: 'description', empty: !String(selected.data.description || '').trim(), view: <Prose text={selected.data.description} />, edit: <Edit><SpoilerTextArea aria-label="Description" rows={5} placeholder="Traits, appearance, culture." value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit> });
+      S.push({ key: 'desc', title: t("Description"), icon: AlignLeft, scalar: true, spoiler: 'description', empty: !String(selected.data.description || '').trim(), view: <Prose text={selected.data.description} />, edit: <Edit><SpoilerTextArea aria-label={t("Description")} rows={5} placeholder={t("Traits, appearance, culture.")} value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit> });
       if (!unsaved && selected.status !== 'proposed') S.push({ key: 'roleplay', raw: <RaceRoleplayDefaults workspaceId={workspaceId} race={selected} api={electronAPI} showToast={showToast} /> });
-      S.push({ key: 'members', title: 'Known members', icon: Users, scalar: false, derived: true, relationalOnly: true, count: rel.members?.length || null, empty: !(rel.members || []).length, emptyNote: 'Filled in as characters take this race',
-        right: <span className="mr-2 text-xs text-text-subtle">Filled from each character's race</span>,
+      S.push({ key: 'members', title: t("Known members"), icon: Users, scalar: false, derived: true, relationalOnly: true, count: rel.members?.length || null, empty: !(rel.members || []).length, emptyNote: 'Filled in as characters take this race',
+        right: <span className="mr-2 text-xs text-text-subtle">{t("Filled from each character's race")}</span>,
         view: <KnownMembers links={rel.members || []} portraits={portraits} onOpen={openEntityById} /> });
-      S.push({ key: 'lore', title: 'Lore', icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
+      S.push({ key: 'lore', title: t("Lore"), icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
     }
     if (type === 'Creatures') {
       const natureOpts = [...new Set([...CREATURE_NATURES, ...byType.Creatures.filter(c => c.data?.scope === 'group').map(c => c.data?.nature).filter(Boolean)])];
       const isIndividual = (selected.data.scope || 'individual') !== 'group';
-      S.push({ key: 'details', title: 'Details', icon: ListTree, scalar: true,
+      S.push({ key: 'details', title: t("Details"), icon: ListTree, scalar: true,
         view: <>
           <FactGrid>
-            {!isIndividual && <ViewField label="Nature" spoiler="nature" value={selected.data.nature} />}
-            {isIndividual && <ViewField label="Species" spoiler="race" value={rel.isRace?.entity ? <button type="button" onClick={() => openEntityById(rel.isRace.entity.id)} className="rounded-sm text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{rel.isRace.entity.canonicalName}</button> : null} />}
-            <ViewField label="Disposition" spoiler="disposition" value={<StateTag map={DISPOSITION} value={selected.data.disposition || 'unknown'} />} />
-            {!isIndividual && <ViewField label="How common" spoiler="abundance" value={selected.data.abundance} />}
-            <ViewField label="Threat" spoiler="threat" value={selected.data.threat} />
-            {isIndividual && <ViewField label="Born" spoiler="birthDate" value={formatWorldDate(worldCalendar, selected.data.birthDate)} />}
-            {isIndividual && selected.data.status === 'deceased' && <ViewField label="Died" spoiler="deathDate" value={formatWorldDate(worldCalendar, selected.data.deathDate)} />}
-            {isIndividual && selected.data.status === 'missing' && <ViewField label="Disappeared" spoiler="missingDate" value={formatWorldDate(worldCalendar, selected.data.missingDate)} />}
-            <ViewField label="Habitat" spoiler="foundIn" value={(rel.foundIn || []).length ? <ChipList onOpen={openEntityById} links={rel.foundIn} /> : null} />
+            {!isIndividual && <ViewField label={t("Nature")} spoiler="nature" value={selected.data.nature} />}
+            {isIndividual && <ViewField label={t("Species")} spoiler="race" value={rel.isRace?.entity ? <button type="button" onClick={() => openEntityById(rel.isRace.entity.id)} className="rounded-sm text-left hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{rel.isRace.entity.canonicalName}</button> : null} />}
+            <ViewField label={t("Disposition")} spoiler="disposition" value={<StateTag map={DISPOSITION} value={selected.data.disposition || 'unknown'} />} />
+            {!isIndividual && <ViewField label={t("How common")} spoiler="abundance" value={selected.data.abundance} />}
+            <ViewField label={t("Threat")} spoiler="threat" value={selected.data.threat} />
+            {isIndividual && <ViewField label={t("Born")} spoiler="birthDate" value={formatWorldDate(worldCalendar, selected.data.birthDate)} />}
+            {isIndividual && selected.data.status === 'deceased' && <ViewField label={t("Died")} spoiler="deathDate" value={formatWorldDate(worldCalendar, selected.data.deathDate)} />}
+            {isIndividual && selected.data.status === 'missing' && <ViewField label={t("Disappeared")} spoiler="missingDate" value={formatWorldDate(worldCalendar, selected.data.missingDate)} />}
+            <ViewField label={t("Habitat")} spoiler="foundIn" value={(rel.foundIn || []).length ? <ChipList onOpen={openEntityById} links={rel.foundIn} /> : null} />
           </FactGrid>
-          <LongField label="Abilities and traits" spoiler="abilities" text={selected.data.abilities} />
+          <LongField label={t("Abilities and traits")} spoiler="abilities" text={selected.data.abilities} />
         </>,
         edit: <>
-          <Edit label="This creature is" spoiler="scope">
-            <SegmentedControl label="Creature shape" value={selected.data.scope || 'individual'} onChange={(scope) => patchData({ scope })} options={[{ value: 'individual', label: 'A specific being' }, { value: 'group', label: 'A group or species' }]} />
-            <Hint>A species has no single life. One tamed wolf does.</Hint>
+          <Edit label={t("This creature is")} spoiler="scope">
+            <SegmentedControl label={t("Creature shape")} value={selected.data.scope || 'individual'} onChange={(scope) => patchData({ scope })} options={[{ value: 'individual', label: t("A specific being") }, { value: 'group', label: t("A group or species") }]} />
+            <Hint>{t("A species has no single life. One tamed wolf does.")}</Hint>
             {isIndividual && (rel.inventory?.length || 0) + (rel.relationships?.length || 0) > 0 && (
-              <Hint>Turning this into a group hides its inventory, connections and knowledge. Nothing is deleted, and switching back brings them into view again.</Hint>
+              <Hint>{t("Turning this into a group hides its inventory, connections and knowledge. Nothing is deleted, and switching back brings them into view again.")}</Hint>
             )}
           </Edit>
           <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">
             {isIndividual
-              ? <SingleRelation label="Species" spoiler="race" disabled={unsaved} current={rel.isRace?.entity?.id} options={byType.Creatures.filter(creature => creature.data?.scope === 'group' && creature.id !== selected.id)} onSet={(id) => setSingle('is_race', id)} />
-              : <Edit label="Nature" spoiler="nature"><FreeDatalist value={selected.data.nature} onChange={(e) => patchData({ nature: e.target.value })} options={natureOpts} placeholder="e.g. Beast, Spirit, Deity" /></Edit>}
-            <Edit label="Threat" spoiler="threat"><ChoiceSelect label="Threat" value={selected.data.threat} onChange={(e) => patchData({ threat: e.target.value })} options={THREAT} /></Edit>
+              ? <SingleRelation label={t("Species")} spoiler="race" disabled={unsaved} current={rel.isRace?.entity?.id} options={byType.Creatures.filter(creature => creature.data?.scope === 'group' && creature.id !== selected.id)} onSet={(id) => setSingle('is_race', id)} />
+              : <Edit label={t("Nature")} spoiler="nature"><FreeDatalist value={selected.data.nature} onChange={(e) => patchData({ nature: e.target.value })} options={natureOpts} placeholder={t("e.g. Beast, Spirit, Deity")} /></Edit>}
+            <Edit label={t("Threat")} spoiler="threat"><ChoiceSelect label={t("Threat")} value={selected.data.threat} onChange={(e) => patchData({ threat: e.target.value })} options={THREAT} /></Edit>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Edit label="Disposition" spoiler="disposition"><StateSelect label="Disposition" map={DISPOSITION} value={selected.data.disposition || 'unknown'} onChange={(e) => patchData({ disposition: e.target.value })} /></Edit>
-            {isIndividual && <Edit label="Status" spoiler="status"><StateSelect label="Status" map={STATUS} value={selected.data.status || 'unknown'} onChange={(e) => patchData({ status: e.target.value })} /></Edit>}
-            {!isIndividual && <Edit label={<>How common <InfoPopover items={ABUNDANCE_HELP} /></>} spoiler="abundance"><ChoiceSelect label="How common" value={selected.data.abundance} onChange={(e) => patchData({ abundance: e.target.value })} options={RARITY} /></Edit>}
-            {isIndividual && worldCalendar && <div className={selected.data.birthDate ? 'sm:col-span-3' : ''}><Edit label="Born" spoiler="birthDate"><WorldDateInput label="Birth date" emptyLabel="Set birthday" calendar={worldCalendar} value={selected.data.birthDate} onChange={birthDate => setBirthDate(birthDate)} /></Edit></div>}
+            <Edit label={t("Disposition")} spoiler="disposition"><StateSelect label={t("Disposition")} map={DISPOSITION} value={selected.data.disposition || 'unknown'} onChange={(e) => patchData({ disposition: e.target.value })} /></Edit>
+            {isIndividual && <Edit label={t("Status")} spoiler="status"><StateSelect label={t("Status")} map={STATUS} value={selected.data.status || 'unknown'} onChange={(e) => patchData({ status: e.target.value })} /></Edit>}
+            {!isIndividual && <Edit label={<>{t("How common")}{' '}<InfoPopover items={ABUNDANCE_HELP} /></>} spoiler="abundance"><ChoiceSelect label={t("How common")} value={selected.data.abundance} onChange={(e) => patchData({ abundance: e.target.value })} options={RARITY} /></Edit>}
+            {isIndividual && worldCalendar && <div className={selected.data.birthDate ? 'sm:col-span-3' : ''}><Edit label={t("Born")} spoiler="birthDate"><WorldDateInput label={t("Birth date")} emptyLabel="Set birthday" calendar={worldCalendar} value={selected.data.birthDate} onChange={birthDate => setBirthDate(birthDate)} /></Edit></div>}
           </div>
-          <Edit label="Abilities and traits" spoiler="abilities" hint="Short, concrete powers the AI can use in a scene."><SpoilerTextArea rows={3} placeholder="e.g. flies, breathes fire, immune to steel." value={selected.data.abilities || ''} onChange={(e) => patchData({ abilities: e.target.value })} /></Edit>
-          {isIndividual && worldCalendar && selected.data.birthDate && <Checkbox checked={Boolean(selected.data.showBirthday)} onChange={showBirthday => patchData({ showBirthday })} label="Show the birthday on the calendar" />}
-          {isIndividual && selected.data.status === 'deceased' && worldCalendar && <Edit label="Death date" spoiler="deathDate"><WorldDateInput label="Death date" emptyLabel="Set death date" calendar={worldCalendar} value={selected.data.deathDate} onChange={deathDate => patchData({ deathDate })} /></Edit>}
-          {isIndividual && selected.data.status === 'missing' && worldCalendar && <Edit label="Disappearance date" spoiler="missingDate"><WorldDateInput label="Disappearance date" emptyLabel="Set disappearance date" calendar={worldCalendar} value={selected.data.missingDate} onChange={missingDate => patchData({ missingDate })} /></Edit>}
-          <MultiRelation label="Habitat" spoiler="foundIn" hint="Where it is found or dwells." disabled={unsaved} links={rel.foundIn || []} options={byType.Locations} onAdd={(id) => addMulti('found_in', id)} onRemove={removeLink} />
+          <Edit label={t("Abilities and traits")} spoiler="abilities" hint={t("Short, concrete powers the AI can use in a scene.")}><SpoilerTextArea rows={3} placeholder={t("e.g. flies, breathes fire, immune to steel.")} value={selected.data.abilities || ''} onChange={(e) => patchData({ abilities: e.target.value })} /></Edit>
+          {isIndividual && worldCalendar && selected.data.birthDate && <Checkbox checked={Boolean(selected.data.showBirthday)} onChange={showBirthday => patchData({ showBirthday })} label={t("Show the birthday on the calendar")} />}
+          {isIndividual && selected.data.status === 'deceased' && worldCalendar && <Edit label={t("Death date")} spoiler="deathDate"><WorldDateInput label={t("Death date")} emptyLabel="Set death date" calendar={worldCalendar} value={selected.data.deathDate} onChange={deathDate => patchData({ deathDate })} /></Edit>}
+          {isIndividual && selected.data.status === 'missing' && worldCalendar && <Edit label={t("Disappearance date")} spoiler="missingDate"><WorldDateInput label={t("Disappearance date")} emptyLabel="Set disappearance date" calendar={worldCalendar} value={selected.data.missingDate} onChange={missingDate => patchData({ missingDate })} /></Edit>}
+          <MultiRelation label={t("Habitat")} spoiler="foundIn" hint={t("Where it is found or dwells.")} disabled={unsaved} links={rel.foundIn || []} options={byType.Locations} onAdd={(id) => addMulti('found_in', id)} onRemove={removeLink} />
         </> });
       // A species has a shared look worth describing, but no single temperament: a
       // personality belongs to one being, never to every member of a kind.
-      S.push({ key: 'appearance', title: 'Appearance', icon: ScanFace, scalar: true, spoiler: 'appearance', empty: !String(selected.data.appearance || '').trim(), view: <Prose text={selected.data.appearance} />, edit: <Edit hint={isIndividual ? undefined : 'What members of this kind typically look like.'}><SpoilerTextArea aria-label="Appearance" rows={5} placeholder={isIndividual ? 'Physical presence and distinguishing features.' : 'Shared build, markings, and distinguishing features.'} value={selected.data.appearance || ''} onChange={(e) => patchData({ appearance: e.target.value })} /></Edit> });
+      S.push({ key: 'appearance', title: t("Appearance"), icon: ScanFace, scalar: true, spoiler: 'appearance', empty: !String(selected.data.appearance || '').trim(), view: <Prose text={selected.data.appearance} />, edit: <Edit hint={isIndividual ? undefined : t("What members of this kind typically look like.")}><SpoilerTextArea aria-label={t("Appearance")} rows={5} placeholder={isIndividual ? t("Physical presence and distinguishing features.") : t("Shared build, markings, and distinguishing features.")} value={selected.data.appearance || ''} onChange={(e) => patchData({ appearance: e.target.value })} /></Edit> });
       if (!isIndividual && !unsaved && selected.status !== 'proposed') S.push({ key: 'roleplay', raw: <RaceRoleplayDefaults workspaceId={workspaceId} race={selected} api={electronAPI} showToast={showToast} /> });
-      if (!isIndividual) S.push({ key: 'members', title: 'Known members', icon: Users, scalar: false, derived: true, relationalOnly: true, count: rel.members?.length || null, empty: !(rel.members || []).length, emptyNote: 'Filled in as specific beings take this species',
-        right: <span className="mr-2 text-xs text-text-subtle">Filled from each specific being's species</span>,
+      if (!isIndividual) S.push({ key: 'members', title: t("Known members"), icon: Users, scalar: false, derived: true, relationalOnly: true, count: rel.members?.length || null, empty: !(rel.members || []).length, emptyNote: 'Filled in as specific beings take this species',
+        right: <span className="mr-2 text-xs text-text-subtle">{t("Filled from each specific being's species")}</span>,
         view: <KnownMembers links={rel.members || []} portraits={portraits} onOpen={openEntityById} /> });
-      if (isIndividual) S.push({ key: 'personality', title: 'Personality', icon: Drama, scalar: true, spoiler: 'personality', empty: !String(selected.data.personality || '').trim(), view: <Prose text={selected.data.personality} />, edit: <Edit><SpoilerTextArea aria-label="Personality" rows={5} placeholder="Temperament, instincts, habits, and values." value={selected.data.personality || ''} onChange={(e) => patchData({ personality: e.target.value })} /></Edit> });
-      S.push({ key: 'lore', title: 'Lore', icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
+      if (isIndividual) S.push({ key: 'personality', title: t("Personality"), icon: Drama, scalar: true, spoiler: 'personality', empty: !String(selected.data.personality || '').trim(), view: <Prose text={selected.data.personality} />, edit: <Edit><SpoilerTextArea aria-label={t("Personality")} rows={5} placeholder={t("Temperament, instincts, habits, and values.")} value={selected.data.personality || ''} onChange={(e) => patchData({ personality: e.target.value })} /></Edit> });
+      S.push({ key: 'lore', title: t("Lore"), icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
     }
     if (type === 'Factions') {
-      S.push({ key: 'desc', title: 'Description', icon: AlignLeft, scalar: true, spoiler: 'description', empty: !String(selected.data.description || '').trim(), view: <Prose text={selected.data.description} />, edit: <Edit><SpoilerTextArea aria-label="Description" rows={5} placeholder="Goals, structure, reputation." value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit> });
-      S.push({ key: 'lore', title: 'Lore', icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
+      S.push({ key: 'desc', title: t("Description"), icon: AlignLeft, scalar: true, spoiler: 'description', empty: !String(selected.data.description || '').trim(), view: <Prose text={selected.data.description} />, edit: <Edit><SpoilerTextArea aria-label={t("Description")} rows={5} placeholder={t("Goals, structure, reputation.")} value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit> });
+      S.push({ key: 'lore', title: t("Lore"), icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
     }
     if (type === 'Events') {
       const kindOpts = ['Battle', 'Festival', 'Holiday', 'Disaster', 'Ceremony', 'Discovery'];
@@ -1946,9 +1965,9 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
         <>
           {((recurring && !weekly && lengthDays > 1) || selected.data.hours?.from) && (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-              {recurring && !weekly && lengthDays > 1 && <Edit label="Lasts" spoiler="date"><LengthInput value={lengthDays} onChange={durationDays => patchRecurrence({ durationDays })} onRemove={removeLength} /></Edit>}
+              {recurring && !weekly && lengthDays > 1 && <Edit label={t("Lasts")} spoiler="date"><LengthInput value={lengthDays} onChange={durationDays => patchRecurrence({ durationDays })} onRemove={removeLength} /></Edit>}
               {selected.data.hours?.from && <div className={recurring && !weekly && lengthDays > 1 ? '' : 'sm:col-span-2 sm:max-w-sm'}>
-                <Edit label="Hours" spoiler="date" hint={!recurring && selected.data.endDate ? 'From is on the first day, Until on the last. Leave Until empty for an open end.' : 'Leave Until empty for a single moment.'}>
+                <Edit label={t("Hours")} spoiler="date" hint={!recurring && selected.data.endDate ? t("From is on the first day, Until on the last. Leave Until empty for an open end.") : t("Leave Until empty for a single moment.")}>
                   <HoursInput calendar={worldCalendar} value={selected.data.hours} onChange={hours => patchData({ hours })} onRemove={() => patchData({ hours: null })} />
                 </Edit>
               </div>}
@@ -1962,52 +1981,52 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
           )}
         </>
       );
-      S.push({ key: 'overview', title: 'Overview', icon: Info, scalar: true,
+      S.push({ key: 'overview', title: t("Overview"), icon: Info, scalar: true,
         view: <>
           <FactGrid>
-            <ViewField label="How often" spoiler="eventNature" value={recurring ? 'Recurring' : 'Once'} />
-            <ViewField label="Kind" spoiler="kind" value={selected.data.kind} />
+            <ViewField label={t("How often")} spoiler="eventNature" value={recurring ? 'Recurring' : 'Once'} />
+            <ViewField label={t("Kind")} spoiler="kind" value={selected.data.kind} />
             {recurring
-              ? <ViewField full label="Schedule" spoiler="date" value={schedule ? <div>
+              ? <ViewField full label={t("Schedule")} spoiler="date" value={schedule ? <div>
                   <div className="text-sm leading-relaxed text-text-primary">{schedule.text}</div>
-                  <div className="mt-0.5 text-xs text-text-subtle">Since {schedule.since}</div>
+                  <div className="mt-0.5 text-xs text-text-subtle">{t("Since")}{' '}{schedule.since}</div>
                 </div> : null} />
-              : <ViewField full label="Date" spoiler="date" value={onceSummary(selected.data, worldCalendar)} />}
-            <ViewField full label="Where" spoiler="happenedAt" value={<ChipList onOpen={openEntityById} links={rel.happenedAt} empty="No place set." />} />
-            <ViewField full label="Who took part" spoiler="involved" value={<ChipList onOpen={openEntityById} links={rel.involved} empty="No one set." />} />
+              : <ViewField full label={t("Date")} spoiler="date" value={onceSummary(selected.data, worldCalendar)} />}
+            <ViewField full label={t("Where")} spoiler="happenedAt" value={<ChipList onOpen={openEntityById} links={rel.happenedAt} empty="No place set." />} />
+            <ViewField full label={t("Who took part")} spoiler="involved" value={<ChipList onOpen={openEntityById} links={rel.involved} empty="No one set." />} />
           </FactGrid>
         </>,
         edit: <>
           <div className="grid grid-cols-1 items-start gap-4 sm:grid-cols-[auto_minmax(0,1fr)]">
-            <Edit label="How often" spoiler="eventNature">
-              <SegmentedControl label="How often" value={selected.data.eventNature || 'one-time'} onChange={(eventNature) => patchData({ eventNature })} options={[{ value: 'one-time', label: 'Once' }, { value: 'recurring', label: 'Recurring' }]} />
+            <Edit label={t("How often")} spoiler="eventNature">
+              <SegmentedControl label={t("How often")} value={selected.data.eventNature || 'one-time'} onChange={(eventNature) => patchData({ eventNature })} options={[{ value: 'one-time', label: t("Once") }, { value: 'recurring', label: t("Recurring") }]} />
             </Edit>
-            <Edit label="Kind" spoiler="kind" hint="Type your own or reuse one."><FreeDatalist value={selected.data.kind} onChange={(e) => patchData({ kind: e.target.value })} options={kindOpts} placeholder="e.g. Battle, Festival, Holiday" /></Edit>
+            <Edit label={t("Kind")} spoiler="kind" hint={t("Type your own or reuse one.")}><FreeDatalist value={selected.data.kind} onChange={(e) => patchData({ kind: e.target.value })} options={kindOpts} placeholder={t("e.g. Battle, Festival, Holiday")} /></Edit>
           </div>
           {worldCalendar && <div className="space-y-5 border-t border-border-subtle pt-5">
           {recurring ? (
             <>
-              <Edit label="First time" spoiler="date"><WorldDateInput label="First time" emptyLabel="Set the first occurrence" calendar={worldCalendar} value={recurrence.anchorDate} onChange={anchorDate => patchRecurrence({ anchorDate })} /></Edit>
-              <Edit label="Repeats every" spoiler="date" hint={weekly && !(recurrence.weekdays || []).length ? 'With no day picked, it falls on the same day as the first time.' : undefined}>
-                <div className="grid grid-cols-[7rem_1fr] gap-2"><NumberInput className={FIELD} min={1} value={recurrence.interval || 1} onChange={interval => patchRecurrence({ interval })} /><SelectMenu ariaLabel="Repeat unit" value={recurrence.unit || 'year'} onChange={unit => patchRecurrence({ unit })} options={[{ value: 'day', label: 'Days' }, { value: 'week', label: 'Weeks' }, { value: 'month', label: 'Months' }, { value: 'year', label: 'Years' }]} /></div>
+              <Edit label={t("First time")} spoiler="date"><WorldDateInput label={t("First time")} emptyLabel="Set the first occurrence" calendar={worldCalendar} value={recurrence.anchorDate} onChange={anchorDate => patchRecurrence({ anchorDate })} /></Edit>
+              <Edit label={t("Repeats every")} spoiler="date" hint={weekly && !(recurrence.weekdays || []).length ? t("With no day picked, it falls on the same day as the first time.") : undefined}>
+                <div className="grid grid-cols-[7rem_1fr] gap-2"><NumberInput className={FIELD} min={1} value={recurrence.interval || 1} onChange={interval => patchRecurrence({ interval })} /><SelectMenu ariaLabel={t("Repeat unit")} value={recurrence.unit || 'year'} onChange={unit => patchRecurrence({ unit })} options={[{ value: 'day', label: t("Days") }, { value: 'week', label: t("Weeks") }, { value: 'month', label: t("Months") }, { value: 'year', label: t("Years") }]} /></div>
                 {weekly && <div className="mt-2"><WeekdayPicker calendar={worldCalendar} value={recurrence.weekdays} onChange={weekdays => patchRecurrence({ weekdays })} /></div>}
               </Edit>
             </>
           ) : (
             <div className={`grid grid-cols-1 gap-3 ${selected.data.startDate || selected.data.endDate ? '' : 'sm:grid-cols-2'}`}>
-              <Edit label="Starts" spoiler="date"><WorldDateInput label="Starts" emptyLabel="Set date" calendar={worldCalendar} value={selected.data.startDate} onChange={startDate => patchData({ startDate })} /></Edit>
-              <Edit label="Ends" spoiler="date" hint="Leave empty for a single day."><WorldDateInput label="Ends" emptyLabel="Add end date" calendar={worldCalendar} value={selected.data.endDate} onChange={endDate => patchData({ endDate })} /></Edit>
+              <Edit label={t("Starts")} spoiler="date"><WorldDateInput label={t("Starts")} emptyLabel="Set date" calendar={worldCalendar} value={selected.data.startDate} onChange={startDate => patchData({ startDate })} /></Edit>
+              <Edit label={t("Ends")} spoiler="date" hint={t("Leave empty for a single day.")}><WorldDateInput label={t("Ends")} emptyLabel="Add end date" calendar={worldCalendar} value={selected.data.endDate} onChange={endDate => patchData({ endDate })} /></Edit>
             </div>
           )}
           {scheduleExtras}
           </div>}
           {!unsaved && <div className="grid grid-cols-1 gap-4 border-t border-border-subtle pt-5 sm:grid-cols-2">
-            <MultiRelation label="Where" spoiler="happenedAt" disabled={unsaved} links={rel.happenedAt || []} options={byType.Locations} onAdd={(id) => addMulti('happened_at', id)} onRemove={removeLink} />
-            <MultiRelation label="Who took part" spoiler="involved" disabled={unsaved} links={rel.involved || []} options={byType.Characters} onAdd={(id) => addMulti('involved', id)} onRemove={removeLink} />
+            <MultiRelation label={t("Where")} spoiler="happenedAt" disabled={unsaved} links={rel.happenedAt || []} options={byType.Locations} onAdd={(id) => addMulti('happened_at', id)} onRemove={removeLink} />
+            <MultiRelation label={t("Who took part")} spoiler="involved" disabled={unsaved} links={rel.involved || []} options={byType.Characters} onAdd={(id) => addMulti('involved', id)} onRemove={removeLink} />
           </div>}
         </> });
-      S.push({ key: 'desc', title: 'Description', icon: AlignLeft, scalar: true, spoiler: 'description', empty: !String(selected.data.description || '').trim(), view: <Prose text={selected.data.description} />, edit: <Edit><SpoilerTextArea aria-label="Description" rows={5} placeholder="What happened, and why it matters." value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit> });
-      S.push({ key: 'lore', title: 'Lore', icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
+      S.push({ key: 'desc', title: t("Description"), icon: AlignLeft, scalar: true, spoiler: 'description', empty: !String(selected.data.description || '').trim(), view: <Prose text={selected.data.description} />, edit: <Edit><SpoilerTextArea aria-label={t("Description")} rows={5} placeholder={t("What happened, and why it matters.")} value={selected.data.description || ''} onChange={(e) => patchData({ description: e.target.value })} /></Edit> });
+      S.push({ key: 'lore', title: t("Lore"), icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit });
     }
     return S;
   };
@@ -2026,53 +2045,53 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
           <span className={`truncate text-sm font-semibold ${former ? 'text-text-secondary' : 'text-text-primary'}`}>{link.entity.canonicalName}</span>
           {link.label && <span className="min-w-0 truncate text-sm text-text-muted">{link.label}</span>}
           <span className="flex-1" />
-          <span className="shrink-0 text-xs text-text-subtle">{former ? 'Former member' : since ? `Since ${since}` : ''}</span>
+          <span className="shrink-0 text-xs text-text-subtle">{former ? t("Former member") : since ? `Since ${since}` : ''}</span>
         </button>
         </SpoilerRow>
       );
     };
-    return { key: 'fac', title: 'Factions', icon: Flag, scalar: false, emptyVerb: 'Add', spoiler: 'factions',
+    return { key: 'fac', title: t("Factions"), icon: Flag, scalar: false, emptyVerb: 'Add', spoiler: 'factions',
       empty: !(rel.memberOf || []).length && !pastFactions.length,
       view: <div className="space-y-0.5">
         {(rel.memberOf || []).map(link => membershipRow(link, false))}
         {pastFactions.map(link => membershipRow(link, true))}
       </div>,
       edit: <>
-        <MultiRelation label="Factions" hint={hint} disabled={unsaved} links={rel.memberOf || []} options={byType.Factions} onAdd={(id) => addMulti('member_of', id)} onRemove={removeLink} />
-        {pastFactions.length > 0 && <Edit label="Former factions" hint="Departures are recorded on the faction sheet."><div className="space-y-0.5">{pastFactions.map(link => membershipRow(link, true))}</div></Edit>}
+        <MultiRelation label={t("Factions")} hint={hint} disabled={unsaved} links={rel.memberOf || []} options={byType.Factions} onAdd={(id) => addMulti('member_of', id)} onRemove={removeLink} />
+        {pastFactions.length > 0 && <Edit label={t("Former factions")} hint={t("Departures are recorded on the faction sheet.")}><div className="space-y-0.5">{pastFactions.map(link => membershipRow(link, true))}</div></Edit>}
       </> };
   };
 
   const characterSections = () => {
     if (charTab === 'data') return [
-      { key: 'identity', title: 'Identity', icon: IdCard, scalar: true,
+      { key: 'identity', title: t("Identity"), icon: IdCard, scalar: true,
         view: <>
           <FactGrid>
-            <ViewField label="Race" spoiler="race" value={rel.isRace?.entity ? <EntityChip entity={rel.isRace.entity} onOpen={openEntityById} /> : null} />
-            <ViewField label="Age" spoiler="age" value={selected.data.birthDate
-              ? (derivedAge(worldCalendar, worldClock, selected.data) && <span data-tooltip="Calculated from the birthday">{derivedAge(worldCalendar, worldClock, selected.data)}</span>)
+            <ViewField label={t("Race")} spoiler="race" value={rel.isRace?.entity ? <EntityChip entity={rel.isRace.entity} onOpen={openEntityById} /> : null} />
+            <ViewField label={t("Age")} spoiler="age" value={selected.data.birthDate
+              ? (derivedAge(worldCalendar, worldClock, selected.data) && <span data-tooltip={t("Calculated from the birthday")}>{derivedAge(worldCalendar, worldClock, selected.data)}</span>)
               : selected.data.age} />
-            <ViewField label="Born" spoiler="birthDate" value={formatWorldDate(worldCalendar, selected.data.birthDate)} />
-            {selected.data.status === 'deceased' && <ViewField label="Died" spoiler="deathDate" value={formatWorldDate(worldCalendar, selected.data.deathDate)} />}
-            {selected.data.status === 'missing' && <ViewField label="Disappeared" spoiler="missingDate" value={formatWorldDate(worldCalendar, selected.data.missingDate)} />}
+            <ViewField label={t("Born")} spoiler="birthDate" value={formatWorldDate(worldCalendar, selected.data.birthDate)} />
+            {selected.data.status === 'deceased' && <ViewField label={t("Died")} spoiler="deathDate" value={formatWorldDate(worldCalendar, selected.data.deathDate)} />}
+            {selected.data.status === 'missing' && <ViewField label={t("Disappeared")} spoiler="missingDate" value={formatWorldDate(worldCalendar, selected.data.missingDate)} />}
           </FactGrid>
         </>,
         edit: <>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Edit label="Status" spoiler="status"><StateSelect label="Status" map={STATUS} value={selected.data.status || 'unknown'} onChange={(e) => patchData({ status: e.target.value })} /></Edit>
-            {!(worldCalendar && selected.data.birthDate) && <Edit label="Age" spoiler="age"><LInput placeholder="e.g. 34" value={selected.data.age || ''} onChange={(e) => patchData({ age: e.target.value })} /></Edit>}
-            {worldCalendar && <div className={selected.data.birthDate ? 'sm:col-span-3' : ''}><Edit label="Born" spoiler="birthDate" hint={selected.data.birthDate ? 'The age follows the story date from here.' : undefined}>
-              <WorldDateInput label="Birth date" emptyLabel="Set birthday" calendar={worldCalendar} value={selected.data.birthDate} seedValue={birthDateForAge(worldCalendar, worldClock, selected.data.age)} onChange={birthDate => setBirthDate(birthDate)} />
+            <Edit label={t("Status")} spoiler="status"><StateSelect label={t("Status")} map={STATUS} value={selected.data.status || 'unknown'} onChange={(e) => patchData({ status: e.target.value })} /></Edit>
+            {!(worldCalendar && selected.data.birthDate) && <Edit label={t("Age")} spoiler="age"><LInput placeholder="e.g. 34" value={selected.data.age || ''} onChange={(e) => patchData({ age: e.target.value })} /></Edit>}
+            {worldCalendar && <div className={selected.data.birthDate ? 'sm:col-span-3' : ''}><Edit label={t("Born")} spoiler="birthDate" hint={selected.data.birthDate ? t("The age follows the story date from here.") : undefined}>
+              <WorldDateInput label={t("Birth date")} emptyLabel="Set birthday" calendar={worldCalendar} value={selected.data.birthDate} seedValue={birthDateForAge(worldCalendar, worldClock, selected.data.age)} onChange={birthDate => setBirthDate(birthDate)} />
             </Edit></div>}
           </div>
-          {worldCalendar && selected.data.birthDate && <Checkbox checked={Boolean(selected.data.showBirthday)} onChange={showBirthday => patchData({ showBirthday })} label="Show the birthday on the calendar" />}
-          <SingleRelation label="Race" spoiler="race" disabled={unsaved} current={rel.isRace?.entity?.id} options={byType.Races} onSet={(id) => setSingle('is_race', id)} />
-          {selected.data.status === 'deceased' && worldCalendar && <Edit label="Death date" spoiler="deathDate"><WorldDateInput label="Death date" emptyLabel="Set death date" calendar={worldCalendar} value={selected.data.deathDate} onChange={deathDate => patchData({ deathDate })} /></Edit>}
-          {selected.data.status === 'missing' && worldCalendar && <Edit label="Disappearance date" spoiler="missingDate"><WorldDateInput label="Disappearance date" emptyLabel="Set disappearance date" calendar={worldCalendar} value={selected.data.missingDate} onChange={missingDate => patchData({ missingDate })} /></Edit>}
+          {worldCalendar && selected.data.birthDate && <Checkbox checked={Boolean(selected.data.showBirthday)} onChange={showBirthday => patchData({ showBirthday })} label={t("Show the birthday on the calendar")} />}
+          <SingleRelation label={t("Race")} spoiler="race" disabled={unsaved} current={rel.isRace?.entity?.id} options={byType.Races} onSet={(id) => setSingle('is_race', id)} />
+          {selected.data.status === 'deceased' && worldCalendar && <Edit label={t("Death date")} spoiler="deathDate"><WorldDateInput label={t("Death date")} emptyLabel="Set death date" calendar={worldCalendar} value={selected.data.deathDate} onChange={deathDate => patchData({ deathDate })} /></Edit>}
+          {selected.data.status === 'missing' && worldCalendar && <Edit label={t("Disappearance date")} spoiler="missingDate"><WorldDateInput label={t("Disappearance date")} emptyLabel="Set disappearance date" calendar={worldCalendar} value={selected.data.missingDate} onChange={missingDate => patchData({ missingDate })} /></Edit>}
         </> },
-      { key: 'appearance', title: 'Appearance', icon: ScanFace, scalar: true, spoiler: 'appearance', empty: !String(selected.data.appearance || '').trim(), view: <Prose text={selected.data.appearance} />, edit: <Edit><SpoilerTextArea aria-label="Appearance" rows={5} placeholder="Physical presence, clothing, and distinguishing features." value={selected.data.appearance || ''} onChange={(e) => patchData({ appearance: e.target.value })} /></Edit> },
-      { key: 'personality', title: 'Personality', icon: Drama, scalar: true, spoiler: 'personality', empty: !String(selected.data.personality || '').trim(), view: <Prose text={selected.data.personality} />, edit: <Edit><SpoilerTextArea aria-label="Personality" rows={5} placeholder="Temperament, habits, values, and contradictions." value={selected.data.personality || ''} onChange={(e) => patchData({ personality: e.target.value })} /></Edit> },
-      { key: 'lore', title: 'Lore', icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit },
+      { key: 'appearance', title: t("Appearance"), icon: ScanFace, scalar: true, spoiler: 'appearance', empty: !String(selected.data.appearance || '').trim(), view: <Prose text={selected.data.appearance} />, edit: <Edit><SpoilerTextArea aria-label={t("Appearance")} rows={5} placeholder={t("Physical presence, clothing, and distinguishing features.")} value={selected.data.appearance || ''} onChange={(e) => patchData({ appearance: e.target.value })} /></Edit> },
+      { key: 'personality', title: t("Personality"), icon: Drama, scalar: true, spoiler: 'personality', empty: !String(selected.data.personality || '').trim(), view: <Prose text={selected.data.personality} />, edit: <Edit><SpoilerTextArea aria-label={t("Personality")} rows={5} placeholder={t("Temperament, habits, values, and contradictions.")} value={selected.data.personality || ''} onChange={(e) => patchData({ personality: e.target.value })} /></Edit> },
+      { key: 'lore', title: t("Lore"), icon: ScrollText, scalar: true, spoiler: 'lore', empty: loreEmpty, view: loreView, edit: loreEdit },
     ];
     if (charTab === 'inventory') return [
       { key: 'inv', raw: <WorldbuildInventory workspaceId={workspaceId} subject={selected} links={rel.inventory || []} options={byType.Items} api={electronAPI} showToast={showToast} onChanged={() => loadRelations(selected)} /> },
@@ -2100,37 +2119,37 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
         empty="No members yet." />
     );
     return [
-      { key: 'overview', title: 'Command and territory', icon: Crown, scalar: true,
+      { key: 'overview', title: t("Command and territory"), icon: Crown, scalar: true,
         view: <FactGrid>
-          <ViewField label="Leader" spoiler="leader" value={rel.leader?.entity ? <EntityChip entity={rel.leader.entity} onOpen={openEntityById} /> : null} />
-          <ViewField label="Founded" spoiler="founded" value={formatWorldDate(worldCalendar, selected.data.foundedDate)} empty="Unknown" />
-          <ViewField label="Founded by" spoiler="foundedBy" value={founders.length
+          <ViewField label={t("Leader")} spoiler="leader" value={rel.leader?.entity ? <EntityChip entity={rel.leader.entity} onOpen={openEntityById} /> : null} />
+          <ViewField label={t("Founded")} spoiler="founded" value={formatWorldDate(worldCalendar, selected.data.foundedDate)} empty="Unknown" />
+          <ViewField label={t("Founded by")} spoiler="foundedBy" value={founders.length
             ? <div className="flex flex-wrap gap-1.5">{founders.map(link => <EntityChip key={link.linkId} entity={link.entity} onOpen={openEntityById} />)}</div>
             : null} empty="Not recorded" />
-          <ViewField full label="Area of operation" spoiler="area" value={<ChipList onOpen={openEntityById} links={rel.operatesIn} empty="No territory set." />} />
+          <ViewField full label={t("Area of operation")} spoiler="area" value={<ChipList onOpen={openEntityById} links={rel.operatesIn} empty="No territory set." />} />
         </FactGrid>,
         edit: <>
-          <SingleRelation label="Leader (optional)" spoiler="leader" hint="Who heads this faction. They join the roster automatically, with an editable rank." disabled={unsaved} current={leaderId} options={candidates} onSet={setFactionLeader} />
-          {worldCalendar && <Edit label="Founded" spoiler="founded" hint="When this faction came into being."><WorldDateInput label="Founded" emptyLabel="Set founding date" calendar={worldCalendar} value={selected.data.foundedDate} onChange={foundedDate => patchData({ foundedDate })} /></Edit>}
-          <Edit label="Founded by" spoiler="foundedBy" hint="Mark a founder with the star on their row in Members or Former members.">
+          <SingleRelation label={t("Leader (optional)")} spoiler="leader" hint={t("Who heads this faction. They join the roster automatically, with an editable rank.")} disabled={unsaved} current={leaderId} options={candidates} onSet={setFactionLeader} />
+          {worldCalendar && <Edit label={t("Founded")} spoiler="founded" hint={t("When this faction came into being.")}><WorldDateInput label={t("Founded")} emptyLabel="Set founding date" calendar={worldCalendar} value={selected.data.foundedDate} onChange={foundedDate => patchData({ foundedDate })} /></Edit>}
+          <Edit label={t("Founded by")} spoiler="foundedBy" hint={t("Mark a founder with the star on their row in Members or Former members.")}>
             {founders.length
               ? <div className="flex flex-wrap gap-1.5">{founders.map(link => <EntityChip key={link.linkId} entity={link.entity} onOpen={openEntityById} />)}</div>
-              : <span className="caption">Nobody marked yet.</span>}
+              : <span className="caption">{t("Nobody marked yet.")}</span>}
           </Edit>
-          <MultiRelation label="Area of operation" spoiler="area" hint="Locations this faction works out of." disabled={unsaved} links={rel.operatesIn || []} options={byType.Locations} onAdd={(id) => addMulti('operates_in', id)} onRemove={removeLink} />
+          <MultiRelation label={t("Area of operation")} spoiler="area" hint={t("Locations this faction works out of.")} disabled={unsaved} links={rel.operatesIn || []} options={byType.Locations} onAdd={(id) => addMulti('operates_in', id)} onRemove={removeLink} />
         </> },
-      { key: 'members', title: 'Members', icon: Users, scalar: false, spoiler: 'members', count: rel.members?.length || null, emptyVerb: 'Add', empty: !(rel.members || []).length,
+      { key: 'members', title: t("Members"), icon: Users, scalar: false, spoiler: 'members', count: rel.members?.length || null, emptyVerb: 'Add', empty: !(rel.members || []).length,
         view: roster(false),
         edit: unsaved ? null : roster(true) },
-      { key: 'formerMembers', title: 'Former members', icon: UserMinus, scalar: false, spoiler: 'formerMembers', empty: !(rel.formerMembers || []).length, derived: !(rel.formerMembers || []).length,
+      { key: 'formerMembers', title: t("Former members"), icon: UserMinus, scalar: false, spoiler: 'formerMembers', empty: !(rel.formerMembers || []).length, derived: !(rel.formerMembers || []).length,
         view: <MemberList links={rel.formerMembers} calendar={worldCalendar} kind="former" onOpen={openEntityById} empty="Nobody has left yet." />,
         edit: <div>
-          <p className="caption mb-2">They keep what they already knew. From here on, whatever the faction shares with all members no longer reaches them.</p>
+          <p className="caption mb-2">{t("They keep what they already knew. From here on, whatever the faction shares with all members no longer reaches them.")}</p>
           <MemberList links={rel.formerMembers} calendar={worldCalendar} kind="former" editing onOpen={openEntityById}
             onSetRole={setFormerRole} onSetMeta={setMemberMeta} onRestore={restoreMember} onRemove={removeLink}
             empty="Nobody has left yet." />
         </div> },
-      { key: 'diplomacy', raw: <WorldbuildRelationships title="Relations" workspaceId={workspaceId} subject={selected} links={rel.relationships || []} options={[...byType.Factions.filter(entity => entity.id !== selected.id), ...byType.Characters, ...individualCreatures]} api={electronAPI} showToast={showToast} onChanged={() => loadRelations(selected)} /> },
+      { key: 'diplomacy', raw: <WorldbuildRelationships title={t("Relations")} workspaceId={workspaceId} subject={selected} links={rel.relationships || []} options={[...byType.Factions.filter(entity => entity.id !== selected.id), ...byType.Characters, ...individualCreatures]} api={electronAPI} showToast={showToast} onChanged={() => loadRelations(selected)} /> },
     ];
   };
 
@@ -2139,14 +2158,14 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
     const localTo = rel.localTo || [];
     const tied = withTies ? rel.connectedTo || [] : [];
     return {
-      key: 'loc', title: 'Places', icon: MapPin, scalar: false, spoiler: 'places', emptyVerb: 'Add', empty: !localTo.length && !tied.length,
+      key: 'loc', title: t("Places"), icon: MapPin, scalar: false, spoiler: 'places', emptyVerb: 'Add', empty: !localTo.length && !tied.length,
       view: <div className="space-y-4">
-        <ViewField label="Local to" spoiler="localTo" empty="Local nowhere yet." value={localTo.length ? <ChipList onOpen={openEntityById} links={localTo} /> : null} />
-        {withTies && <ViewField label="Tied to" empty="Tied to no place." value={tied.length ? <ChipList onOpen={openEntityById} links={tied} /> : null} />}
+        <ViewField label={t("Local to")} spoiler="localTo" empty="Local nowhere yet." value={localTo.length ? <ChipList onOpen={openEntityById} links={localTo} /> : null} />
+        {withTies && <ViewField label={t("Tied to")} empty="Tied to no place." value={tied.length ? <ChipList onOpen={openEntityById} links={tied} /> : null} />}
       </div>,
       edit: <>
-        <MultiRelation label="Local to" spoiler="localTo" hint={`Regions and Areas this ${noun} is from. In play they know what everyone there knows.`} disabled={unsaved} links={localTo} options={sharingLocations} onAdd={(id) => addMulti('local_to', id)} onRemove={removeLink} />
-        {withTies && <MultiRelation label="Tied to" hint={`Places this ${noun} is tied to.`} disabled={unsaved} links={tied} options={byType.Locations} onAdd={(id) => addMulti('connected_to', id)} onRemove={removeLink} />}
+        <MultiRelation label={t("Local to")} spoiler="localTo" hint={`Regions and Areas this ${noun} is from. In play they know what everyone there knows.`} disabled={unsaved} links={localTo} options={sharingLocations} onAdd={(id) => addMulti('local_to', id)} onRemove={removeLink} />
+        {withTies && <MultiRelation label={t("Tied to")} hint={`Places this ${noun} is tied to.`} disabled={unsaved} links={tied} options={byType.Locations} onAdd={(id) => addMulti('connected_to', id)} onRemove={removeLink} />}
       </>,
     };
   };
@@ -2185,7 +2204,11 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
     const custom = charTab === 'data' ? templateSections.filter(section => section.kind === 'custom' && !section.hidden).map(section => templateSection(section.id, section.label)) : [];
     return [...source, ...custom, ...loose]
       .filter(section => !sectionSetting(section.key)?.hidden)
-      .map(section => ({ ...section, title: sectionSetting(section.key)?.label || section.title }))
+      .map(section => {
+        const label = sectionSetting(section.key)?.label;
+        const defaultLabel = nativeSections(selected.type).find(item => item.id === section.key)?.label;
+        return { ...section, title: label ? (label === defaultLabel ? t(label) : label) : section.title };
+      })
       .sort((left, right) => (positions.get(left.key) ?? 999) - (positions.get(right.key) ?? 999));
   };
   const sections = selected
@@ -2196,10 +2219,10 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
   const m = selected ? concreteEntityMeta(selected) : null;
   const hasLifeStatus = selected?.type === 'Characters' || isIndividualCreature;
   const reviewSwitcher = charTab === 'review' && hasEntityReview && hasNarrativeReview ? (
-    <SegmentedControl label="Kind of suggestion" value={reviewKind} onChange={setReviewKind}
+    <SegmentedControl label={t("Kind of suggestion")} value={reviewKind} onChange={setReviewKind}
       options={[
-        { value: 'entity', label: 'Sheet updates', icon: ScanEye, count: selectedReviewCounts.entityUpdates },
-        { value: 'narrative', label: 'Narrative state', icon: AiGlyph, count: selectedReviewCounts.narrative },
+        { value: 'entity', label: t("Sheet updates"), icon: ScanEye, count: selectedReviewCounts.entityUpdates },
+        { value: 'narrative', label: t("Narrative state"), icon: AiGlyph, count: selectedReviewCounts.narrative },
       ]} />
   ) : null;
   const sheetBeingRead = !!readingEntityId && readingEntityId === selected?.id;
@@ -2210,11 +2233,11 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
   // The shape of this sheet, read beside its type: a unique item, a species, a place's scale.
   // The type line names the kind in the type's colour ("Item · weapon"), then a quieter fact.
   const sheetTypeLabel = !selected ? ''
-    : selected.type === 'Creatures' ? `Creature · ${isIndividualCreature ? 'specific being' : 'group or species'}`
-    : selected.type === 'Items' && selected.data?.itemType ? `Item · ${String(selected.data.itemType).toLowerCase()}`
+    : selected.type === 'Creatures' ? `${t('Creature')} · ${t(isIndividualCreature ? 'Specific being' : 'Group or species')}`
+    : selected.type === 'Items' && selected.data?.itemType ? `${t('Item')} · ${t(String(selected.data.itemType))}`
     : m?.label;
   const sheetVariantLabel = !selected ? null
-    : selected.type === 'Locations' ? (locationSizeLabel(locationSizeOf(selected)) || null)
+    : selected.type === 'Locations' ? (t(locationSizeLabel(locationSizeOf(selected))) || null)
     : selected.type === 'Events' ? ((selected.data?.eventNature || 'one-time') === 'recurring'
       ? recurrenceText(selected.data, worldCalendar) || 'Recurring'
       : selected.data?.startDate ? formatWorldDate(worldCalendar, selected.data.startDate) : null)
@@ -2232,9 +2255,9 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
 
   // The AI's marks on a row, in a fixed order so a list scans the same way every time.
   const entitySignals = (entity) => <>
-    {enrichProgress?.entityId === entity.id && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-accent" aria-label="Being read by the AI" />}
-    {enrichErrors.some(error => error.entityId === entity.id) && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-status-danger" data-tooltip="The last update failed" />}
-    {entity.status === 'proposed' && <AiGlyph className="h-3.5 w-3.5 shrink-0 text-status-warning" data-tooltip="Proposed by the AI" />}
+    {enrichProgress?.entityId === entity.id && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-accent" aria-label={t("Being read by the AI")} />}
+    {enrichErrors.some(error => error.entityId === entity.id) && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-status-danger" data-tooltip={t("The last update failed")} />}
+    {entity.status === 'proposed' && <AiGlyph className="h-3.5 w-3.5 shrink-0 text-status-warning" data-tooltip={t("Proposed by the AI")} />}
     {entity.status !== 'proposed' && (reviewCounts[entity.id]?.entityUpdates || 0) > 0 && <ScanEye className="h-3.5 w-3.5 shrink-0 text-status-info" data-tooltip={`${reviewCounts[entity.id].entityUpdates} suggested updates`} />}
     {entity.status !== 'proposed' && (reviewCounts[entity.id]?.narrative || 0) > 0 && <AiGlyph className="h-3.5 w-3.5 shrink-0 text-entity-event" data-tooltip={`${reviewCounts[entity.id].narrative} Narrative state suggestions`} />}
     {nameReview.has(entity.id) && <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-status-warning" data-tooltip={describeNameReview(nameReview.get(entity.id)[0])} />}
@@ -2243,8 +2266,8 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
   // One row: the type icon, or the checkbox in its place while selecting several. A place
   // with places inside carries its expand toggle at the right edge, so every row starts aligned.
   const entityRow = (entity, { icon, sizeTip, trailing, toggle } = {}) => {
-    const t = concreteEntityMeta(entity);
-    const Icon = icon || t.icon;
+    const localValue = concreteEntityMeta(entity);
+    const Icon = icon || localValue.icon;
     const active = selected?.id === entity.id;
     const picked = selectedIds.has(entity.id);
     const status = (entity.type === 'Characters' || (entity.type === 'Creatures' && (entity.data?.scope || 'individual') !== 'group')) && STATUS_TONE[entity.data?.status]
@@ -2256,7 +2279,7 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
           {manageMode && <span aria-hidden="true" className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border-[1.5px] ${picked ? 'border-accent bg-accent text-on-accent' : 'border-border-strong'}`}>{picked && <Check className="h-3 w-3" strokeWidth={3} />}</span>}
           {portraits[entity.id]?.imagePath && canHavePortrait(entity)
               ? <span aria-hidden="true" className="block h-6 w-6 shrink-0 rounded-md border border-border-default" style={framedImageStyle(portraits[entity.id])} />
-              : <span data-tooltip={sizeTip} className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${t.medallion}`}><Icon className="h-3.5 w-3.5" /></span>}
+              : <span data-tooltip={sizeTip} className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${localValue.medallion}`}><Icon className="h-3.5 w-3.5" /></span>}
           <span className={`min-w-0 flex-1 truncate text-sm font-medium ${active && !manageMode ? 'text-accent' : 'text-text-secondary group-hover:text-text-primary'}`}>{entity.canonicalName}</span>
           {status && <span className={`shrink-0 text-xs ${STATUS_TONE[status]}`}>{STATUS[status].label}</span>}
           {entitySignals(entity)}
@@ -2326,7 +2349,7 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
         <button type="button" onClick={toggleAllLocations}
           className="mt-2 inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-muted transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
           {allLocationsCollapsed ? <ChevronsUpDown className="h-3.5 w-3.5" aria-hidden="true" /> : <ChevronsDownUp className="h-3.5 w-3.5" aria-hidden="true" />}
-          {allLocationsCollapsed ? 'Expand all' : 'Collapse all'}
+          {allLocationsCollapsed ? t("Expand all") : t("Collapse all")}
         </button>
       )}
       </div>
@@ -2362,11 +2385,11 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
             <div className="flex items-center justify-end gap-2 pt-1">
               {savable ? (
                 <>
-                  <Button variant="ghost" size="sm" onClick={cancelSection}>Cancel</Button>
-                  <Button size="sm" icon={Check} loading={saving} onClick={saveSection}>Save</Button>
+                  <Button variant="ghost" size="sm" onClick={cancelSection}>{t("Cancel")}</Button>
+                  <Button size="sm" icon={Check} loading={saving} onClick={saveSection}>{t("Save")}</Button>
                 </>
               ) : (
-                <Button variant="ghost" size="sm" onClick={() => setEditingSection(null)}>Done</Button>
+                <Button variant="ghost" size="sm" onClick={() => setEditingSection(null)}>{t("Done")}</Button>
               )}
             </div>
           </>
@@ -2418,27 +2441,27 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
     };
     const updateDetails = `${summary.pendingFields} field changes, ${summary.pendingLore} lore updates, ${summary.pendingLinks} relationships, and ${summary.pendingSkills || 0} skill changes`;
     if (action === 'accept-proposed') return {
-      tone: 'warning', title: 'Accept proposed entities', confirm: 'Accept proposals',
+      tone: 'warning', title: t("Accept proposed entities"), confirm: 'Accept proposals',
       message: `${summary.proposed} selected proposals will become confirmed entities. Possible duplicates still need to be merged manually.`,
     };
     if (action === 'accept-updates') return {
-      tone: 'warning', title: 'Accept AI updates', confirm: 'Accept updates',
+      tone: 'warning', title: t("Accept AI updates"), confirm: 'Accept updates',
       message: `Accept all pending AI changes for ${summary.pendingUpdates} selected entities: ${updateDetails}.`,
     };
     if (action === 'reject-proposed') return {
-      tone: 'danger', title: 'Reject proposed entities', confirm: 'Reject proposals',
+      tone: 'danger', title: t("Reject proposed entities"), confirm: 'Reject proposals',
       message: `Reject and remove ${summary.proposed} selected proposed entities. Confirmed entities in the selection will not be changed.`,
     };
     if (action === 'reject-updates') return {
-      tone: 'danger', title: 'Reject AI updates', confirm: 'Reject updates',
+      tone: 'danger', title: t("Reject AI updates"), confirm: 'Reject updates',
       message: `Discard all pending AI changes for ${summary.pendingUpdates} selected entities: ${updateDetails}. Current canonical data will not be changed.`,
     };
     if (action === 'reject-narrative') return {
-      tone: 'danger', title: 'Reject Narrative state suggestions', confirm: 'Reject suggestions',
+      tone: 'danger', title: t("Reject Narrative state suggestions"), confirm: 'Reject suggestions',
       message: `Discard ${summary.pendingNarrative || 0} pending Narrative state ${summary.pendingNarrative === 1 ? 'suggestion' : 'suggestions'} for the selected entities: what they know, believe, remember and feel. Nothing already recorded changes.`,
     };
     if (action === 'reprocess') return {
-      tone: 'warning', title: 'Reprocess selected entities', confirm: 'Reset progress',
+      tone: 'warning', title: t("Reprocess selected entities"), confirm: 'Reset progress',
       message: `Clear the processed-evidence status for ${summary.entities - summary.proposed} confirmed entities. Current data and pending reviews will be preserved. The next Update Entities run will read their matching evidence again.`,
     };
     return null;
@@ -2512,7 +2535,7 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
           title={bulkDialog.title}
           message={bulkDialog.message}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setBulkConfirm(null) },
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setBulkConfirm(null) },
             { label: bulkDialog.confirm, variant: bulkDialog.tone === 'danger' ? 'danger' : 'primary', autoFocus: true, loading: bulkSaving, onClick: () => runBulkAction(bulkConfirm.action) },
           ]}
           onClose={() => setBulkConfirm(null)}
@@ -2542,63 +2565,61 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
       {confirmDelete && selected && (
         <ConfirmDialog
           tone="danger"
-          title="Delete entity"
-          message={<>The {typeMeta(selected.type).label.toLowerCase()} <strong className="text-text-secondary">“{selected.canonicalName}”</strong> will be permanently deleted, along with its connections and story tags.{describeStoryImpact(deleteImpact)} This cannot be undone.</>}
+          title={t("Delete entity")}
+          message={<>{t("The")}{' '}{typeMeta(selected.type).label.toLowerCase()} <strong className="text-text-secondary">“{selected.canonicalName}”</strong>{' '}{t("will be permanently deleted, along with its connections and story tags.")}{describeStoryImpact(deleteImpact)}{' '}{t("This cannot be undone.")}</>}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setConfirmDelete(false) },
-            { label: 'Delete', variant: 'danger', autoFocus: true, loading: saving, onClick: async () => { await remove(); setConfirmDelete(false); } },
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setConfirmDelete(false) },
+            { label: t("Delete"), variant: 'danger', autoFocus: true, loading: saving, onClick: async () => { await remove(); setConfirmDelete(false); } },
           ]}
           onClose={() => setConfirmDelete(false)}
         />
       )}
       <div style={{ '--worldbuild-sidebar-width': `${sidebarWidth}px` }} className="ws-rail relative w-full lg:w-[var(--worldbuild-sidebar-width)] shrink-0 flex flex-col h-full overflow-visible border-r border-border-subtle/40 bg-surface-canvas/35 backdrop-blur-md">
         {/* The whole right edge resizes; no floating handle over the content. */}
-        <div role="separator" aria-orientation="vertical" aria-label="Resize Worldbuild sidebar" tabIndex={0} onPointerDown={startSidebarResize} onKeyDown={handleSidebarResizeKey}
+        <div role="separator" aria-orientation="vertical" aria-label={t("Resize Worldbuild sidebar")} tabIndex={0} onPointerDown={startSidebarResize} onKeyDown={handleSidebarResizeKey}
           className="absolute -right-1 top-0 bottom-0 z-20 hidden w-2 cursor-col-resize transition-colors hover:bg-accent/25 focus-visible:bg-accent/40 focus-visible:outline-none lg:block" />
         <div className="space-y-3 px-3 pb-1 pt-3.5">
           <div className="flex h-8 items-center gap-1">
             {/* Away from the overview it reads as a button, so there is always a way back. */}
-            <button type="button" onClick={showOverview} aria-current={onOverview ? 'page' : undefined} data-tooltip={onOverview ? undefined : 'Back to Your world'}
+            <button type="button" onClick={showOverview} aria-current={onOverview ? 'page' : undefined} data-tooltip={onOverview ? undefined : t("Back to Your world")}
               className={`inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-control border pl-2 pr-2.5 text-[0.9375rem] font-bold text-text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${onOverview ? 'border-transparent hover:bg-surface-hover/60' : 'border-transparent bg-surface-hover/20 hover:bg-surface-hover/50'}`}>
-              <WorldbuildGlyph className={`h-[1.0625rem] w-[1.0625rem] shrink-0 ${onOverview ? 'text-accent' : 'text-text-secondary'}`} aria-hidden="true" />
-              Worldbuild
-            </button>
+              <WorldbuildGlyph className={`h-[1.0625rem] w-[1.0625rem] shrink-0 ${onOverview ? 'text-accent' : 'text-text-secondary'}`} aria-hidden="true" />{t("Worldbuild")}</button>
             <span className="flex-1" />
             <button type="button" data-tour="wb-update" disabled={enriching || entities.length === 0 || !hasSystemAi} onClick={() => runEnrichment()}
-              data-tooltip={!hasSystemAi ? 'Choose an API connection and a model for System AI in Settings to update entities' : enriching ? undefined : 'Reads the story again and suggests changes. Locked sheets are skipped.'}
+              data-tooltip={!hasSystemAi ? t("Choose an API connection and a model for System AI in Settings to update entities") : enriching ? undefined : t("Reads the story again and suggests changes. Locked sheets are skipped.")}
               className="mr-0.5 inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-control border border-status-info/45 bg-status-info/15 px-2.5 text-xs font-semibold text-text-primary transition-colors hover:bg-status-info/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-default disabled:border-status-info/25 disabled:bg-status-info/[0.07] disabled:text-text-muted">
               {enriching ? <Loader2 className="h-3.5 w-3.5 animate-spin text-status-info" aria-hidden="true" /> : <RefreshCw className="h-3.5 w-3.5 text-status-info" aria-hidden="true" />}
-              {enriching ? 'Updating…' : 'Update entities'}
+              {enriching ? t("Updating…") : t("Update entities")}
             </button>
-            <IconButton icon={ListChecks} size="sm" label={manageMode ? 'Stop selecting' : 'Select several'} aria-pressed={manageMode}
+            <IconButton icon={ListChecks} size="sm" label={manageMode ? t("Stop selecting") : t("Select several")} aria-pressed={manageMode}
               className={manageMode ? '!bg-accent/15 !text-accent' : ''} onClick={() => manageMode ? leaveManageMode() : setManageMode(true)} />
-            <IconButton ref={moreMenuRef} icon={MoreHorizontal} size="sm" label="More Worldbuild actions" aria-haspopup="menu" aria-expanded={showMoreMenu} onClick={() => setShowMoreMenu(v => !v)} />
-            <Menu anchorRef={moreMenuRef} open={showMoreMenu} onClose={() => setShowMoreMenu(false)} label="Worldbuild actions" className="w-64">
-              <MenuItem icon={Upload} label="Import" description="Bring in a .klwb file to review." onSelect={() => { setShowMoreMenu(false); importWorld(); }} />
-              <MenuItem icon={Download} label="Export" description={exportableCount ? 'Save this world as a .klwb file.' : 'Nothing to export yet.'} disabled={!exportableCount} onSelect={() => { setShowMoreMenu(false); setShowExportModal(true); }} />
+            <IconButton ref={moreMenuRef} icon={MoreHorizontal} size="sm" label={t("More Worldbuild actions")} aria-haspopup="menu" aria-expanded={showMoreMenu} onClick={() => setShowMoreMenu(v => !v)} />
+            <Menu anchorRef={moreMenuRef} open={showMoreMenu} onClose={() => setShowMoreMenu(false)} label={t("Worldbuild actions")} className="w-64">
+              <MenuItem icon={Upload} label={t("Import")} description={t("Bring in a .klwb file to review.")} onSelect={() => { setShowMoreMenu(false); importWorld(); }} />
+              <MenuItem icon={Download} label={t("Export")} description={exportableCount ? t("Save this world as a .klwb file.") : t("Nothing to export yet.")} disabled={!exportableCount} onSelect={() => { setShowMoreMenu(false); setShowExportModal(true); }} />
               <MenuSeparator />
-              <MenuItem icon={Lightbulb} label="Take the tour" description="A one-minute look around Worldbuild." onSelect={() => { setShowMoreMenu(false); startTour('worldbuild'); }} />
+              <MenuItem icon={Lightbulb} label={t("Take the tour")} description={t("A one-minute look around Worldbuild.")} onSelect={() => { setShowMoreMenu(false); startTour('worldbuild'); }} />
             </Menu>
           </div>
           <div data-tour="wb-search-create" className="flex gap-2">
             <div className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-subtle" aria-hidden="true" />
-              <input ref={searchRef} value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => { if (e.key === 'Escape' && search) { e.stopPropagation(); setSearch(''); } }} placeholder="Search the world" aria-label="Search the world" aria-keyshortcuts="Control+K" className={`${FIELD} pl-9 ${search || sidebarWidth < 360 ? '' : 'pr-14'}`} />
+              <input ref={searchRef} value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={(e) => { if (e.key === 'Escape' && search) { e.stopPropagation(); setSearch(''); } }} placeholder={t("Search the world")} aria-label={t("Search the world")} aria-keyshortcuts="Control+K" className={`${FIELD} pl-9 ${search || sidebarWidth < 360 ? '' : 'pr-14'}`} />
               {!search && sidebarWidth >= 360 && <kbd aria-hidden="true" className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-border-default px-1.5 py-0.5 font-sans text-xs text-text-subtle">Ctrl K</kbd>}
             </div>
             <div ref={createRef} data-tour="wb-create" className="shrink-0">
-              <Button icon={Plus} onClick={() => setShowCreate(v => !v)} aria-haspopup="menu" aria-expanded={showCreate}>Create</Button>
+              <Button icon={Plus} onClick={() => setShowCreate(v => !v)} aria-haspopup="menu" aria-expanded={showCreate}>{t("Create")}</Button>
             </div>
-            <Menu anchorRef={createRef} open={showCreate} onClose={() => setShowCreate(false)} label="Create" className="w-64">
+            <Menu anchorRef={createRef} open={showCreate} onClose={() => setShowCreate(false)} label={t("Create")} className="w-64">
               {createOptions.map(option => {
-                const t = typeMeta(option.type);
-                const Icon = option.id === 'Creatures:group' ? Users : option.id === 'Items:unique' ? Gem : t.icon;
+                const localValue = typeMeta(option.type);
+                const Icon = option.id === 'Creatures:group' ? Users : option.id === 'Items:unique' ? Gem : localValue.icon;
                 return (
                   <button key={option.id} type="button" role="menuitem" data-tour={`wb-create-${option.id}`} onClick={() => startNew(option.type, option.data)}
                     className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none">
-                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${t.medallion}`}><Icon className="h-3.5 w-3.5" aria-hidden="true" /></span>
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border ${localValue.medallion}`}><Icon className="h-3.5 w-3.5" aria-hidden="true" /></span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-text-primary">{option.label || t.label}</span>
+                      <span className="block truncate text-sm font-semibold text-text-primary">{option.label || localValue.label}</span>
                       {option.note && <span className="block truncate text-xs text-text-muted">{option.note}</span>}
                     </span>
                   </button>
@@ -2609,25 +2630,24 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                 className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-surface-hover focus-visible:bg-surface-hover focus-visible:outline-none">
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-status-info/30 bg-status-info/15 text-status-info"><Sparkles className="h-3.5 w-3.5" aria-hidden="true" /></span>
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-semibold text-text-primary">Create with AI</span>
-                  <span className="block truncate text-xs text-text-muted">From cards, lorebooks or notes</span>
+                  <span className="block truncate text-sm font-semibold text-text-primary">{t("Create with AI")}</span>
+                  <span className="block truncate text-xs text-text-muted">{t("From cards, lorebooks or notes")}</span>
                 </span>
               </button>
             </Menu>
           </div>
-          <div role="radiogroup" aria-label="Filter by type" className="flex items-stretch justify-between gap-0.5">
+          <div role="radiogroup" aria-label={t("Filter by type")} className="flex items-stretch justify-between gap-0.5">
             <button type="button" role="radio" aria-checked={!filterType} onClick={() => setFilterType(null)}
-              className={`flex h-11 min-w-[2.125rem] shrink-0 flex-col items-center justify-center rounded-md px-1.5 text-xs font-semibold leading-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${!filterType ? 'bg-surface-hover text-text-primary ring-1 ring-inset ring-border-strong' : 'text-text-muted hover:text-text-primary'}`}>
-              All<span className="font-normal tabular-nums text-text-muted">{entities.length}</span>
+              className={`flex h-11 min-w-[2.125rem] shrink-0 flex-col items-center justify-center rounded-md px-1.5 text-xs font-semibold leading-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${!filterType ? 'bg-surface-hover text-text-primary ring-1 ring-inset ring-border-strong' : 'text-text-muted hover:text-text-primary'}`}>{t("All")}<span className="font-normal tabular-nums text-text-muted">{entities.length}</span>
             </button>
             {TYPE_ORDER.map(key => {
-              const t = typeMeta(key);
-              const Icon = t.icon;
+              const localValue = typeMeta(key);
+              const Icon = localValue.icon;
               const on = filterType === key;
               return (
-                <Tooltip key={key} content={t.plural || `${t.label}s`}>
-                  <button type="button" role="radio" aria-checked={on} aria-label={`${t.plural || `${t.label}s`}, ${typeCounts[key] || 0}`} onClick={() => setFilterType(on ? null : key)}
-                    className={`flex h-11 w-[1.875rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${on ? t.medallion : `border-transparent ${t.soft} hover:bg-surface-hover/60`}`}>
+                <Tooltip key={key} content={localValue.plural || `${localValue.label}s`}>
+                  <button type="button" role="radio" aria-checked={on} aria-label={`${localValue.plural || `${localValue.label}s`}, ${typeCounts[key] || 0}`} onClick={() => setFilterType(on ? null : key)}
+                    className={`flex h-11 w-[1.875rem] shrink-0 flex-col items-center justify-center gap-0.5 rounded-md border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${on ? localValue.medallion : `border-transparent ${localValue.soft} hover:bg-surface-hover/60`}`}>
                     <Icon className="h-4 w-4" aria-hidden="true" />
                     <span className={`text-xs leading-4 tabular-nums ${on ? '' : 'text-text-subtle'}`}>{typeCounts[key] || 0}</span>
                   </button>
@@ -2640,19 +2660,19 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
         <div ref={listScrollRef} data-tour="wb-list" onScroll={(e) => { scrollOffsets.current.list = e.currentTarget.scrollTop; }} aria-busy={!registryFresh} className={`flex-1 overflow-y-auto custom-scrollbar px-2 pb-2 ${registryFresh ? '' : 'pointer-events-none'}`}>
           {/* The world's own pages sit above the review card, which comes and goes, so they never move. */}
           {!manageMode && (
-            <nav aria-label="World" className="pt-2">
+            <nav aria-label={t("World")} className="pt-2">
               <div className="flex items-center gap-2.5 px-1 pb-2">
                 <span aria-hidden="true" className="h-px flex-1 bg-border-subtle" />
-                <span className="text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">World</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">{t("World")}</span>
                 <span aria-hidden="true" className="h-px flex-1 bg-border-subtle" />
               </div>
               {/* Four across, title only; what each holds is in its tooltip. */}
               <div data-tour="wb-world-tools" className="grid grid-cols-4 gap-1.5">
                 {[
-                  { key: 'calendar', icon: CalendarDays, label: 'Calendar', meta: (worldClock && worldCalendar && formatWorldDate(worldCalendar, worldClock)) || worldCalendar?.name || 'Not set up' },
-                  { key: 'facts', icon: BookCheck, label: 'Facts', meta: String(factCount || 0) },
-                  { key: 'rules', icon: Scale, label: 'Rules', meta: rulesMeta || 'None yet' },
-                  { key: 'types', icon: LayoutTemplate, label: 'Entity types', meta: `${TYPE_ORDER.length} types`, open: () => setShowTemplateManager(true) },
+                  { key: 'calendar', icon: CalendarDays, label: t("Calendar"), meta: (worldClock && worldCalendar && formatWorldDate(worldCalendar, worldClock)) || worldCalendar?.name || 'Not set up' },
+                  { key: 'facts', icon: BookCheck, label: t("Facts"), meta: String(factCount || 0) },
+                  { key: 'rules', icon: Scale, label: t("Rules"), meta: rulesMeta || 'None yet' },
+                  { key: 'types', icon: LayoutTemplate, label: t("Entity types"), meta: `${TYPE_ORDER.length} types`, open: () => setShowTemplateManager(true) },
                 ].map(link => {
                   const on = surface === link.key;
                   return (
@@ -2676,26 +2696,26 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold text-text-primary">{reviewFilter ? REVIEW_FILTERS[reviewFilter] : `${proposedCount + pendingUpdateCount + nameReviewCount} waiting for review`}</span>
                   <span className="mt-0.5 flex flex-wrap gap-x-2.5 text-xs text-text-muted">
-                    {proposedCount > 0 && <span><span className="tabular-nums text-status-warning">{proposedCount}</span> new</span>}
-                    {pendingUpdateCount > 0 && <span><span className="tabular-nums text-status-info">{pendingUpdateCount}</span> updates</span>}
-                    {nameReviewCount > 0 && <span><span className="tabular-nums text-status-warning">{nameReviewCount}</span> {nameReviewCount === 1 ? 'name' : 'names'}</span>}
+                    {proposedCount > 0 && <span><span className="tabular-nums text-status-warning">{proposedCount}</span>{' '}{t("new")}</span>}
+                    {pendingUpdateCount > 0 && <span><span className="tabular-nums text-status-info">{pendingUpdateCount}</span>{' '}{t("updates")}</span>}
+                    {nameReviewCount > 0 && <span><span className="tabular-nums text-status-warning">{nameReviewCount}</span> {nameReviewCount === 1 ? t("name") : t("names")}</span>}
                   </span>
                 </span>
                 {reviewFilter
-                  ? <span role="button" tabIndex={0} aria-label="Show everything" onClick={(event) => { event.stopPropagation(); setReviewFilter(null); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.stopPropagation(); setReviewFilter(null); } }} className="rounded p-0.5 text-text-muted hover:text-text-primary"><X className="h-3.5 w-3.5" /></span>
+                  ? <span role="button" tabIndex={0} aria-label={t("Show everything")} onClick={(event) => { event.stopPropagation(); setReviewFilter(null); }} onKeyDown={(event) => { if (event.key === 'Enter') { event.stopPropagation(); setReviewFilter(null); } }} className="rounded p-0.5 text-text-muted hover:text-text-primary"><X className="h-3.5 w-3.5" /></span>
                   : <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />}
               </button>
-              <Menu anchorRef={reviewMenuRef} open={showReviewMenu} onClose={() => setShowReviewMenu(false)} label="Review filters" className="w-64">
-                <MenuLabel>Show only</MenuLabel>
-                {proposedCount > 0 && <MenuItem icon={AiGlyph} iconClassName="text-status-warning" label="Proposed by the AI" trailing={<span className="text-xs tabular-nums text-text-subtle">{proposedCount}</span>} checked={reviewFilter === 'proposed'} onSelect={() => { setShowReviewMenu(false); setReviewFilter(reviewFilter === 'proposed' ? null : 'proposed'); }} />}
-                {pendingUpdateCount > 0 && <MenuItem icon={ScanEye} iconClassName="text-status-info" label="With suggested updates" trailing={<span className="text-xs tabular-nums text-text-subtle">{pendingUpdateCount}</span>} checked={reviewFilter === 'updates'} onSelect={() => { setShowReviewMenu(false); setReviewFilter(reviewFilter === 'updates' ? null : 'updates'); }} />}
-                {nameReviewCount > 0 && <MenuItem icon={AlertTriangle} iconClassName="text-status-warning" label="Names to check" description="Common words, pieces of other names, or duplicates." trailing={<span className="text-xs tabular-nums text-text-subtle">{nameReviewCount}</span>} checked={reviewFilter === 'names'} onSelect={() => { setShowReviewMenu(false); setReviewFilter(reviewFilter === 'names' ? null : 'names'); }} />}
+              <Menu anchorRef={reviewMenuRef} open={showReviewMenu} onClose={() => setShowReviewMenu(false)} label={t("Review filters")} className="w-64">
+                <MenuLabel>{t("Show only")}</MenuLabel>
+                {proposedCount > 0 && <MenuItem icon={AiGlyph} iconClassName="text-status-warning" label={t("Proposed by the AI")} trailing={<span className="text-xs tabular-nums text-text-subtle">{proposedCount}</span>} checked={reviewFilter === 'proposed'} onSelect={() => { setShowReviewMenu(false); setReviewFilter(reviewFilter === 'proposed' ? null : 'proposed'); }} />}
+                {pendingUpdateCount > 0 && <MenuItem icon={ScanEye} iconClassName="text-status-info" label={t("With suggested updates")} trailing={<span className="text-xs tabular-nums text-text-subtle">{pendingUpdateCount}</span>} checked={reviewFilter === 'updates'} onSelect={() => { setShowReviewMenu(false); setReviewFilter(reviewFilter === 'updates' ? null : 'updates'); }} />}
+                {nameReviewCount > 0 && <MenuItem icon={AlertTriangle} iconClassName="text-status-warning" label={t("Names to check")} description={t("Common words, pieces of other names, or duplicates.")} trailing={<span className="text-xs tabular-nums text-text-subtle">{nameReviewCount}</span>} checked={reviewFilter === 'names'} onSelect={() => { setShowReviewMenu(false); setReviewFilter(reviewFilter === 'names' ? null : 'names'); }} />}
               </Menu>
             </div>
           )}
           <div className="space-y-px pt-1">
-            {loading ? <p className="caption py-8 text-center">Loading…</p>
-              : filtered.length === 0 ? <p className="caption py-8 text-center">{search.trim() || filterType || reviewFilter ? 'Nothing matches.' : 'Nothing here yet.'}</p>
+            {loading ? <p className="caption py-8 text-center">{t("Loading…")}</p>
+              : filtered.length === 0 ? <p className="caption py-8 text-center">{search.trim() || filterType || reviewFilter ? t("Nothing matches.") : t("Nothing here yet.")}</p>
               : renderSidebarEntities()}
           </div>
         </div>
@@ -2724,10 +2744,10 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
             confirmedCount={selectedConfirmedCount}
             busy={bulkSaving}
             selectOptions={[
-              { key: 'visible', icon: ListChecks, label: 'Everything visible', count: filtered.length, onSelect: selectVisibleEntities },
-              { key: 'proposed', icon: AiGlyph, tone: 'text-status-warning', label: 'Proposed by the AI', count: proposedCount, onSelect: () => selectEntities(entities.filter(entity => entity.status === 'proposed')) },
-              { key: 'updates', icon: ScanEye, tone: 'text-status-info', label: 'With suggested updates', count: pendingUpdateCount, onSelect: () => selectEntities(entities.filter(entity => entity.status !== 'proposed' && ((reviewCounts[entity.id]?.entityUpdates || 0) > 0 || (reviewCounts[entity.id]?.narrative || 0) > 0))) },
-              { key: 'names', icon: AlertTriangle, tone: 'text-status-warning', label: 'Names to check', count: nameReviewCount, onSelect: () => selectEntities(entities.filter(entity => nameReview.has(entity.id))) },
+              { key: 'visible', icon: ListChecks, label: t("Everything visible"), count: filtered.length, onSelect: selectVisibleEntities },
+              { key: 'proposed', icon: AiGlyph, tone: 'text-status-warning', label: t("Proposed by the AI"), count: proposedCount, onSelect: () => selectEntities(entities.filter(entity => entity.status === 'proposed')) },
+              { key: 'updates', icon: ScanEye, tone: 'text-status-info', label: t("With suggested updates"), count: pendingUpdateCount, onSelect: () => selectEntities(entities.filter(entity => entity.status !== 'proposed' && ((reviewCounts[entity.id]?.entityUpdates || 0) > 0 || (reviewCounts[entity.id]?.narrative || 0) > 0))) },
+              { key: 'names', icon: AlertTriangle, tone: 'text-status-warning', label: t("Names to check"), count: nameReviewCount, onSelect: () => selectEntities(entities.filter(entity => nameReview.has(entity.id))) },
             ]}
             policyOptions={Object.entries(AI_POLICY).map(([policy, config]) => ({
               key: policy, icon: config.icon, label: config.label, description: config.tip,
@@ -2790,30 +2810,29 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
         ) : (
           <>
           {/* Outside the inert sheet, so the way back works while the AI reads it. */}
-          <nav aria-label="Breadcrumb" className="mx-auto flex max-w-3xl min-w-0 items-center gap-1 px-6 pt-4 text-[0.8125rem]">
+          <nav aria-label={t("Breadcrumb")} className="mx-auto flex max-w-3xl min-w-0 items-center gap-1 px-6 pt-4 text-[0.8125rem]">
             <button type="button" onClick={showOverview}
               className="-ml-2 inline-flex h-7 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 font-medium text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />Your world
-            </button>
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />{t("Your world")}</button>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-text-disabled" aria-hidden="true" />
             <span className="shrink-0 whitespace-nowrap px-2 text-text-subtle">{typeMeta(selected.type).plural || typeMeta(selected.type).label}</span>
             <ChevronRight className="h-3.5 w-3.5 shrink-0 text-text-disabled" aria-hidden="true" />
-            <span aria-current="page" className="min-w-0 truncate px-2 text-text-subtle">{isNew ? `New ${typeMeta(selected.type).label.toLowerCase()}` : selected.canonicalName}</span>
+            <span aria-current="page" className="min-w-0 truncate px-2 text-text-subtle">{isNew ? t('New {type}', { type: typeMeta(selected.type).label.toLowerCase() }) : selected.canonicalName}</span>
           </nav>
           <div className="mx-auto max-w-3xl space-y-4 px-6 pb-6 pt-3" inert={sheetBeingRead || undefined} aria-busy={sheetBeingRead || undefined}>
             <SpoilerScope key={selected.id || 'new'} data={selected.data} onToggle={toggleHidden}>
             {sheetBeingRead && (
-              <SheetNotice busy icon={Loader2} title="The AI is reading this sheet" text="It opens for editing again as soon as this entity is done. Other sheets stay editable." />
+              <SheetNotice busy icon={Loader2} title={t("The AI is reading this sheet")} text={t("It opens for editing again as soon as this entity is done. Other sheets stay editable.")} />
             )}
             {selected.status === 'proposed' && (
-              <SheetNotice icon={AiGlyph} title={selected.data?._imported ? 'Imported from a Worldbuild package' : 'Proposed by the AI'}
+              <SheetNotice icon={AiGlyph} title={selected.data?._imported ? t("Imported from a Worldbuild package") : t("Proposed by the AI")}
                 text={selected.data?._imported
-                  ? 'Keep it as a new entity, fold it into one you already have, or dismiss it.'
+                  ? t("Keep it as a new entity, fold it into one you already have, or dismiss it.")
                   : `${Array.isArray(selected.data?.proposalEvidence) && selected.data.proposalEvidence.length ? `Found in ${selected.data.proposalEvidence.length} ${selected.data.proposalEvidence.length === 1 ? 'passage' : 'passages'} of the story. ` : ''}Keep it, fold it into an entity you already have, or dismiss it.`}>
-                <Button size="sm" loading={saving} onClick={() => persist({ accept: true })}>Keep as new</Button>
-                <Button size="sm" variant="ghost" icon={Merge} onClick={() => setMergeDialog({ suggestedId: null })}>Merge into…</Button>
-                <Button size="sm" variant="subtle" loading={saving} onClick={remove}>Dismiss</Button>
-                {!selected.data?._imported && Array.isArray(selected.data?.proposalEvidence) && selected.data.proposalEvidence.length > 0 && <div className="ml-auto"><EvidenceReferences label="See passages" excerpts={selected.data.proposalEvidence.map(item => item.excerpt)} /></div>}
+                <Button size="sm" loading={saving} onClick={() => persist({ accept: true })}>{t("Keep as new")}</Button>
+                <Button size="sm" variant="ghost" icon={Merge} onClick={() => setMergeDialog({ suggestedId: null })}>{t("Merge into…")}</Button>
+                <Button size="sm" variant="subtle" loading={saving} onClick={remove}>{t("Dismiss")}</Button>
+                {!selected.data?._imported && Array.isArray(selected.data?.proposalEvidence) && selected.data.proposalEvidence.length > 0 && <div className="ml-auto"><EvidenceReferences label={t("See passages")} excerpts={selected.data.proposalEvidence.map(item => item.excerpt)} /></div>}
               </SheetNotice>
             )}
             {!isNew && nameReview.has(selected.id) && (
@@ -2823,10 +2842,10 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                   ...nameReview.get(selected.id).slice(1).map(describeNameReview),
                 ].filter(Boolean).join(' ')}>
                 {nameReview.get(selected.id).filter(reason => reason.relatedId && entities.some(e => e.id === reason.relatedId)).slice(0, 1).map(reason => (
-                  <Button key={reason.relatedId} size="sm" variant="ghost" icon={Merge} loading={saving} onClick={() => mergeInto(reason.relatedId, 'target')}>Merge into {reason.relatedName}</Button>
+                  <Button key={reason.relatedId} size="sm" variant="ghost" icon={Merge} loading={saving} onClick={() => mergeInto(reason.relatedId, 'target')}>{t("Merge into")}{' '}{reason.relatedName}</Button>
                 ))}
-                <Button size="sm" variant="subtle" loading={saving} onClick={keepName}>{nameReview.get(selected.id).some(reason => reason.code === 'duplicate' || reason.code === 'fragment') ? 'Keep both' : 'Keep as is'}</Button>
-                <Button size="sm" variant="subtle" icon={Trash2} className="!text-status-danger" onClick={() => setConfirmDelete(true)}>Delete</Button>
+                <Button size="sm" variant="subtle" loading={saving} onClick={keepName}>{nameReview.get(selected.id).some(reason => reason.code === 'duplicate' || reason.code === 'fragment') ? t("Keep both") : t("Keep as is")}</Button>
+                <Button size="sm" variant="subtle" icon={Trash2} className="!text-status-danger" onClick={() => setConfirmDelete(true)}>{t("Delete")}</Button>
               </SheetNotice>
             )}
             <div data-tour={isNew ? 'wb-new-head' : 'wb-sheet-head'} data-entity-id={isNew ? undefined : selected.id} data-entity-name={isNew ? undefined : selected.canonicalName} data-entity-type={selected.type}
@@ -2842,13 +2861,13 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                 <div className="flex items-start gap-4">
                   <SheetMedallion meta={m} portrait={isNew ? null : sheetPortrait} />
                   <div className="min-w-0 flex-1 space-y-3.5">
-                    {isNew && <div className={`text-xs font-semibold ${m.soft}`}>New {m.label.toLowerCase()}</div>}
+                    {isNew && <div className={`text-xs font-semibold ${m.soft}`}>{t("New")}{' '}{m.label.toLowerCase()}</div>}
                     <Edit label={nameLabel}><LInput autoFocus placeholder={placeholderName(selected.type)} value={selected.canonicalName} onChange={(e) => patch({ canonicalName: e.target.value })} /></Edit>
-                    {showAliases && <Edit label="Other names" hint="Aliases and titles. When the story mentions any of them, it points to this sheet."><AliasInput withEyes={!isNew} value={selected.aliases} placeholder={isNew ? placeholderAlias(selected.type) : 'Type and press Enter'} onChange={(aliases) => patch({ aliases })} /></Edit>}
+                    {showAliases && <Edit label={t("Other names")} hint={t("Aliases and titles. When the story mentions any of them, it points to this sheet.")}><AliasInput withEyes={!isNew} value={selected.aliases} placeholder={isNew ? placeholderAlias(selected.type) : t("Type and press Enter")} onChange={(aliases) => patch({ aliases })} /></Edit>}
                     {!isNew && (
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" onClick={cancelSection}>Cancel</Button>
-                        <Button size="sm" icon={Check} loading={saving} onClick={saveSection}>Save</Button>
+                        <Button variant="ghost" size="sm" onClick={cancelSection}>{t("Cancel")}</Button>
+                        <Button size="sm" icon={Check} loading={saving} onClick={saveSection}>{t("Save")}</Button>
                       </div>
                     )}
                   </div>
@@ -2862,16 +2881,16 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                       {sheetVariantLabel && <><span className="text-text-disabled" aria-hidden="true">·</span><SpoilerCover field="scope" compact><span className="text-text-secondary">{sheetVariantLabel}</span></SpoilerCover></>}
                       {hasLifeStatus && <><span className="text-text-disabled" aria-hidden="true">·</span><SpoilerCover field="status" compact><StateTag map={STATUS} value={selected.data.status || 'unknown'} /></SpoilerCover></>}
                       {rel.isRace?.entity && <><span className="text-text-disabled" aria-hidden="true">·</span><SpoilerCover field="race" compact><span className="text-text-secondary">{rel.isRace.entity.canonicalName}</span></SpoilerCover></>}
-                      {playerEntityId && playerEntityId === selected.id && <span className="ml-1 inline-flex h-5.5 items-center gap-1 rounded-full border border-accent/30 px-2 font-medium text-accent"><Gamepad2 aria-hidden="true" className="h-3.5 w-3.5" />You play them</span>}
+                      {playerEntityId && playerEntityId === selected.id && <span className="ml-1 inline-flex h-5.5 items-center gap-1 rounded-full border border-accent/30 px-2 font-medium text-accent"><Gamepad2 aria-hidden="true" className="h-3.5 w-3.5" />{t("You play them")}</span>}
                     </div>
                     <h1 className="mt-1 line-clamp-2 break-words text-2xl font-bold leading-tight text-text-primary">{selected.canonicalName}</h1>
                     {coverAllowed && locationCover?.inherited && (() => {
                       const source = entities.find(e => e.id === locationCover.sourceLocationId);
-                      return source ? <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-text-subtle"><ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />Background from<EntityChip entity={source} onOpen={openEntityById} /></div> : null;
+                      return source ? <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-text-subtle"><ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />{t("Background from")}<EntityChip entity={source} onOpen={openEntityById} /></div> : null;
                     })()}
                     {showAliases && (aliasesArr(selected.aliases).length > 0
-                      ? <div className="mt-2.5 flex flex-wrap items-center gap-1.5"><span className="mr-0.5 text-xs text-text-subtle">Also</span>{aliasesArr(selected.aliases).map((a, i) => <SpoilerCover key={i} field={`alias:${a}`} compact><Chip>{a}</Chip></SpoilerCover>)}</div>
-                      : <button type="button" onClick={() => setEditingSection('__header__')} className="-ml-2 mt-1.5 inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-subtle transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><Plus className="h-3.5 w-3.5" aria-hidden="true" />Add other names</button>)}
+                      ? <div className="mt-2.5 flex flex-wrap items-center gap-1.5"><span className="mr-0.5 text-xs text-text-subtle">{t("Also")}</span>{aliasesArr(selected.aliases).map((a, i) => <SpoilerCover key={i} field={`alias:${a}`} compact><Chip>{a}</Chip></SpoilerCover>)}</div>
+                      : <button type="button" onClick={() => setEditingSection('__header__')} className="-ml-2 mt-1.5 inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-subtle transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><Plus className="h-3.5 w-3.5" aria-hidden="true" />{t("Add other names")}</button>)}
                   </div>
                   <div className="flex shrink-0 items-start gap-1">
                     {coverAllowed && <LocationCoverMenu cover={locationCover} parentName={rel.inside?.entity?.canonicalName}
@@ -2892,16 +2911,16 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
               </div>
               </div>
               {visibleSheetTabs.length > 1 && !isNew && (
-                <div role="tablist" aria-label="Sheet sections" className="relative flex gap-1 overflow-x-auto border-t border-border-subtle px-4 [scrollbar-width:none]">
-                  {visibleSheetTabs.map(t => {
-                    const on = charTab === t;
-                    const count = t === 'review' ? selectedReviewCounts.entityUpdates + selectedReviewCounts.narrative : tabCounts[t];
+                <div role="tablist" aria-label={t("Sheet sections")} className="relative flex gap-1 overflow-x-auto border-t border-border-subtle px-4 [scrollbar-width:none]">
+                  {visibleSheetTabs.map(localValue => {
+                    const on = charTab === localValue;
+                    const count = localValue === 'review' ? selectedReviewCounts.entityUpdates + selectedReviewCounts.narrative : tabCounts[localValue];
                     return (
-                      <button key={t} type="button" role="tab" aria-selected={on} data-tour={`wb-tab-${t}`} onClick={() => { setCharTab(t); setEditingSection(null); }}
+                      <button key={localValue} type="button" role="tab" aria-selected={on} data-tour={`wb-tab-${localValue}`} onClick={() => { setCharTab(localValue); setEditingSection(null); }}
                         className={`relative inline-flex h-11 shrink-0 items-center gap-1.5 px-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40 ${on ? 'font-semibold text-text-primary' : 'font-medium text-text-muted hover:text-text-primary'}`}>
-                        {SheetTabIcon[t] && React.createElement(SheetTabIcon[t], { className: `h-4 w-4 ${on ? 'text-accent' : ''}`, 'aria-hidden': true })}
-                        {sheetTabLabel(t)}
-                        {t !== 'data' && count != null && (t !== 'review' || count > 0) && <span className={`rounded-full px-1.5 py-px text-xs tabular-nums ${t === 'review' ? 'bg-status-info/15 text-status-info' : 'bg-surface-hover/70 text-text-muted'}`}>{count}</span>}
+                        {SheetTabIcon[localValue] && React.createElement(SheetTabIcon[localValue], { className: `h-4 w-4 ${on ? 'text-accent' : ''}`, 'aria-hidden': true })}
+                        {sheetTabLabel(localValue)}
+                        {localValue !== 'data' && count != null && (localValue !== 'review' || count > 0) && <span className={`rounded-full px-1.5 py-px text-xs tabular-nums ${localValue === 'review' ? 'bg-status-info/15 text-status-info' : 'bg-surface-hover/70 text-text-muted'}`}>{count}</span>}
                         {on && <span aria-hidden="true" className="absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-accent" />}
                       </button>
                     );
@@ -2943,12 +2962,12 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
               return (
                 <section className="ws-card rounded-card border border-border-default bg-surface-panel-muted/60 px-4 pb-2 pt-3.5 backdrop-blur-md">
                   <div className="flex flex-wrap items-center gap-2">
-                    {reviewSwitcher || <><ScanEye className="h-4 w-4 shrink-0 text-status-info" aria-hidden="true" /><h2 className="text-sm font-semibold text-text-primary">Suggested updates</h2></>}
+                    {reviewSwitcher || <><ScanEye className="h-4 w-4 shrink-0 text-status-info" aria-hidden="true" /><h2 className="text-sm font-semibold text-text-primary">{t("Suggested updates")}</h2></>}
                     <span className="flex-1" />
-                    <Button size="sm" variant="subtle" loading={saving} onClick={() => resolveWholeReview(false, hasStagedUpdate ? { fields: allFields, lore: true, links: allLinks, chapters: allChapters } : null)}>Reject all</Button>
-                    <Button size="sm" variant="ghost" icon={Check} loading={saving} onClick={() => resolveWholeReview(true, hasStagedUpdate ? { fields: allFields, lore: true, links: allLinks, chapters: allChapters } : null)}>Accept all</Button>
+                    <Button size="sm" variant="subtle" loading={saving} onClick={() => resolveWholeReview(false, hasStagedUpdate ? { fields: allFields, lore: true, links: allLinks, chapters: allChapters } : null)}>{t("Reject all")}</Button>
+                    <Button size="sm" variant="ghost" icon={Check} loading={saving} onClick={() => resolveWholeReview(true, hasStagedUpdate ? { fields: allFields, lore: true, links: allLinks, chapters: allChapters } : null)}>{t("Accept all")}</Button>
                   </div>
-                  <p className="caption mt-1.5">The AI read new passages and suggests these changes. Nothing changes until you accept.</p>
+                  <p className="caption mt-1.5">{t("The AI read new passages and suggests these changes. Nothing changes until you accept.")}</p>
                   <div className="mt-2 divide-y divide-border-subtle">
                     {fields.map(f => {
                       const customFieldKey = f.startsWith('customFields.') ? f.slice('customFields.'.length) : null;
@@ -2958,7 +2977,7 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                       return (
                         <div key={f} className="flex items-start gap-4 py-3.5">
                           <div className="min-w-0 flex-1">
-                            <span className="block text-xs font-medium text-text-muted">{pData[f]?.fieldLabel || fieldLabel(f)}</span>
+                            <span className="block text-xs font-medium text-text-muted">{pData[f]?.fieldLabel || t(fieldLabel(f))}</span>
                             <SpoilerCover field={customFieldKey ? null : f}><div className="mt-1 flex flex-wrap items-baseline gap-2 text-sm">
                               {!empty && <><span className="text-text-subtle line-through"><SpoilerText text={curStr} /></span><ChevronRight className="h-3.5 w-3.5 self-center text-text-subtle" aria-hidden="true" /></>}
                               <span className="text-text-primary"><SpoilerText text={displayProposalValue(f, pData[f], fieldDefinitions, entities)} /></span>
@@ -2966,8 +2985,8 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                             <EvidenceReferences excerpts={proposalEvidence(pData[f])} support={proposalSupport(pData[f])} />
                           </div>
                           <div className="flex shrink-0 items-start gap-1.5">
-                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveReview({}, { fields: [f] })}>Reject</Button>
-                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveReview({ fields: [f] }, {})}>Accept</Button>
+                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveReview({}, { fields: [f] })}>{t("Reject")}</Button>
+                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveReview({ fields: [f] }, {})}>{t("Accept")}</Button>
                           </div>
                         </div>
                       );
@@ -2975,13 +2994,13 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                     {hasLore && (
                       <div className="flex items-start gap-4 py-3.5">
                         <div className="min-w-0 flex-1">
-                          <span className="block text-xs font-medium text-text-muted">Lore</span>
+                          <span className="block text-xs font-medium text-text-muted">{t("Lore")}</span>
                           <SpoilerCover field="lore"><p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-primary"><SpoilerText text={String(proposalValue(pending.lore))} /></p></SpoilerCover>
                           <EvidenceReferences excerpts={proposalEvidence(pending.lore)} support={proposalSupport(pending.lore)} />
                         </div>
                         <div className="flex shrink-0 items-start gap-1.5">
-                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveReview({}, { lore: true })}>Reject</Button>
-                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveReview({ lore: true }, {})}>Accept</Button>
+                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveReview({}, { lore: true })}>{t("Reject")}</Button>
+                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveReview({ lore: true }, {})}>{t("Accept")}</Button>
                           </div>
                       </div>
                     )}
@@ -2990,37 +3009,37 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                         <div className="min-w-0 flex-1 text-sm">
                           <span className="block text-xs font-medium text-text-muted">{l.relLabel || l.relKey}</span>
                           <div className="mt-1 flex flex-wrap items-center gap-2 text-text-primary">{entities.find(e => e.id === l.targetId) ? <EntityChip entity={entities.find(e => e.id === l.targetId)} onOpen={openEntityById} /> : <span>{l.targetName}</span>}{l.label && <span>{l.label}</span>}</div>
-                          {l.metadata && <p className="mt-1 text-xs text-text-muted"><span className="font-semibold text-text-secondary">How {selected.canonicalName} sees {l.targetName}:</span> {l.metadata.value}{l.metadata.description ? <> · <SpoilerText text={l.metadata.description} /></> : ''}</p>}
+                          {l.metadata && <p className="mt-1 text-xs text-text-muted"><span className="font-semibold text-text-secondary">{t("How")}{' '}{selected.canonicalName}{' '}{t("sees")}{' '}{l.targetName}:</span> {l.metadata.value}{l.metadata.description ? <> · <SpoilerText text={l.metadata.description} /></> : ''}</p>}
                           <EvidenceReferences excerpts={proposalEvidence(l)} support={proposalSupport(l)} />
                         </div>
                         <div className="flex shrink-0 items-start gap-1.5">
-                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveReview({}, { links: [k] })}>Reject</Button>
-                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveReview({ links: [k] }, {})}>Accept</Button>
+                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveReview({}, { links: [k] })}>{t("Reject")}</Button>
+                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveReview({ links: [k] }, {})}>{t("Accept")}</Button>
                           </div>
                       </div>
                     ); })}
                     {reviewSkillChanges.map(change => (
                       <div key={change.id} className="flex items-start gap-4 py-3.5">
                         <div className="min-w-0 flex-1 text-sm">
-                          <span className="block text-xs font-medium text-text-muted">Skill</span>
+                          <span className="block text-xs font-medium text-text-muted">{t("Skill")}</span>
                           <div className="mt-1 text-text-primary">{describeSkillChange(change, selected.canonicalName)}</div>
                           {change.reason && <p className="mt-1 text-xs leading-relaxed text-text-muted">{change.reason}</p>}
                         </div>
                         <div className="flex shrink-0 items-start gap-1.5">
-                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveSkillReview([change], 'rejected')}>Reject</Button>
-                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveSkillReview([change], 'approved')}>Accept</Button>
+                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveSkillReview([change], 'rejected')}>{t("Reject")}</Button>
+                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveSkillReview([change], 'approved')}>{t("Accept")}</Button>
                           </div>
                       </div>
                     ))}
                     {chapters.map(c => (
                       <div key={c.id} className="flex items-start gap-4 py-3.5">
                         <div className="min-w-0 flex-1 text-sm">
-                          <span className="block text-xs font-medium text-text-muted">Writing Desk chapter</span>
-                          <div className="mt-1 text-text-primary">{c.title || 'Untitled'}</div>
+                          <span className="block text-xs font-medium text-text-muted">{t("Writing Desk chapter")}</span>
+                          <div className="mt-1 text-text-primary">{c.title || t("Untitled")}</div>
                         </div>
                         <div className="flex shrink-0 items-start gap-1.5">
-                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveReview({}, { chapters: [c.id] })}>Reject</Button>
-                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveReview({ chapters: [c.id] }, {})}>Accept</Button>
+                            <Button size="sm" variant="subtle" icon={X} disabled={saving} onClick={() => resolveReview({}, { chapters: [c.id] })}>{t("Reject")}</Button>
+                            <Button size="sm" variant="ghost" icon={Check} disabled={saving} className="!border-status-success/35 !text-status-success" onClick={() => resolveReview({ chapters: [c.id] }, {})}>{t("Accept")}</Button>
                           </div>
                       </div>
                     ))}
@@ -3036,8 +3055,8 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
                 {/* Links need a saved sheet, so the footer says what opens next beside the only two actions. */}
                 <div data-tour="wb-new-footer" className="sticky bottom-4 z-10 flex items-center gap-3 rounded-card border border-border-default bg-surface-panel/95 px-4 py-3 shadow-overlay backdrop-blur-xl">
                   {createRelationHint(selected.type) ? <p className="caption flex min-w-0 flex-1 items-center gap-1.5"><Link2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />{createRelationHint(selected.type)}</p> : <span className="flex-1" />}
-                  <Button variant="ghost" onClick={() => setSelected(null)}>Discard</Button>
-                  <Button data-tour="wb-create-entity" icon={Check} loading={saving} onClick={() => persist()}>Create {typeMeta(selected.type).label.toLowerCase()}</Button>
+                  <Button variant="ghost" onClick={() => setSelected(null)}>{t("Discard")}</Button>
+                  <Button data-tour="wb-create-entity" icon={Check} loading={saving} onClick={() => persist()}>{t("Create")}{' '}{typeMeta(selected.type).label.toLowerCase()}</Button>
                 </div>
               </>
             ) : (
@@ -3098,6 +3117,7 @@ export default function WorldbuildView({ chat, electronAPI, focusEntityId, onFoc
 const MEMBER_PAGE = 8;
 // A race can gather many characters, so its roster is searchable and shows a page at a time.
 function KnownMembers({ links, portraits, onOpen }) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
   const needle = query.trim().toLowerCase();
@@ -3108,11 +3128,11 @@ function KnownMembers({ links, portraits, onOpen }) {
       {links.length > MEMBER_PAGE && (
         <label className="flex h-8 items-center gap-2 rounded-control border border-border-default bg-surface-input/70 px-2.5 focus-within:border-accent/60">
           <Search className="h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
-          <input value={query} onChange={event => setQuery(event.target.value)} placeholder={`Search ${links.length} members`} aria-label="Search members"
+          <input value={query} onChange={event => setQuery(event.target.value)} placeholder={`Search ${links.length} members`} aria-label={t("Search members")}
             className="min-w-0 flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-subtle focus:outline-none" />
         </label>
       )}
-      {shown.length === 0 ? <p className="text-sm text-text-disabled">Nobody matches.</p> : (
+      {shown.length === 0 ? <p className="text-sm text-text-disabled">{t("Nobody matches.")}</p> : (
         <div className="grid gap-1 sm:grid-cols-2">
           {shown.map(link => {
             const entity = link.entity;
@@ -3126,7 +3146,7 @@ function KnownMembers({ links, portraits, onOpen }) {
                   ? <span aria-hidden="true" className="block h-6 w-6 shrink-0 rounded-md border border-border-default" style={framedImageStyle(portrait)} />
                   : <span aria-hidden="true" className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${typeInfo.medallion}`}>{React.createElement(typeInfo.icon, { className: 'h-3.5 w-3.5' })}</span>}
                 <span className="min-w-0 flex-1 truncate text-sm font-medium text-text-secondary">{entity.canonicalName}</span>
-                {status && <span className={`shrink-0 text-xs ${STATUS_TONE[status]}`}>{STATUS[status].label}</span>}
+                {status && <span className={`shrink-0 text-xs ${STATUS_TONE[status]}`}>{t(STATUS[status].label)}</span>}
               </button>
             );
           })}
@@ -3135,7 +3155,7 @@ function KnownMembers({ links, portraits, onOpen }) {
       {!needle && matches.length > MEMBER_PAGE && (
         <button type="button" onClick={() => setShowAll(v => !v)}
           className="rounded text-xs font-semibold text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-          {showAll ? 'Show fewer' : `Show ${matches.length - MEMBER_PAGE} more`}<ChevronDown className={`ml-1 inline h-3.5 w-3.5 transition-transform ${showAll ? 'rotate-180' : ''}`} aria-hidden="true" />
+          {showAll ? t("Show fewer") : `Show ${matches.length - MEMBER_PAGE} more`}<ChevronDown className={`ml-1 inline h-3.5 w-3.5 transition-transform ${showAll ? 'rotate-180' : ''}`} aria-hidden="true" />
         </button>
       )}
     </div>

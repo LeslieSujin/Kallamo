@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import WritingEditor, { DEFAULT_WRITING_DESK } from './WritingEditor';
@@ -24,6 +25,7 @@ import {
 import { AiGlyph, AiNoteGlyph, IndexingGlyph, SuggestionPendingGlyph, WritingGlyph } from './ui/glyphs';
 
 export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
+  const { t } = useI18n();
   const { settings, showToast } = useApp();
   const workspaceId = chat.id;
   const toolbarMode = settings?.interface?.writingToolbar === 'bubble' ? 'bubble' : 'fixed';
@@ -513,7 +515,7 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
 
   const renderEditable = (item) => (
     <label className="min-w-0 flex-1">
-      <span className="sr-only">{item.type === 'folder' ? 'Folder name' : 'Chapter name'}</span>
+      <span className="sr-only">{item.type === 'folder' ? t("Folder name") : t("Chapter name")}</span>
       <input
         autoFocus
         value={editValue}
@@ -583,7 +585,7 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
             {childFolders(folder.id).map(renderFolder)}
             {childDocs(folder.id).map(renderDoc)}
             {!childFolders(folder.id).length && !childDocs(folder.id).length && (
-              <p className="px-2 py-1 text-xs text-text-subtle">Empty folder</p>
+              <p className="px-2 py-1 text-xs text-text-subtle">{t("Empty folder")}</p>
             )}
           </div>
         )}
@@ -608,11 +610,11 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
         {dropLine(item, 'before')}
         {dropLine(item, 'after')}
         {doc.inWorld
-          ? <Tooltip content="In-world text: the AI reads it only through its item"><span className="inline-flex shrink-0"><ScrollText className={`h-4 w-4 ${active ? 'text-accent' : 'text-entity-item'}`} aria-label="In-world text" /></span></Tooltip>
+          ? <Tooltip content="In-world text: the AI reads it only through its item"><span className="inline-flex shrink-0"><ScrollText className={`h-4 w-4 ${active ? 'text-accent' : 'text-entity-item'}`} aria-label={t("In-world text")} /></span></Tooltip>
           : <FileText className={`h-4 w-4 shrink-0 ${active ? 'text-accent' : 'text-text-subtle'}`} aria-hidden="true" />}
         {editingId === doc.id ? renderEditable(item) : (
           <>
-            <span className={`min-w-0 flex-1 truncate ${active ? 'font-semibold' : ''}`}>{doc.title || 'Untitled'}</span>
+            <span className={`min-w-0 flex-1 truncate ${active ? 'font-semibold' : ''}`}>{doc.title || t("Untitled")}</span>
             {indexing[doc.id] && (
               <Tooltip content={indexing[doc.id].total ? `Updating the AI's memory, ${indexing[doc.id].done} of ${indexing[doc.id].total}` : "Updating the AI's memory"}>
                 <span className="inline-flex shrink-0 text-status-info"><IndexingGlyph animated className="h-4 w-4" /></span>
@@ -625,12 +627,12 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
             )}
             {!inFlight[doc.id] && pendingIds.has(doc.id) && (
               <Tooltip content="An AI suggestion is waiting for your review">
-                <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-status-success"><SuggestionPendingGlyph className="h-4 w-4" />Review</span>
+                <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-status-success"><SuggestionPendingGlyph className="h-4 w-4" />{t("Review")}</span>
               </Tooltip>
             )}
             {!inFlight[doc.id] && !pendingIds.has(doc.id) && unreadAnalyses.has(doc.id) && (
               <Tooltip content="A new analysis is waiting in Analyses">
-                <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-status-success"><AiNoteGlyph className="h-4 w-4" />Read</span>
+                <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold text-status-success"><AiNoteGlyph className="h-4 w-4" />{t("Read")}</span>
               </Tooltip>
             )}
             <button type="button" aria-label={`${doc.title || 'Untitled'} actions`} aria-haspopup="menu" aria-expanded={rowMenu?.item.id === doc.id} onClick={(e) => openRowMenu(e, item)} className={rowActionClass(item)}>
@@ -654,18 +656,18 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
   return (
     <div className="relative flex flex-1 overflow-hidden select-none">
       {showSidebar && (
-        <aside aria-label="Chapters" data-tour="wd-chapters" className="glass-rail flex w-[21rem] shrink-0 flex-col border-r border-border-subtle">
+        <aside aria-label={t("Chapters")} data-tour="wd-chapters" className="glass-rail flex w-[21rem] shrink-0 flex-col border-r border-border-subtle">
           <div className="flex h-[3.25rem] shrink-0 items-center gap-1 pl-4 pr-3">
-            <h2 className="text-[0.9375rem] font-bold text-text-primary">Chapters</h2>
+            <h2 className="text-[0.9375rem] font-bold text-text-primary">{t("Chapters")}</h2>
             <span className="text-xs tabular-nums text-text-subtle">{tree.documents.length}</span>
             <span className="flex-1" />
-            <Button size="sm" icon={Plus} className="whitespace-nowrap !px-2.5" onClick={() => newDocument(null)}>New chapter</Button>
-            <IconButton icon={FolderPlus} label="New folder" size="sm" tooltipSide="bottom" onClick={() => newFolder(null)} />
-            <IconButton ref={moreMenuRef} icon={MoreHorizontal} label="More chapter actions" size="sm" tooltipSide="bottom" aria-haspopup="menu" aria-expanded={showMoreMenu} onClick={() => setShowMoreMenu(v => !v)} />
-            <Menu anchorRef={moreMenuRef} open={showMoreMenu} onClose={() => setShowMoreMenu(false)} label="Chapter actions" className="w-64">
-              <MenuItem icon={FileInput} label="Import" description="Bring in a .docx or .pdf as a new chapter." onSelect={() => { setShowMoreMenu(false); importDocument(); }} />
+            <Button size="sm" icon={Plus} className="whitespace-nowrap !px-2.5" onClick={() => newDocument(null)}>{t("New chapter")}</Button>
+            <IconButton icon={FolderPlus} label={t("New folder")} size="sm" tooltipSide="bottom" onClick={() => newFolder(null)} />
+            <IconButton ref={moreMenuRef} icon={MoreHorizontal} label={t("More chapter actions")} size="sm" tooltipSide="bottom" aria-haspopup="menu" aria-expanded={showMoreMenu} onClick={() => setShowMoreMenu(v => !v)} />
+            <Menu anchorRef={moreMenuRef} open={showMoreMenu} onClose={() => setShowMoreMenu(false)} label={t("Chapter actions")} className="w-64">
+              <MenuItem icon={FileInput} label={t("Import")} description={t("Bring in a .docx or .pdf as a new chapter.")} onSelect={() => { setShowMoreMenu(false); importDocument(); }} />
               <MenuSeparator />
-              <MenuItem icon={Lightbulb} label="Take the tour" description="A one-minute look around the Writing Desk." onSelect={() => { setShowMoreMenu(false); startTour('writing'); }} />
+              <MenuItem icon={Lightbulb} label={t("Take the tour")} description={t("A one-minute look around the Writing Desk.")} onSelect={() => { setShowMoreMenu(false); startTour('writing'); }} />
             </Menu>
           </div>
           <div
@@ -685,7 +687,7 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
               {childDocs(null).map(renderDoc)}
             </div>
             {isEmpty && !tourExample && (
-              <p className="px-2 py-4 text-sm leading-relaxed text-text-subtle">No chapters yet. Start one above, or import a .docx or .pdf.</p>
+              <p className="px-2 py-4 text-sm leading-relaxed text-text-subtle">{t("No chapters yet. Start one above, or import a .docx or .pdf.")}</p>
             )}
             {/* Fills remaining space so there's always a drop target to send items back to the top level. */}
             <div
@@ -694,9 +696,7 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
               onDrop={onRootDrop}
             >
               {/* Always in the layout, so starting a drag never shifts the list under the pointer. */}
-              <div aria-hidden={!dragItem} className={`pointer-events-none mx-0.5 mt-2 flex h-9 items-center justify-center rounded-md border border-dashed text-xs transition-colors ${!dragItem ? 'invisible' : dropInfo?.id === '__root__' ? 'border-accent/70 bg-accent/10 text-accent' : 'border-border-default text-text-subtle'}`}>
-                Move to top level
-              </div>
+              <div aria-hidden={!dragItem} className={`pointer-events-none mx-0.5 mt-2 flex h-9 items-center justify-center rounded-md border border-dashed text-xs transition-colors ${!dragItem ? 'invisible' : dropInfo?.id === '__root__' ? 'border-accent/70 bg-accent/10 text-accent' : 'border-border-default text-text-subtle'}`}>{t("Move to top level")}</div>
             </div>
           </div>
         </aside>
@@ -742,15 +742,15 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
         </div>
       ) : (
         <div className="flex flex-1 items-center justify-center p-6">
-          <section aria-label="No chapter open" className="glass-panel flex w-full max-w-md flex-col items-center gap-3 rounded-surface border border-border-subtle px-8 py-8 text-center">
+          <section aria-label={t("No chapter open")} className="glass-panel flex w-full max-w-md flex-col items-center gap-3 rounded-surface border border-border-subtle px-8 py-8 text-center">
             <span className="flex h-12 w-12 items-center justify-center rounded-card bg-tint/[0.06] text-text-primary"><WritingGlyph className="h-6 w-6" /></span>
-            <h2 className="mt-1 text-lg font-bold text-text-primary">{isEmpty ? 'Start your first chapter' : 'Pick a chapter, or start one'}</h2>
+            <h2 className="mt-1 text-lg font-bold text-text-primary">{isEmpty ? t("Start your first chapter") : t("Pick a chapter, or start one")}</h2>
             <p className="mb-2 text-sm leading-relaxed text-text-muted">
-              {isEmpty ? 'Write here from scratch, or bring in a manuscript you already have.' : 'Chapters live in the list on the left. You can also bring in a manuscript you already have.'}
+              {isEmpty ? t("Write here from scratch, or bring in a manuscript you already have.") : t("Chapters live in the list on the left. You can also bring in a manuscript you already have.")}
             </p>
             <div className="flex flex-wrap justify-center gap-2">
-              <Button icon={Plus} onClick={() => newDocument(null)}>New chapter</Button>
-              <Button variant="ghost" icon={FileInput} onClick={importDocument}>Import .docx or .pdf</Button>
+              <Button icon={Plus} onClick={() => newDocument(null)}>{t("New chapter")}</Button>
+              <Button variant="ghost" icon={FileInput} onClick={importDocument}>{t("Import .docx or .pdf")}</Button>
             </div>
           </section>
         </div>
@@ -794,14 +794,14 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
         />
       )}
 
-      <Menu anchorRef={rowMenuAnchorRef} open={!!rowMenu} onClose={() => setRowMenu(null)} label={menuItem ? `${menuItem.name || menuItem.title} actions` : 'Actions'} className="w-60">
+      <Menu anchorRef={rowMenuAnchorRef} open={!!rowMenu} onClose={() => setRowMenu(null)} label={menuItem ? `${menuItem.name || menuItem.title} actions` : t("Actions")} className="w-60">
         {close => menuItem && (rowMenu.view === 'move' ? (
           <>
-            <MenuItem icon={ChevronLeft} label="Back" onSelect={() => setRowMenu({ ...rowMenu, view: 'actions' })} />
+            <MenuItem icon={ChevronLeft} label={t("Back")} onSelect={() => setRowMenu({ ...rowMenu, view: 'actions' })} />
             <MenuSeparator />
-            <MenuLabel>Move to</MenuLabel>
+            <MenuLabel>{t("Move to")}</MenuLabel>
             <div className="custom-scrollbar max-h-72 overflow-y-auto">
-              <MenuItem label="Top level" checked={currentParent === null} onSelect={() => { close(); doMove(menuItem, null); }} />
+              <MenuItem label={t("Top level")} checked={currentParent === null} onSelect={() => { close(); doMove(menuItem, null); }} />
               {moveTargets.map(f => (
                 <MenuItem key={f.id} label={f.name} checked={currentParent === f.id} onSelect={() => { close(); doMove(menuItem, f.id); }} />
               ))}
@@ -809,23 +809,23 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
           </>
         ) : (
           <>
-            <MenuItem icon={PenLine} label="Rename" onSelect={() => { close(); startRename(menuItem); }} />
-            <MenuItem icon={FolderInput} label="Move to" onSelect={() => setRowMenu({ ...rowMenu, view: 'move' })} />
+            <MenuItem icon={PenLine} label={t("Rename")} onSelect={() => { close(); startRename(menuItem); }} />
+            <MenuItem icon={FolderInput} label={t("Move to")} onSelect={() => setRowMenu({ ...rowMenu, view: 'move' })} />
             {menuItem.type === 'document' && (
-              <MenuItem icon={ScrollText} label="In-world text" description={menuItem.inWorld ? 'Written inside the story' : 'A journal, letter or notice in the story'}
+              <MenuItem icon={ScrollText} label={t("In-world text")} description={menuItem.inWorld ? t("Written inside the story") : t("A journal, letter or notice in the story")}
                 onSelect={() => { close(); setInWorldTarget(menuItem); }} />
             )}
             {menuItem.type === 'folder' && (
               <MenuItem
                 icon={Download}
-                label="Export folder"
-                description={childDocs(menuItem.id).length ? null : 'No chapters directly inside'}
+                label={t("Export folder")}
+                description={childDocs(menuItem.id).length ? null : t("No chapters directly inside")}
                 disabled={!childDocs(menuItem.id).length}
                 onSelect={() => { close(); setExportFolderTarget(menuItem); }}
               />
             )}
             <MenuSeparator />
-            <MenuItem icon={Trash2} label={menuItem.type === 'folder' ? 'Delete folder' : 'Delete chapter'} danger onSelect={() => { close(); setDeleteTarget(menuItem); }} />
+            <MenuItem icon={Trash2} label={menuItem.type === 'folder' ? t("Delete folder") : t("Delete chapter")} danger onSelect={() => { close(); setDeleteTarget(menuItem); }} />
           </>
         ))}
       </Menu>
@@ -833,13 +833,13 @@ export default function WritingDeskView({ chat, electronAPI, onOpenEntity }) {
       {deleteTarget && (
         <ConfirmDialog
           tone="danger"
-          title={deleteTarget.type === 'folder' ? 'Delete folder' : 'Delete chapter'}
+          title={deleteTarget.type === 'folder' ? t("Delete folder") : t("Delete chapter")}
           message={deleteTarget.type === 'folder'
-            ? <>The folder <strong className="text-text-primary">“{deleteTarget.name}”</strong> and every chapter inside it will be permanently deleted. This cannot be undone.</>
-            : <>The chapter <strong className="text-text-primary">“{deleteTarget.title}”</strong> will be permanently deleted. This cannot be undone.</>}
+            ? <>{t("The folder")}{' '}<strong className="text-text-primary">“{deleteTarget.name}”</strong>{' '}{t("and every chapter inside it will be permanently deleted. This cannot be undone.")}</>
+            : <>{t("The chapter")}{' '}<strong className="text-text-primary">“{deleteTarget.title}”</strong>{' '}{t("will be permanently deleted. This cannot be undone.")}</>}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDeleteTarget(null) },
-            { label: 'Delete', variant: 'danger', autoFocus: true, onClick: () => doDelete(deleteTarget) },
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleteTarget(null) },
+            { label: t("Delete"), variant: 'danger', autoFocus: true, onClick: () => doDelete(deleteTarget) },
           ]}
           onClose={() => setDeleteTarget(null)}
         />

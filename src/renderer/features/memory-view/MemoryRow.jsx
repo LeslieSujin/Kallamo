@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useRef, useState } from 'react';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import Checkbox from '../../components/ui/Checkbox';
@@ -35,6 +36,7 @@ export default function MemoryRow({
   menuItems,
   controlsTourId,
 }) {
+  const { t } = useI18n();
   const menuAnchorRef = useRef(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const shownTags = tags.slice(0, MAX_ROW_TAGS);
@@ -77,7 +79,7 @@ export default function MemoryRow({
               <IconButton
                 ref={menuAnchorRef}
                 icon={MoreHorizontal}
-                label="More actions"
+                label={t("More actions")}
                 size="sm"
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}

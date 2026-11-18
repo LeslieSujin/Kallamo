@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Award, Check, ChevronDown, ChevronRight, ChevronUp, CornerDownRight, MoreHorizontal, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
 import Button from '../../../components/ui/Button';
@@ -27,6 +28,7 @@ const LEARN_WORDING = {
  * sub-skills, the world's rank ladder, who the AI may teach, and how far it may go.
  */
 export default function SkillsSection({ sectionRef, workspaceId, api, showToast, skills, changes, groups, names, onChanged, embedded = false }) {
+  const { t } = useI18n();
   const [config, setConfigState] = useState(skills.config);
   const configRef = useRef(skills.config);
   const setConfig = next => {
@@ -89,14 +91,14 @@ export default function SkillsSection({ sectionRef, workspaceId, api, showToast,
       sectionRef={sectionRef}
       embedded={embedded}
       icon={Award}
-      title="Skills"
-      description="What characters are good at, each at a rank. Separate from levels: a world with no XP can still use them."
+      title={t("Skills")}
+      description={t("What characters are good at, each at a rank. Separate from levels: a world with no XP can still use them.")}
     >
       <div className="flex flex-col gap-5">
         <SettingsList>
           <SwitchRow
-            label="Use skills in this world"
-            description="Characters hold skills at a rank, and the AI can teach them new ones as the story earns it."
+            label={t("Use skills in this world")}
+            description={t("Characters hold skills at a rank, and the AI can teach them new ones as the story earns it.")}
             checked={skills.enabled}
             onChange={enabled => persist({ enabled })}
           />
@@ -104,7 +106,7 @@ export default function SkillsSection({ sectionRef, workspaceId, api, showToast,
 
         {skills.enabled && (
           <>
-            <Block title={<>Skills{catalog.length > 0 && <span className="ml-1.5 font-normal tabular-nums text-text-subtle">{catalog.length}</span>}</>} aside="A class, a trade or a fighting style: the name and description say what it is.">
+            <Block title={<>{t("Skills")}{catalog.length > 0 && <span className="ml-1.5 font-normal tabular-nums text-text-subtle">{catalog.length}</span>}</>} aside={t("A class, a trade or a fighting style: the name and description say what it is.")}>
               <SkillList
                 skills={catalog}
                 proposals={proposals}
@@ -117,29 +119,29 @@ export default function SkillsSection({ sectionRef, workspaceId, api, showToast,
               />
             </Block>
 
-            <Block title="Ranks" aside="Lowest first. Every skill uses the same ladder.">
+            <Block title={t("Ranks")} aside={t("Lowest first. Every skill uses the same ladder.")}>
               <RankLadder ranks={config.ranks} onSave={ranks => saveConfig({ ranks })} />
             </Block>
 
-            <Block title="Who learns">
+            <Block title={t("Who learns")}>
               <WhoProgresses progression={skills} groups={groups} names={names} onChange={setMembers} wording={LEARN_WORDING} />
             </Block>
 
-            <Block title="How the AI changes skills">
+            <Block title={t("How the AI changes skills")}>
               <div className="flex flex-col gap-2.5 rounded-card border border-border-subtle bg-surface-inset p-3.5">
-                <CheckRow checked={config.aiAssigns} onChange={aiAssigns => saveConfig({ aiAssigns })} label="The AI gives skills from this list" help="When the story shows a character actually learning one: being taught, or practising until it takes." />
-                <CheckRow checked={config.aiRaises} onChange={aiRaises => saveConfig({ aiRaises })} label="The AI raises ranks" help="Only for a milestone the scene shows, never for repetition alone. One rank at a time, and it says why." />
-                <CheckRow checked={config.aiLowers} onChange={aiLowers => saveConfig({ aiLowers })} label="The AI can also lower ranks" help="For a lasting loss, such as a crippling injury. Off by default." />
-                <CheckRow checked={config.aiCreates} onChange={aiCreates => saveConfig({ aiCreates })} label="The AI can propose new skills" help="When the story shows a lasting competence nothing here covers. A new skill always waits for your review before it joins the list." />
+                <CheckRow checked={config.aiAssigns} onChange={aiAssigns => saveConfig({ aiAssigns })} label={t("The AI gives skills from this list")} help={t("When the story shows a character actually learning one: being taught, or practising until it takes.")} />
+                <CheckRow checked={config.aiRaises} onChange={aiRaises => saveConfig({ aiRaises })} label={t("The AI raises ranks")} help={t("Only for a milestone the scene shows, never for repetition alone. One rank at a time, and it says why.")} />
+                <CheckRow checked={config.aiLowers} onChange={aiLowers => saveConfig({ aiLowers })} label={t("The AI can also lower ranks")} help={t("For a lasting loss, such as a crippling injury. Off by default.")} />
+                <CheckRow checked={config.aiCreates} onChange={aiCreates => saveConfig({ aiCreates })} label={t("The AI can propose new skills")} help={t("When the story shows a lasting competence nothing here covers. A new skill always waits for your review before it joins the list.")} />
                 <div className="flex flex-col gap-1.5">
-                  <FieldLabel>When skills change</FieldLabel>
-                  <ResizableTextarea storageKey="rules-skill-guidance" value={config.guidance} onChange={event => setConfig(current => ({ ...current, guidance: event.target.value }))} onBlur={commit} placeholder="A rank takes a real test: a commission beyond their skill, a duel they should have lost, a master's lesson finished. Master is rare." />
-                  <Help>Leave it empty and the AI uses the general rule above.</Help>
+                  <FieldLabel>{t("When skills change")}</FieldLabel>
+                  <ResizableTextarea storageKey="rules-skill-guidance" value={config.guidance} onChange={event => setConfig(current => ({ ...current, guidance: event.target.value }))} onBlur={commit} placeholder={t("A rank takes a real test: a commission beyond their skill, a duel they should have lost, a master's lesson finished. Master is rare.")} />
+                  <Help>{t("Leave it empty and the AI uses the general rule above.")}</Help>
                 </div>
               </div>
             </Block>
 
-            <PolicyBlock label="How AI changes are applied" help="Covers learning, ranks and new skills. Review shows each one in Narrative State first." value={config.policy} onChange={policy => saveConfig({ policy })} />
+            <PolicyBlock label={t("How AI changes are applied")} help={t("Covers learning, ranks and new skills. Review shows each one in Narrative State first.")} value={config.policy} onChange={policy => saveConfig({ policy })} />
           </>
         )}
       </div>
@@ -151,8 +153,8 @@ export default function SkillsSection({ sectionRef, workspaceId, api, showToast,
           title={`Delete ${deleting.name}?`}
           message={`Every character loses ${deleting.name}.${catalog.some(skill => skill.parentId === deleting.id) ? ' Its sub-skills stay, as skills of their own.' : ''}`}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDeleting(null) },
-            { label: 'Delete', variant: 'danger', autoFocus: true, onClick: () => removeSkill(deleting) }
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleting(null) },
+            { label: t("Delete"), variant: 'danger', autoFocus: true, onClick: () => removeSkill(deleting) }
           ]}
           onClose={() => setDeleting(null)}
         />
@@ -191,6 +193,7 @@ function familiesOf(skills) {
 }
 
 function SkillList({ skills, proposals, names, onAdd, onEdit, onAddSub, onDelete, onResolve }) {
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [openIds, setOpenIds] = useState(() => new Set());
   const [showAll, setShowAll] = useState(false);
@@ -233,11 +236,11 @@ function SkillList({ skills, proposals, names, onAdd, onEdit, onAddSub, onDelete
     requestAnimationFrame(() => listRef.current?.scrollIntoView({ block: 'nearest' }));
   };
 
-  const addButton = <Button variant="ghost" size="sm" icon={Plus} onClick={() => onAdd()}>Add skill</Button>;
+  const addButton = <Button variant="ghost" size="sm" icon={Plus} onClick={() => onAdd()}>{t("Add skill")}</Button>;
   if (!skills.length) {
     return (
       <>
-        <p className="rounded-card border border-dashed border-border-subtle px-4 py-5 text-center text-[0.8125rem] text-text-muted">No skills yet.</p>
+        <p className="rounded-card border border-dashed border-border-subtle px-4 py-5 text-center text-[0.8125rem] text-text-muted">{t("No skills yet.")}</p>
         <div>{addButton}</div>
       </>
     );
@@ -252,17 +255,17 @@ function SkillList({ skills, proposals, names, onAdd, onEdit, onAddSub, onDelete
             value={search}
             onChange={event => setSearch(event.target.value)}
             onKeyDown={event => { if (event.key === 'Escape' && search) { event.stopPropagation(); setSearch(''); } }}
-            placeholder="Search skills"
-            aria-label="Search skills"
+            placeholder={t("Search skills")}
+            aria-label={t("Search skills")}
             className="min-w-0 flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-subtle focus:outline-none [&::-webkit-search-cancel-button]:hidden"
           />
-          {search && <IconButton icon={X} size="sm" label="Clear search" onClick={() => setSearch('')} />}
+          {search && <IconButton icon={X} size="sm" label={t("Clear search")} onClick={() => setSearch('')} />}
         </label>
         {query
-          ? <span className="shrink-0 text-xs tabular-nums text-text-muted">{found} of {skills.length}</span>
+          ? <span className="shrink-0 text-xs tabular-nums text-text-muted">{found}{' '}{t("of")}{' '}{skills.length}</span>
           : withChildren.length > 0 && (
             <Button variant="subtle" size="sm" onClick={() => setOpenIds(allOpen ? new Set() : new Set(withChildren.map(family => family.skill.id)))}>
-              {allOpen ? 'Collapse all' : 'Expand all'}
+              {allOpen ? t("Collapse all") : t("Expand all")}
             </Button>
           )}
         {addButton}
@@ -309,16 +312,16 @@ function SkillList({ skills, proposals, names, onAdd, onEdit, onAddSub, onDelete
               className="flex w-full items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-text-muted transition-colors hover:bg-tint/[0.04] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/40"
             >
               {showAll ? <ChevronUp aria-hidden="true" className="h-3.5 w-3.5" /> : <ChevronDown aria-hidden="true" className="h-3.5 w-3.5" />}
-              {showAll ? 'Show fewer' : `Show ${hiddenCount} more ${hiddenCount === 1 ? 'skill' : 'skills'}`}
+              {showAll ? t("Show fewer") : `Show ${hiddenCount} more ${hiddenCount === 1 ? 'skill' : 'skills'}`}
             </button>
           )}
         </div>
       ) : (
         <div className="rounded-card border border-dashed border-border-subtle px-4 py-7 text-center">
-          <p className="text-sm text-text-secondary">No skill matches “{search.trim()}”.</p>
-          <p className="caption mt-1">Search looks in names and descriptions.</p>
+          <p className="text-sm text-text-secondary">{t("No skill matches “")}{search.trim()}”.</p>
+          <p className="caption mt-1">{t("Search looks in names and descriptions.")}</p>
           <div className="mt-3 flex justify-center">
-            <Button variant="ghost" size="sm" icon={Plus} onClick={() => onAdd(search.trim())}>Add “{search.trim()}”</Button>
+            <Button variant="ghost" size="sm" icon={Plus} onClick={() => onAdd(search.trim())}>{t("Add “")}{search.trim()}”</Button>
           </div>
         </div>
       )}
@@ -327,6 +330,7 @@ function SkillList({ skills, proposals, names, onAdd, onEdit, onAddSub, onDelete
 }
 
 function SkillRow({ skill, child = false, query = '', dim = false, childCount = 0, open = false, onToggle = null, proposal, proposedFor, onEdit, onAddSub, onDelete, onResolve }) {
+  const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const anchorRef = useRef(null);
   const proposed = skill.status === 'proposed';
@@ -343,8 +347,8 @@ function SkillRow({ skill, child = false, query = '', dim = false, childCount = 
       <div className={`min-w-0 flex-1 ${dim ? 'opacity-55' : ''}`}>
         <span className="flex items-center gap-2">
           <span className="truncate text-[0.8125rem] font-semibold text-text-secondary"><Highlight text={skill.name} query={query} /></span>
-          {childCount > 0 && <span className="shrink-0 rounded-full bg-tint/[0.06] px-2 py-0.5 text-xs font-medium tabular-nums text-text-muted">{childCount} {childCount === 1 ? 'sub-skill' : 'sub-skills'}</span>}
-          {proposed && <span className="shrink-0 rounded-full bg-status-warning/12 px-2 py-0.5 text-xs font-semibold text-status-warning">Proposed by the AI</span>}
+          {childCount > 0 && <span className="shrink-0 rounded-full bg-tint/[0.06] px-2 py-0.5 text-xs font-medium tabular-nums text-text-muted">{childCount} {childCount === 1 ? t("sub-skill") : t("sub-skills")}</span>}
+          {proposed && <span className="shrink-0 rounded-full bg-status-warning/12 px-2 py-0.5 text-xs font-semibold text-status-warning">{t("Proposed by the AI")}</span>}
         </span>
         <span className="block truncate text-xs text-text-muted" data-tooltip={description.length > 90 ? description : undefined}>
           <Highlight text={description} query={query} />
@@ -352,17 +356,17 @@ function SkillRow({ skill, child = false, query = '', dim = false, childCount = 
       </div>
       {proposed && proposal ? (
         <>
-          <Button variant="subtle" size="sm" icon={X} onClick={() => onResolve(proposal, 'rejected')}>Dismiss</Button>
-          <Button variant="ghost" size="sm" icon={Check} onClick={() => onResolve(proposal, 'approved')}>Add</Button>
+          <Button variant="subtle" size="sm" icon={X} onClick={() => onResolve(proposal, 'rejected')}>{t("Dismiss")}</Button>
+          <Button variant="ghost" size="sm" icon={Check} onClick={() => onResolve(proposal, 'approved')}>{t("Add")}</Button>
         </>
       ) : (
         <>
           <IconButton ref={anchorRef} icon={MoreHorizontal} size="sm" label={`${skill.name} actions`} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(value => !value)} />
           <Menu anchorRef={anchorRef} open={menuOpen} onClose={() => setMenuOpen(false)} label={`${skill.name} actions`} className="w-48">
-            <MenuItem icon={Pencil} label="Edit" onSelect={() => { setMenuOpen(false); onEdit(); }} />
-            {onAddSub && <MenuItem icon={Plus} label="Add sub-skill" onSelect={() => { setMenuOpen(false); onAddSub(); }} />}
+            <MenuItem icon={Pencil} label={t("Edit")} onSelect={() => { setMenuOpen(false); onEdit(); }} />
+            {onAddSub && <MenuItem icon={Plus} label={t("Add sub-skill")} onSelect={() => { setMenuOpen(false); onAddSub(); }} />}
             <MenuSeparator />
-            <MenuItem icon={Trash2} label="Delete" danger onSelect={() => { setMenuOpen(false); onDelete(); }} />
+            <MenuItem icon={Trash2} label={t("Delete")} danger onSelect={() => { setMenuOpen(false); onDelete(); }} />
           </Menu>
         </>
       )}
@@ -372,6 +376,7 @@ function SkillRow({ skill, child = false, query = '', dim = false, childCount = 
 
 // Names are edited in place and saved together when a field is left, so typing never reorders.
 function RankLadder({ ranks, onSave }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState(ranks);
   useEffect(() => setDraft(ranks), [ranks]);
   const save = next => {
@@ -407,13 +412,14 @@ function RankLadder({ ranks, onSave }) {
           </li>
         ))}
       </ol>
-      <Button variant="ghost" size="sm" icon={Plus} className="self-start" disabled={draft.length >= MAX_RANKS} onClick={() => setDraft(current => [...current, ''])}>Add rank</Button>
-      <Help>Removing the top rank moves whoever held it to the new top.</Help>
+      <Button variant="ghost" size="sm" icon={Plus} className="self-start" disabled={draft.length >= MAX_RANKS} onClick={() => setDraft(current => [...current, ''])}>{t("Add rank")}</Button>
+      <Help>{t("Removing the top rank moves whoever held it to the new top.")}</Help>
     </>
   );
 }
 
 function SkillModal({ initial, parents, hasChildren, onCancel, onSave }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState(initial);
   const [saving, setSaving] = useState(false);
   const set = patch => setDraft(current => ({ ...current, ...patch }));
@@ -422,28 +428,28 @@ function SkillModal({ initial, parents, hasChildren, onCancel, onSave }) {
     setSaving(true);
     try { await onSave({ ...draft, parentId: draft.parentId || null }); } finally { setSaving(false); }
   };
-  const parentOptions = [{ id: NO_PARENT, label: 'None, a skill of its own' }, ...parents.map(skill => ({ id: skill.id, label: skill.name }))];
+  const parentOptions = [{ id: NO_PARENT, label: t("None, a skill of its own") }, ...parents.map(skill => ({ id: skill.id, label: skill.name }))];
   return (
-    <Modal title={initial.id ? `Edit ${initial.name}` : initial.parentId ? 'New sub-skill' : 'New skill'} icon={Award} iconClassName="text-text-secondary" onClose={() => { if (!saving) onCancel(); }} size="md">
+    <Modal title={initial.id ? `Edit ${initial.name}` : initial.parentId ? t("New sub-skill") : t("New skill")} icon={Award} iconClassName="text-text-secondary" onClose={() => { if (!saving) onCancel(); }} size="md">
       <form onSubmit={submit} className="flex flex-col gap-4 px-6 py-5">
         <label className="flex flex-col gap-1.5">
-          <span className="text-[0.8125rem] font-semibold text-text-secondary">Name</span>
-          <input autoFocus className="field-input h-10 px-3 text-sm" value={draft.name || ''} onChange={event => set({ name: event.target.value })} placeholder="Blacksmithing" />
+          <span className="text-[0.8125rem] font-semibold text-text-secondary">{t("Name")}</span>
+          <input autoFocus className="field-input h-10 px-3 text-sm" value={draft.name || ''} onChange={event => set({ name: event.target.value })} placeholder={t("Blacksmithing")} />
         </label>
         {!hasChildren && (
           <div className="flex flex-col gap-1.5">
-            <span className="text-[0.8125rem] font-semibold text-text-secondary">Part of</span>
-            <SearchableSelect clearable={false} value={draft.parentId || NO_PARENT} onChange={value => set({ parentId: value === NO_PARENT ? null : value })} options={parentOptions} placeholder="None, a skill of its own" ariaLabel="Parent skill" />
-            <Help>A sub-skill is a narrower part of another, such as Tempering under Blacksmithing.</Help>
+            <span className="text-[0.8125rem] font-semibold text-text-secondary">{t("Part of")}</span>
+            <SearchableSelect clearable={false} value={draft.parentId || NO_PARENT} onChange={value => set({ parentId: value === NO_PARENT ? null : value })} options={parentOptions} placeholder={t("None, a skill of its own")} ariaLabel={t("Parent skill")} />
+            <Help>{t("A sub-skill is a narrower part of another, such as Tempering under Blacksmithing.")}</Help>
           </div>
         )}
         <label className="flex flex-col gap-1.5">
-          <span className="text-[0.8125rem] font-semibold text-text-secondary">What it means to the AI</span>
-          <ResizableTextarea storageKey="rules-skill-meaning" value={draft.description || ''} onChange={event => set({ description: event.target.value })} placeholder="Working metal at a forge: tools, blades, armour and repairs." />
+          <span className="text-[0.8125rem] font-semibold text-text-secondary">{t("What it means to the AI")}</span>
+          <ResizableTextarea storageKey="rules-skill-meaning" value={draft.description || ''} onChange={event => set({ description: event.target.value })} placeholder={t("Working metal at a forge: tools, blades, armour and repairs.")} />
         </label>
         <div className="flex justify-end gap-2 pt-1">
-          <Button type="button" variant="ghost" disabled={saving} onClick={onCancel}>Cancel</Button>
-          <Button type="submit" variant="primary" loading={saving} disabled={!draft.name?.trim()}>{initial.id ? 'Save' : 'Add skill'}</Button>
+          <Button type="button" variant="ghost" disabled={saving} onClick={onCancel}>{t("Cancel")}</Button>
+          <Button type="submit" variant="primary" loading={saving} disabled={!draft.name?.trim()}>{initial.id ? t("Save") : t("Add skill")}</Button>
         </div>
       </form>
     </Modal>

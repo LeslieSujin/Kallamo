@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useMemo, useState } from 'react';
 import { Check, ChevronRight, MoreHorizontal, Pencil, Plus, Trash2, Users, Backpack } from 'lucide-react';
 import { useRef } from 'react';
@@ -92,6 +93,7 @@ interface RelationshipDraft {
 }
 
 export function WorldbuildRelationships({ workspaceId, subject, links, options, api, showToast, onChanged, title = 'Relationships' }: RelationshipProps) {
+  const { t } = useI18n();
   const [editor, setEditor] = useState<RelationshipDraft | null>(null);
   const [deleting, setDeleting] = useState<EntityLink | null>(null);
   const [saving, setSaving] = useState(false);
@@ -163,18 +165,17 @@ export function WorldbuildRelationships({ workspaceId, subject, links, options, 
         <div className="mt-1 border-t border-border-subtle pt-3">
           <button type="button" aria-expanded={showIncoming} onClick={() => setShowIncoming(v => !v)}
             className="flex w-full items-center gap-2 rounded text-left text-sm font-medium text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-            <ChevronRight className={`h-3.5 w-3.5 transition-transform ${showIncoming ? 'rotate-90' : ''}`} aria-hidden="true" />
-            How others see {subject.canonicalName}
+            <ChevronRight className={`h-3.5 w-3.5 transition-transform ${showIncoming ? 'rotate-90' : ''}`} aria-hidden="true" />{t("How others see")}{subject.canonicalName}
             <span className="text-xs tabular-nums text-text-subtle">{incoming.length}</span>
             <span className="flex-1" />
-            <span className="text-xs font-normal text-text-subtle">Written on their sheets</span>
+            <span className="text-xs font-normal text-text-subtle">{t("Written on their sheets")}</span>
           </button>
           {showIncoming && <div className="mt-1 divide-y divide-border-subtle">{incoming.map(link => <div key={link.linkId}><SpoilerCover field={linkKey(link)} className="my-2.5"><RelationshipRow link={link} readOnly /></SpoilerCover></div>)}</div>}
         </div>
       )}
-      {deleting && <ConfirmDialog title="Delete relationship" message={`Delete ${subject.canonicalName}'s relationship with ${deleting.entity.canonicalName}? This removes only this direction and cannot be undone.`} actions={[
-        { label: 'Cancel', variant: 'ghost', onClick: () => setDeleting(null) },
-        { label: 'Delete', variant: 'danger', loading: saving, autoFocus: true, onClick: remove },
+      {deleting && <ConfirmDialog title={t("Delete relationship")} message={`Delete ${subject.canonicalName}'s relationship with ${deleting.entity.canonicalName}? This removes only this direction and cannot be undone.`} actions={[
+        { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleting(null) },
+        { label: t("Delete"), variant: 'danger', loading: saving, autoFocus: true, onClick: remove },
       ]} onClose={() => setDeleting(null)} />}
     </CollectionShell>
   );
@@ -182,6 +183,7 @@ export function WorldbuildRelationships({ workspaceId, subject, links, options, 
 
 // A relationship read at a glance: who, what they are, how it leans, and why.
 function RelationshipRow({ link, onEdit, onDelete, readOnly = false }: { link: EntityLink; onEdit?(): void; onDelete?(): void; readOnly?: boolean }) {
+  const { t } = useI18n();
   const value = clampRelationship(link.metadata?.value);
   const description = String(link.metadata?.description ?? '').trim();
   const positive = value >= 0;
@@ -192,12 +194,12 @@ function RelationshipRow({ link, onEdit, onDelete, readOnly = false }: { link: E
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${meta(link.entity.type).medallion}`}><Icon className="h-3.5 w-3.5" aria-hidden="true" /></span>
           <h4 className="text-sm font-semibold text-text-primary">{link.entity.canonicalName}</h4>
-          {link.label ? <span className="text-sm font-medium text-accent"><SpoilerText text={link.label} /></span> : <span className="text-sm text-text-disabled">No label</span>}
+          {link.label ? <span className="text-sm font-medium text-accent"><SpoilerText text={link.label} /></span> : <span className="text-sm text-text-disabled">{t("No label")}</span>}
         </div>
         {description && <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-text-muted"><SpoilerText text={description} /></p>}
       </div>
       <div className="pt-1" aria-label={`Feeling ${value > 0 ? '+' : ''}${value} out of 100`}>
-        <div className="flex justify-between text-xs text-text-subtle"><span>Hostile</span><span className={`font-semibold tabular-nums ${value === 0 ? 'text-text-muted' : positive ? 'text-status-success' : 'text-status-danger'}`}>{value > 0 ? '+' : ''}{value}</span><span>Close</span></div>
+        <div className="flex justify-between text-xs text-text-subtle"><span>{t("Hostile")}</span><span className={`font-semibold tabular-nums ${value === 0 ? 'text-text-muted' : positive ? 'text-status-success' : 'text-status-danger'}`}>{value > 0 ? '+' : ''}{value}</span><span>{t("Close")}</span></div>
         <div className="relative mt-1.5 h-1.5 rounded-full bg-surface-hover">
           <span aria-hidden="true" className="absolute left-1/2 -top-0.5 h-2.5 w-px bg-border-strong" />
           <span aria-hidden="true" className={`absolute top-0 bottom-0 rounded-full ${positive ? 'left-1/2 bg-status-success' : 'right-1/2 bg-status-danger'}`} style={{ width: `${Math.abs(value) / 2}%` }} />
@@ -211,6 +213,7 @@ function RelationshipRow({ link, onEdit, onDelete, readOnly = false }: { link: E
 function RelationshipEditor({ draft, setDraft, options, copy, onSave, onClose, saving, subjectName = '' }: {
   draft: RelationshipDraft; setDraft(draft: RelationshipDraft): void; options: WorldbuildEntity[]; copy: RelationCopy; onSave(): void; onClose(): void; saving: boolean; subjectName?: string;
 }) {
+  const { t } = useI18n();
   const update = (patch: Partial<RelationshipDraft>) => setDraft({ ...draft, ...patch });
   // Named on both sides, so the direction of the relationship cannot be read backwards.
   const subject = firstName(subjectName);
@@ -223,7 +226,7 @@ function RelationshipEditor({ draft, setDraft, options, copy, onSave, onClose, s
   return <section className="overflow-hidden rounded-card border border-border-default bg-surface-panel-muted/80">
     <header className="flex min-h-11 items-center gap-2.5 border-b border-border-subtle px-4">
       <ConnectionsGlyph className="h-4 w-4 shrink-0 text-text-muted" aria-hidden="true" />
-      <h4 className="text-sm font-semibold text-text-primary">{draft.link ? `Edit relationship with ${draft.link.entity.canonicalName}` : 'New relationship'}</h4>
+      <h4 className="text-sm font-semibold text-text-primary">{draft.link ? `Edit relationship with ${draft.link.entity.canonicalName}` : t("New relationship")}</h4>
     </header>
     <div className="space-y-4 p-4">
       {/* items-end keeps both inputs on one baseline when a label wraps to two lines. */}
@@ -241,7 +244,7 @@ function RelationshipEditor({ draft, setDraft, options, copy, onSave, onClose, s
       <Field label={descriptionLabel} hint={descriptionHint}>
         <textarea className={`${INPUT} min-h-20 resize-y`} value={draft.description} onChange={event => update({ description: event.target.value })} placeholder={personal ? `How ${subject} sees ${target || 'them'}, in their own terms` : copy.descriptionPlaceholder} />
       </Field>
-      <div className="flex justify-end gap-2"><Button variant="subtle" size="sm" onClick={onClose} disabled={saving}>Cancel</Button><Button icon={Check} size="sm" onClick={onSave} loading={saving} disabled={!draft.targetId}>Save relationship</Button></div>
+      <div className="flex justify-end gap-2"><Button variant="subtle" size="sm" onClick={onClose} disabled={saving}>{t("Cancel")}</Button><Button icon={Check} size="sm" onClick={onSave} loading={saving} disabled={!draft.targetId}>{t("Save relationship")}</Button></div>
     </div>
   </section>;
 }
@@ -271,6 +274,7 @@ interface InventoryProps extends CommonProps { options: WorldbuildEntity[]; }
 interface InventoryDraft { link?: EntityLink; itemId: string; quantity: number; condition: string; notes: string; }
 
 export function WorldbuildInventory({ workspaceId, subject, links, options, api, showToast, onChanged }: InventoryProps) {
+  const { t } = useI18n();
   const [editor, setEditor] = useState<InventoryDraft | null>(null);
   const [deleting, setDeleting] = useState<EntityLink | null>(null);
   const [saving, setSaving] = useState(false);
@@ -303,17 +307,18 @@ export function WorldbuildInventory({ workspaceId, subject, links, options, api,
     } catch (error) { showToast(error instanceof Error ? error.message : 'Could not remove the item.', 'error'); }
     finally { setSaving(false); }
   };
-  return <CollectionShell icon={Backpack} title="Carried" count={links.length || undefined} empty={!links.length && !editor} emptyVerb="Add item" onAdd={available.length ? startAdd : undefined}>
+  return <CollectionShell icon={Backpack} title={t("Carried")} count={links.length || undefined} empty={!links.length && !editor} emptyVerb="Add item" onAdd={available.length ? startAdd : undefined}>
     {editor && <div className="pt-2"><InventoryEditor spoiler={editor.link ? linkKey(editor.link) : null} draft={editor} setDraft={setEditor} options={editor.link ? [editor.link.entity as WorldbuildEntity] : available} onSave={save} onClose={() => setEditor(null)} saving={saving} /></div>}
     <div className="grid grid-cols-1 gap-2.5 py-2 sm:grid-cols-2">{links.map(link => <SpoilerCover key={link.linkId} field={linkKey(link)} className="w-full justify-center py-3"><InventoryCard link={link} onEdit={() => startEdit(link)} onDelete={() => setDeleting(link)} /></SpoilerCover>)}</div>
-    {deleting && <ConfirmDialog title="Remove inventory item" message={`Remove ${deleting.entity.canonicalName} from ${subject.canonicalName}'s inventory? The Worldbuild item itself will not be deleted.`} actions={[
-      { label: 'Cancel', variant: 'ghost', onClick: () => setDeleting(null) },
-      { label: 'Remove', variant: 'danger', loading: saving, autoFocus: true, onClick: remove },
+    {deleting && <ConfirmDialog title={t("Remove inventory item")} message={`Remove ${deleting.entity.canonicalName} from ${subject.canonicalName}'s inventory? The Worldbuild item itself will not be deleted.`} actions={[
+      { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleting(null) },
+      { label: t("Remove"), variant: 'danger', loading: saving, autoFocus: true, onClick: remove },
     ]} onClose={() => setDeleting(null)} />}
   </CollectionShell>;
 }
 
 function InventoryCard({ link, onEdit, onDelete }: { link: EntityLink; onEdit(): void; onDelete(): void }) {
+  const { t } = useI18n();
   const quantity = positiveQuantity(link.metadata?.quantity);
   const isUnique = isUniqueItem(link.entity);
   const condition = String(link.metadata?.condition ?? '');
@@ -328,7 +333,7 @@ function InventoryCard({ link, onEdit, onDelete }: { link: EntityLink; onEdit():
         isUnique ? `Unique ${link.entity.data?.itemType ? String(link.entity.data.itemType).toLowerCase() : 'item'}` : itemMeta(link.entity.data?.itemType).label,
         !isUnique && quantity > 1 ? `×${quantity}` : null,
         condition || null,
-      ].filter(Boolean).join(' · ')}{link.metadata?.equipped ? <span className="text-text-secondary"> · Equipped</span> : null}</p>
+      ].filter(Boolean).join(' · ')}{link.metadata?.equipped ? <span className="text-text-secondary">{' '}{t("· Equipped")}</span> : null}</p>
       {notes && <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-text-subtle"><SpoilerText text={notes} /></p>}
     </div>
     <RowActions spoiler={linkKey(link)} onEdit={onEdit} onDelete={onDelete} />
@@ -336,28 +341,30 @@ function InventoryCard({ link, onEdit, onDelete }: { link: EntityLink; onEdit():
 }
 
 function InventoryEditor({ draft, setDraft, options, onSave, onClose, saving, spoiler = null }: { draft: InventoryDraft; setDraft(draft: InventoryDraft): void; options: WorldbuildEntity[]; onSave(): void; onClose(): void; saving: boolean; spoiler?: string | null }) {
+  const { t } = useI18n();
   const update = (patch: Partial<InventoryDraft>) => setDraft({ ...draft, ...patch });
   const isUnique = isUniqueItem(options.find(option => option.id === draft.itemId));
-  return <Modal size="lg" title={draft.link ? 'Edit inventory item' : 'Add inventory item'} icon={Backpack} iconClassName="text-text-muted" onClose={onClose} closeOnEsc={!saving} closeOnOverlay={!saving}>
+  return <Modal size="lg" title={draft.link ? t("Edit inventory item") : t("Add inventory item")} icon={Backpack} iconClassName="text-text-muted" onClose={onClose} closeOnEsc={!saving} closeOnOverlay={!saving}>
     <SpoilerCover field={spoiler}><div className="space-y-5 p-5">
       <div className={`grid gap-4 ${isUnique ? 'grid-cols-1' : 'grid-cols-[minmax(0,1fr)_8rem]'}`}>
-        <Field label="Item"><SearchableSelect value={draft.itemId} disabled={Boolean(draft.link)} onChange={(itemId: string) => update({ itemId })} options={options.map(option => ({ id: option.id, label: option.canonicalName, aliases: option.aliases, group: itemMeta(option.data?.itemType).label, icon: itemMeta(option.data?.itemType).icon }))} placeholder="Search for an item" /></Field>
-        {!isUnique && <Field label="Quantity"><NumberInput className={INPUT} min={1} value={Number(draft.quantity)} onChange={quantity => update({ quantity: quantity ?? undefined })} /></Field>}
+        <Field label={t("Item")}><SearchableSelect value={draft.itemId} disabled={Boolean(draft.link)} onChange={(itemId: string) => update({ itemId })} options={options.map(option => ({ id: option.id, label: option.canonicalName, aliases: option.aliases, group: itemMeta(option.data?.itemType).label, icon: itemMeta(option.data?.itemType).icon }))} placeholder={t("Search for an item")} /></Field>
+        {!isUnique && <Field label={t("Quantity")}><NumberInput className={INPUT} min={1} value={Number(draft.quantity)} onChange={quantity => update({ quantity: quantity ?? undefined })} /></Field>}
       </div>
-      <Field label="Condition"><input className={INPUT} value={draft.condition} onChange={event => update({ condition: event.target.value })} placeholder="Worn, pristine, damaged…" /></Field>
-      <Field label="Notes"><textarea className={`${INPUT} min-h-28 resize-y`} value={draft.notes} onChange={event => update({ notes: event.target.value })} placeholder="How it is carried, used, or distinguished…" /></Field>
+      <Field label={t("Condition")}><input className={INPUT} value={draft.condition} onChange={event => update({ condition: event.target.value })} placeholder={t("Worn, pristine, damaged…")} /></Field>
+      <Field label={t("Notes")}><textarea className={`${INPUT} min-h-28 resize-y`} value={draft.notes} onChange={event => update({ notes: event.target.value })} placeholder={t("How it is carried, used, or distinguished…")} /></Field>
     </div></SpoilerCover>
-    <ModalFooter saving={saving} valid={Boolean(draft.itemId) && draft.quantity >= 1} onClose={onClose} onSave={onSave} label="Save item" />
+    <ModalFooter saving={saving} valid={Boolean(draft.itemId) && draft.quantity >= 1} onClose={onClose} onSave={onSave} label={t("Save item")} />
   </Modal>;
 }
 
 // Same card as a sheet section, so a relational tab reads like the rest of the sheet.
 function CollectionShell({ icon: Icon, title, count, empty = false, emptyVerb = 'Add', onAdd, children }: { icon: typeof Users; title: string; count?: number; empty?: boolean; emptyVerb?: string; onAdd?: () => void; children: React.ReactNode }) {
+  const { t } = useI18n();
   if (empty) {
     return <section className="flex min-h-12 items-center gap-2.5 rounded-card border border-border-subtle bg-surface-panel-muted/45 py-1.5 pl-4 pr-2 backdrop-blur-md">
       <Icon className="h-4 w-4 shrink-0 text-text-disabled" aria-hidden="true" />
       <h3 className="text-sm font-semibold text-text-secondary">{title}</h3>
-      <span className="min-w-0 flex-1 truncate text-sm text-text-disabled">None yet</span>
+      <span className="min-w-0 flex-1 truncate text-sm text-text-disabled">{t("None yet")}</span>
       {onAdd && <button type="button" onClick={onAdd} className="inline-flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-muted transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><Plus className="h-3.5 w-3.5" aria-hidden="true" />{emptyVerb}</button>}
     </section>;
   }
@@ -374,21 +381,23 @@ function CollectionShell({ icon: Icon, title, count, empty = false, emptyVerb = 
 }
 
 function RowActions({ onEdit, onDelete, spoiler = null }: { onEdit(): void; onDelete(): void; spoiler?: string | null }) {
+  const { t } = useI18n();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   return <>
-    <IconButton ref={anchorRef} icon={MoreHorizontal} size="sm" label="Actions" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(v => !v)} />
-    <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label="Actions" className="w-44">
-      <MenuItem icon={Pencil} label="Edit" onSelect={() => { setOpen(false); onEdit(); }} />
+    <IconButton ref={anchorRef} icon={MoreHorizontal} size="sm" label={t("Actions")} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(v => !v)} />
+    <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={t("Actions")} className="w-44">
+      <MenuItem icon={Pencil} label={t("Edit")} onSelect={() => { setOpen(false); onEdit(); }} />
       <SpoilerMenuItem field={spoiler} onDone={() => setOpen(false)} />
       <MenuSeparator />
-      <MenuItem icon={Trash2} label="Delete" danger onSelect={() => { setOpen(false); onDelete(); }} />
+      <MenuItem icon={Trash2} label={t("Delete")} danger onSelect={() => { setOpen(false); onDelete(); }} />
     </Menu>
   </>;
 }
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) { return <label className="block"><span className="mb-1.5 block text-xs font-medium text-text-muted">{label}</span>{children}{hint && <span className="mt-1 block text-xs leading-relaxed text-text-subtle">{hint}</span>}</label>; }
-function ModalFooter({ saving, valid, onClose, onSave, label }: { saving: boolean; valid: boolean; onClose(): void; onSave(): void; label: string }) { return <footer className="flex justify-end gap-2 border-t border-border-subtle px-5 py-4"><Button variant="ghost" onClick={onClose} disabled={saving}>Cancel</Button><Button icon={Check} onClick={onSave} loading={saving} disabled={!valid}>{label}</Button></footer>; }
+function ModalFooter({ saving, valid, onClose, onSave, label }: { saving: boolean; valid: boolean; onClose(): void; onSave(): void; label: string }) {
+  const { t } = useI18n(); return <footer className="flex justify-end gap-2 border-t border-border-subtle px-5 py-4"><Button variant="ghost" onClick={onClose} disabled={saving}>{t("Cancel")}</Button><Button icon={Check} onClick={onSave} loading={saving} disabled={!valid}>{label}</Button></footer>; }
 function clampRelationship(value: unknown): number { const number = Number(value); return Number.isFinite(number) ? Math.max(-100, Math.min(100, Math.round(number))) : 0; }
 const firstName = (name: string) => String(name || '').trim().split(/\s+/)[0] || '';
 function positiveQuantity(value: unknown): number { const number = Number(value); return Number.isFinite(number) ? Math.max(1, Math.round(number)) : 1; }

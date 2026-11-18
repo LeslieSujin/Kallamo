@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ArrowRight, BookOpen, ChevronLeft, ChevronRight, Clock, Coins, Eye, Guitar, MapPin, Route, Shapes, Shield, Slice, Sword, User, UserPlus, Users,
@@ -14,6 +15,7 @@ const PAGES = ['intro', 'world', 'pick'];
 
 // The first visit to a seeded story: what the Narrative State does, the world, then who to play.
 export default function StoryIntro({ workspaceId, visible }) {
+  const { t } = useI18n();
   const app = useApp();
   const { electronAPI, setActiveWorkspaceView } = app;
   const { startTour } = useTour();
@@ -87,16 +89,13 @@ export default function StoryIntro({ workspaceId, visible }) {
           onClick={() => playAs(ownCharacter)}
           className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-xl bg-accent/90 px-4 text-sm font-semibold text-on-accent shadow-[0_0.375rem_1.125rem_-0.5rem] shadow-accent/50 transition-colors hover:bg-accent disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
-          <User className="h-4 w-4" aria-hidden="true" />
-          Play as {ownCharacter.short || ownCharacter.name}
+          <User className="h-4 w-4" aria-hidden="true" />{t("Play as")}{ownCharacter.short || ownCharacter.name}
         </button>
         <button
           type="button"
           onClick={() => setPage('pick')}
           className="inline-flex h-10 items-center whitespace-nowrap rounded-xl border border-border-default bg-surface-panel/85 px-4 text-sm font-semibold text-text-secondary backdrop-blur-sm transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-        >
-          Choose someone else
-        </button>
+        >{t("Choose someone else")}</button>
       </div>
     );
   }
@@ -108,9 +107,7 @@ export default function StoryIntro({ workspaceId, visible }) {
         onClick={() => setPage(story.stage === 'own-character' ? 'pick' : 'intro')}
         className="absolute left-1/2 top-28 z-20 inline-flex h-10 -translate-x-1/2 items-center gap-2 rounded-xl bg-accent/90 px-4 text-sm font-semibold text-on-accent shadow-[0_0.375rem_1.125rem_-0.5rem] shadow-accent/50 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
       >
-        <Users className="h-4 w-4" aria-hidden="true" />
-        Choose who you play
-      </button>
+        <Users className="h-4 w-4" aria-hidden="true" />{t("Choose who you play")}</button>
     );
   }
 
@@ -139,8 +136,8 @@ export default function StoryIntro({ workspaceId, visible }) {
               })}
             </ul>
           </div>
-          <Footer step={step} left={<Button variant="subtle" onClick={() => setPage('pick')}>Skip introduction</Button>}>
-            <Button autoFocus onClick={() => setPage('world')}>Continue<ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></Button>
+          <Footer step={step} left={<Button variant="subtle" onClick={() => setPage('pick')}>{t("Skip introduction")}</Button>}>
+            <Button autoFocus onClick={() => setPage('world')}>{t("Continue")}<ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></Button>
           </Footer>
         </>
       )}
@@ -159,7 +156,7 @@ export default function StoryIntro({ workspaceId, visible }) {
           </div>
           <div className="flex flex-col gap-3.5 px-8 pb-6 pt-2">
             <div className="flex flex-col gap-0.5">
-              <span className="text-xs font-semibold text-text-muted">The world · 2 of {PAGES.length}</span>
+              <span className="text-xs font-semibold text-text-muted">{t("The world · 2 of")}{' '}{PAGES.length}</span>
               <h2 className="text-xl font-extrabold tracking-[-0.015em] text-text-primary">{story.world.title}</h2>
             </div>
             {story.world.paragraphs.map(text => <p key={text.slice(0, 24)} className="text-sm leading-relaxed text-text-secondary">{text}</p>)}
@@ -178,8 +175,8 @@ export default function StoryIntro({ workspaceId, visible }) {
               </div>
             </div>
           </div>
-          <Footer step={step} left={<Button variant="ghost" onClick={() => setPage('intro')}>Back</Button>}>
-            <Button onClick={() => setPage('pick')}>Pick a character<ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></Button>
+          <Footer step={step} left={<Button variant="ghost" onClick={() => setPage('intro')}>{t("Back")}</Button>}>
+            <Button onClick={() => setPage('pick')}>{t("Pick a character")}<ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></Button>
           </Footer>
         </>
       )}
@@ -187,10 +184,10 @@ export default function StoryIntro({ workspaceId, visible }) {
       {page === 'pick' && (
         <>
           <div className="flex flex-col gap-5 px-8 pb-7 pt-7">
-            <DialogHeading icon={Users} eyebrow={`Your character · 3 of ${PAGES.length}`} title="Who do you want to be?" />
+            <DialogHeading icon={Users} eyebrow={`Your character · 3 of ${PAGES.length}`} title={t("Who do you want to be?")} />
             <div className="flex items-center gap-2">
-              <StepButton label="Previous character" icon={ChevronLeft} onClick={() => setPick((pick - 1 + options.length) % options.length)} />
-              <div role="radiogroup" aria-label="Characters" className="flex min-w-0 flex-1 gap-1 rounded-control border border-border-default bg-surface-inset p-1">
+              <StepButton label={t("Previous character")} icon={ChevronLeft} onClick={() => setPick((pick - 1 + options.length) % options.length)} />
+              <div role="radiogroup" aria-label={t("Characters")} className="flex min-w-0 flex-1 gap-1 rounded-control border border-border-default bg-surface-inset p-1">
                 {options.map((option, index) => {
                   const Icon = ICONS[option.icon] || User;
                   const on = index === pick;
@@ -202,7 +199,7 @@ export default function StoryIntro({ workspaceId, visible }) {
                   );
                 })}
               </div>
-              <StepButton label="Next character" icon={ChevronRight} onClick={() => setPick((pick + 1) % options.length)} />
+              <StepButton label={t("Next character")} icon={ChevronRight} onClick={() => setPick((pick + 1) % options.length)} />
             </div>
 
             <div className="flex flex-col gap-4 rounded-surface border border-tint/[0.08] surface-card p-[1.375rem]">
@@ -217,23 +214,23 @@ export default function StoryIntro({ workspaceId, visible }) {
                   </div>
                   <span className="inline-flex h-6 self-start items-center rounded-full border border-tint/10 bg-tint/[0.04] px-2.5 text-xs font-medium text-text-secondary">{current.role}</span>
                 </div>
-                <span className="ml-auto self-start text-xs font-semibold tabular-nums text-text-subtle">{pick + 1} of {options.length}</span>
+                <span className="ml-auto self-start text-xs font-semibold tabular-nums text-text-subtle">{pick + 1}{' '}{t("of")}{' '}{options.length}</span>
               </div>
               {current.intro && <p className="text-sm leading-relaxed text-text-secondary">{current.intro}</p>}
               {current.look && (
                 <div className="flex flex-col gap-1 border-t border-tint/[0.08] pt-3.5">
-                  <span className="text-xs font-semibold text-text-muted">Looks</span>
+                  <span className="text-xs font-semibold text-text-muted">{t("Looks")}</span>
                   <span className="text-[0.8125rem] leading-relaxed text-text-secondary">{current.look}</span>
                 </div>
               )}
               <div className="flex flex-col gap-1 border-t border-tint/[0.08] pt-3.5">
-                <span className="text-xs font-semibold text-text-muted">At the start</span>
+                <span className="text-xs font-semibold text-text-muted">{t("At the start")}</span>
                 <span className="text-[0.8125rem] leading-relaxed text-text-secondary">{current.start}</span>
               </div>
             </div>
           </div>
-          <Footer step={step} left={<Button variant="ghost" onClick={() => setPage('world')}>Back</Button>}>
-            <Button loading={starting} onClick={choose}>{current.newcomer ? 'Create my character' : `Play as ${current.short || current.name}`}</Button>
+          <Footer step={step} left={<Button variant="ghost" onClick={() => setPage('world')}>{t("Back")}</Button>}>
+            <Button loading={starting} onClick={choose}>{current.newcomer ? t("Create my character") : `Play as ${current.short || current.name}`}</Button>
           </Footer>
         </>
       )}

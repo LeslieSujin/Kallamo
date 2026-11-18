@@ -175,17 +175,17 @@ export default function DashboardView() {
         <ConfirmDialog
           tone="warning"
           icon={Plug}
-          title="No model is connected yet"
+          title={t("No model is connected yet")}
           message={(
             <>
-              <p>{gateNames(gate)} {gate.profiles.length > 1 ? 'need' : 'needs'} a model to {gate.chat.experienceMode === 'roleplay' ? 'narrate the story and play its characters' : 'reply'}. Nothing is connected in Settings yet.</p>
-              <p className="mt-2">You can still open {gate.chat.title} and look around, but no one will reply until a model is connected.</p>
+              <p>{gateNames(gate)} {gate.profiles.length > 1 ? t("need") : t("needs")}{' '}{t("a model to")}{' '}{gate.chat.experienceMode === 'roleplay' ? t("narrate the story and play its characters") : t("reply")}{t(". Nothing is connected in Settings yet.")}</p>
+              <p className="mt-2">{t("You can still open")}{' '}{gate.chat.title}{' '}{t("and look around, but no one will reply until a model is connected.")}</p>
             </>
           )}
           actions={[
-            { label: 'Guide me step by step', variant: 'primary', icon: Lightbulb, autoFocus: true, onClick: () => { setGate(null); startTour('setup', { profileName: gate.profile.name }); } },
-            { label: 'Add a connection in Settings', icon: Settings, onClick: () => { setGate(null); openSettings('api'); } },
-            { label: 'Open without a model', onClick: () => { const { chat } = gate; setGate(null); openWorkspace(chat, 'chat'); } },
+            { label: t("Guide me step by step"), variant: 'primary', icon: Lightbulb, autoFocus: true, onClick: () => { setGate(null); startTour('setup', { profileName: gate.profile.name }); } },
+            { label: t("Add a connection in Settings"), icon: Settings, onClick: () => { setGate(null); openSettings('api'); } },
+            { label: t("Open without a model"), onClick: () => { const { chat } = gate; setGate(null); openWorkspace(chat, 'chat'); } },
           ]}
           onClose={() => setGate(null)}
         />
@@ -194,11 +194,11 @@ export default function DashboardView() {
         <ConfirmDialog
           tone="warning"
           icon={Link2}
-          title={gate.chat.experienceMode === 'roleplay' ? 'The narrator has no model yet' : gate.profiles.length > 1 ? 'These profiles have no model yet' : 'This profile has no model yet'}
-          message={<p>There is a connection in Settings, but {gateNames(gate)} {gate.profiles.length > 1 ? 'do' : 'does'} not use it yet.</p>}
+          title={gate.chat.experienceMode === 'roleplay' ? t("The narrator has no model yet") : gate.profiles.length > 1 ? t("These profiles have no model yet") : t("This profile has no model yet")}
+          message={<p>{t("There is a connection in Settings, but")}{' '}{gateNames(gate)} {gate.profiles.length > 1 ? t("do") : t("does")}{' '}{t("not use it yet.")}</p>}
           actions={[
-            { label: 'Open without a model', onClick: () => { const { chat } = gate; setGate(null); openWorkspace(chat, 'chat'); } },
-            { label: 'Link a model', variant: 'primary', icon: Link2, autoFocus: true, onClick: () => { setProfileToLink(gate.profile); setGate(null); } },
+            { label: t("Open without a model"), onClick: () => { const { chat } = gate; setGate(null); openWorkspace(chat, 'chat'); } },
+            { label: t("Link a model"), variant: 'primary', icon: Link2, autoFocus: true, onClick: () => { setProfileToLink(gate.profile); setGate(null); } },
           ]}
           onClose={() => setGate(null)}
         />
@@ -220,9 +220,9 @@ export default function DashboardView() {
       {chatModal && <ChatModal chat={chatModal.chat} draft={chatModal.draft} onClose={() => setChatModal(null)} />}
       {chatToDelete && (
         <DeleteModal
-          title="Delete this workspace?"
-          message="Its chat, Worldbuild, Writing Desk, memory and files go with it. This cannot be undone."
-          confirmText="Delete workspace"
+          title={t("Delete this workspace?")}
+          message={t("Its chat, Worldbuild, Writing Desk, memory and files go with it. This cannot be undone.")}
+          confirmText={t("Delete workspace")}
           subject={{
             leading: <ToneTile icon={MessageSquare} color="var(--app-accent)" size="sm" />,
             name: chatToDelete.title,

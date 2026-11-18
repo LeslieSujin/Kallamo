@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { X, Sparkles, PenLine, Globe2, Brain, Plus, RefreshCw, Wrench, Drama } from 'lucide-react';
 import Modal from '../ui/Modal';
@@ -15,6 +16,7 @@ const SECTION_META = {
 };
 
 export default function WhatsNewModal({ onClose, type = 'global', version }) {
+  const { t } = useI18n();
   const isPatch = type === 'patch';
   const content = isPatch
     ? PATCH_WHATS_NEW[version] || FALLBACK_PATCH_WHATS_NEW
@@ -34,7 +36,7 @@ export default function WhatsNewModal({ onClose, type = 'global', version }) {
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={t("Close")}
           className="absolute right-3.5 top-3.5 z-10 inline-flex min-h-8 min-w-8 items-center justify-center rounded-md text-text-secondary backdrop-blur-sm transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           style={{ background: 'color-mix(in srgb, var(--theme-shade) 30%, transparent)' }}
         >
@@ -43,7 +45,7 @@ export default function WhatsNewModal({ onClose, type = 'global', version }) {
         <div className="absolute inset-x-0 bottom-0 px-6 pb-4">
           <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-accent/[0.13] px-2.5 text-xs font-semibold text-accent ring-1 ring-inset ring-accent/35">
             <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            {isPatch ? 'Update notes' : "What's new"} · Kallamo v{displayVersion}
+            {isPatch ? t("Update notes") : t("What's new")}{' '}{t("· Kallamo v")}{displayVersion}
           </span>
           <h2 className="mt-2 text-2xl font-bold leading-tight text-text-primary">{content.title}</h2>
         </div>
@@ -116,8 +118,8 @@ export default function WhatsNewModal({ onClose, type = 'global', version }) {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 border-t border-border-subtle px-5 py-3.5">
-        <span className="caption mr-auto">Thanks for creating with Kallamo.</span>
-        <Button icon={Sparkles} onClick={onClose}>Let's go</Button>
+        <span className="caption mr-auto">{t("Thanks for creating with Kallamo.")}</span>
+        <Button icon={Sparkles} onClick={onClose}>{t("Let's go")}</Button>
       </div>
     </Modal>
   );

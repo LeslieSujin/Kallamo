@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { Fragment, type KeyboardEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import {
   BookOpenCheck, Brain, Check, ChevronDown, Eye, EyeOff, Lightbulb, Link2, Lock, LockKeyhole,
@@ -125,6 +126,7 @@ interface Props {
 }
 
 export default function WorldbuildKnowledgeTab({ workspaceId, entity, entities, api, showToast, calendar = null, clock = null, onOpenEntity }: Props) {
+  const { t } = useI18n();
   const [surface, setSurface] = useState<Surface>('knowledge');
   const [memberships, setMemberships] = useState<Array<{ fromId: string; toId: string }>>([]);
   const [projection, setProjection] = useState<WorldbuildKnowledgeProjection | null>(null);
@@ -320,14 +322,14 @@ export default function WorldbuildKnowledgeTab({ workspaceId, entity, entities, 
   return (
     <section className="ws-card space-y-3 rounded-card border border-border-default bg-surface-panel-muted/60 p-4 backdrop-blur-md">
       <div className="flex flex-wrap items-center gap-2">
-      <div role="tablist" aria-label="Knowledge views" aria-orientation="horizontal" className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
-        <SurfaceButton id="knowledge-surface-tab" controls="knowledge-surface-panel" active={surface === 'knowledge'} onClick={() => setSurface('knowledge')} onKeyDown={event => handleSurfaceKeyDown(event, 'knowledge')} icon={KnowledgeGlyph} label="Subjects" count={currentProjection?.cards.length ?? 0} />
-        {!isPlace && <SurfaceButton id="memories-surface-tab" controls="memories-surface-panel" active={surface === 'memories'} onClick={() => setSurface('memories')} onKeyDown={event => handleSurfaceKeyDown(event, 'memories')} icon={Brain} label="Memories" count={currentProjection?.memories.length ?? 0} />}
+      <div role="tablist" aria-label={t("Knowledge views")} aria-orientation="horizontal" className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
+        <SurfaceButton id="knowledge-surface-tab" controls="knowledge-surface-panel" active={surface === 'knowledge'} onClick={() => setSurface('knowledge')} onKeyDown={event => handleSurfaceKeyDown(event, 'knowledge')} icon={KnowledgeGlyph} label={t("Subjects")} count={currentProjection?.cards.length ?? 0} />
+        {!isPlace && <SurfaceButton id="memories-surface-tab" controls="memories-surface-panel" active={surface === 'memories'} onClick={() => setSurface('memories')} onKeyDown={event => handleSurfaceKeyDown(event, 'memories')} icon={Brain} label={t("Memories")} count={currentProjection?.memories.length ?? 0} />}
       </div>
       <span className="flex-1" />
       {surface === 'knowledge'
-        ? <Button variant="ghost" size="sm" icon={Plus} onClick={() => setAddingCard(true)}>Add subject</Button>
-        : <Button variant="ghost" size="sm" icon={Plus} onClick={() => setComposeSignal(value => value + 1)}>Add memory</Button>}
+        ? <Button variant="ghost" size="sm" icon={Plus} onClick={() => setAddingCard(true)}>{t("Add subject")}</Button>
+        : <Button variant="ghost" size="sm" icon={Plus} onClick={() => setComposeSignal(value => value + 1)}>{t("Add memory")}</Button>}
       </div>
 
       <div id="knowledge-surface-panel" role="tabpanel" aria-labelledby="knowledge-surface-tab" hidden={surface !== 'knowledge'} aria-busy={loading} className="space-y-3">
@@ -335,15 +337,15 @@ export default function WorldbuildKnowledgeTab({ workspaceId, entity, entities, 
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
             <span>
               {entity.type === 'Factions'
-                ? <>Each card is something {entity.canonicalName} knows exists. What the group knows reaches its whole roster{roster.length ? `, ${roster.length} today` : ''}, unless a card names exceptions.</>
+                ? <>{t("Each card is something")}{' '}{entity.canonicalName}{' '}{t("knows exists. What the group knows reaches its whole roster")}{roster.length ? `, ${roster.length} today` : ''}{t(", unless a card names exceptions.")}</>
                 : isPlace
-                  ? <>Everyone local to {entity.canonicalName}, or to an Area inside it, reads these cards in play{locals.length ? `: ${locals.length} ${locals.length === 1 ? 'character' : 'characters'} today` : ''}. Places inside join on their own; remove one to keep it secret.</>
-                  : <>Each card is something {firstName(entity.canonicalName)} knows exists. Open it to choose what else {firstName(entity.canonicalName)} knows.<SharingRule entity={entity} groups={[...ownFactions, ...ownPlaces]} entities={entities} onOpenEntity={onOpenEntity} /></>}
+                  ? <>{t("Everyone local to")}{' '}{entity.canonicalName}{t(", or to an Area inside it, reads these cards in play")}{locals.length ? `: ${locals.length} ${locals.length === 1 ? 'character' : 'characters'} today` : ''}{t(". Places inside join on their own; remove one to keep it secret.")}</>
+                  : <>{t("Each card is something")}{' '}{firstName(entity.canonicalName)}{' '}{t("knows exists. Open it to choose what else")}{' '}{firstName(entity.canonicalName)}{' '}{t("knows.")}<SharingRule entity={entity} groups={[...ownFactions, ...ownPlaces]} entities={entities} onOpenEntity={onOpenEntity} /></>}
             </span>
           </p>
           <div>
             <label className="relative block">
-              <span className="sr-only">Search known subjects</span>
+              <span className="sr-only">{t("Search known subjects")}</span>
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" aria-hidden="true" />
               <input
                 type="search"
@@ -351,7 +353,7 @@ export default function WorldbuildKnowledgeTab({ workspaceId, entity, entities, 
                 autoComplete="off"
                 value={cardSearch}
                 onChange={event => setCardSearch(event.target.value)}
-                placeholder="Search known subjects"
+                placeholder={t("Search known subjects")}
                 className="wb-input field-input py-2 pl-9 pr-9 text-sm [&::-webkit-search-cancel-button]:hidden"
               />
               {cardSearch && (
@@ -359,7 +361,7 @@ export default function WorldbuildKnowledgeTab({ workspaceId, entity, entities, 
                   type="button"
                   onClick={() => setCardSearch('')}
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-1.5 text-text-subtle transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 motion-reduce:transition-none"
-                  aria-label="Clear Knowledge search"
+                  aria-label={t("Clear Knowledge search")}
                 >
                   <X className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
@@ -368,11 +370,9 @@ export default function WorldbuildKnowledgeTab({ workspaceId, entity, entities, 
           </div>
           <div className="custom-scrollbar grid max-h-[40rem] gap-2 overflow-y-auto overscroll-contain sm:grid-cols-2">
             {loading && <div className="col-span-full h-24 animate-pulse rounded-card bg-surface-panel-muted/60 motion-reduce:animate-none" />}
-            {!loading && !currentProjection?.cards.length && <EmptyState text="No known subjects yet." onClick={() => setAddingCard(true)} />}
+            {!loading && !currentProjection?.cards.length && <EmptyState text={t("No known subjects yet.")} onClick={() => setAddingCard(true)} />}
             {!loading && (currentProjection?.cards.length ?? 0) > 0 && !filteredCards.length && (
-              <div className="col-span-full rounded-card border border-dashed border-border-subtle px-5 py-8 text-center text-sm text-text-muted">
-                No known subjects match your search.
-              </div>
+              <div className="col-span-full rounded-card border border-dashed border-border-subtle px-5 py-8 text-center text-sm text-text-muted">{t("No known subjects match your search.")}</div>
             )}
             {filteredCards.map(card => {
               const known = currentProjection?.known.filter(entry => entry.aboutId === card.targetId).length ?? 0;
@@ -390,10 +390,10 @@ export default function WorldbuildKnowledgeTab({ workspaceId, entity, entities, 
                       <span className="block truncate text-sm font-semibold text-text-primary">{card.targetName}</span>
                     <CardStats
                       counts={[
-                        { value: card.knownFieldKeys.length, label: 'fields' },
-                        { value: card.knownRelationships.length, label: 'connections' },
-                        { value: known, label: 'known' },
-                        { value: beliefs, label: 'believed' },
+                        { value: card.knownFieldKeys.length, label: t("fields") },
+                        { value: card.knownRelationships.length, label: t("connections") },
+                        { value: known, label: t("known") },
+                        { value: beliefs, label: t("believed") },
                       ]}
                     />
                     </span>
@@ -426,11 +426,11 @@ export default function WorldbuildKnowledgeTab({ workspaceId, entity, entities, 
       )}
       {deletingCard && (
         <ConfirmDialog
-          title="Remove Knowledge card"
+          title={t("Remove Knowledge card")}
           message={`Remove awareness of ${deletingCard.targetName}? Structural sources will remain unchanged and will be recorded as exclusions.`}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDeletingCard(null) },
-            { label: 'Remove', variant: 'danger', onClick: removeCard },
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDeletingCard(null) },
+            { label: t("Remove"), variant: 'danger', onClick: removeCard },
           ]}
           onClose={() => setDeletingCard(null)}
         />
@@ -513,6 +513,7 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
   onClose(): void;
   showToast: Toast;
 }) {
+  const { t } = useI18n();
   const [pane, setPane] = useState<CardPane>('access');
   const [openSection, setOpenSection] = useState<CardSection | null>('fields');
   const [definitions, setDefinitions] = useState<Array<{ key: string; label: string; aiAccess: string }>>([]);
@@ -843,9 +844,9 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
       <div className="px-4 pt-4 sm:px-5">
         {/* Two different questions, so two panes rather than one stack: what this
             perspective is allowed to read, and what it actually holds in its own words. */}
-        <div role="tablist" aria-label="Knowledge card views" className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
-          <PaneButton id="card-access-tab" controls="card-access-pane" active={pane === 'access'} onClick={() => setPane('access')} icon={Check} label="Access" count={fieldKeys.length + relationshipIds.length} />
-          <PaneButton id="card-statements-tab" controls="card-statements-pane" active={pane === 'statements'} onClick={() => setPane('statements')} icon={BookOpenCheck} label="Statements" count={statements.length} />
+        <div role="tablist" aria-label={t("Knowledge card views")} className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
+          <PaneButton id="card-access-tab" controls="card-access-pane" active={pane === 'access'} onClick={() => setPane('access')} icon={Check} label={t("Access")} count={fieldKeys.length + relationshipIds.length} />
+          <PaneButton id="card-statements-tab" controls="card-statements-pane" active={pane === 'statements'} onClick={() => setPane('statements')} icon={BookOpenCheck} label={t("Statements")} count={statements.length} />
         </div>
       </div>
       <div id="card-access-pane" role="tabpanel" aria-labelledby="card-access-tab" className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-2 sm:px-5" hidden={pane !== 'access'}>
@@ -854,13 +855,13 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
           open={openSection === 'fields'}
           onToggle={() => toggleSection('fields')}
           icon={Check}
-          title="Known fields"
+          title={t("Known fields")}
           description={`Which of ${card.targetName}'s filled fields this perspective can read.`}
           summary={definitions.length ? `${fieldKeys.length} of ${definitions.length}` : 'None filled'}
         >
           <div className="p-3 sm:p-4">
             {!definitions.length ? (
-              <p className="text-xs text-text-subtle">No eligible fields are currently filled on this subject.</p>
+              <p className="text-xs text-text-subtle">{t("No eligible fields are currently filled on this subject.")}</p>
             ) : (
               <>
                 <BulkActions
@@ -899,7 +900,7 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
           open={openSection === 'connections'}
           onToggle={() => toggleSection('connections')}
           icon={Link2}
-          title="Known connections"
+          title={t("Known connections")}
           description={`Which of ${card.targetName}'s ties this perspective knows about. What a tie is privately called stays hidden.`}
           summary={relationships.length ? `${relationshipIds.length} of ${relationships.length}` : 'None available'}
         >
@@ -921,7 +922,7 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
             open={openSection === 'audience'}
             onToggle={() => toggleSection('audience')}
             icon={Users}
-            title="Shared with"
+            title={t("Shared with")}
             description={`Who inside ${owner.canonicalName} reads this perspective in play.`}
             summary={audienceSummary(audienceType, selectedMemberIds.length, roster.length)}
           >
@@ -936,15 +937,15 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
           </KnowledgeSection>
         )}
 
-        {card.sources.length > 0 && <p className="mt-2 flex gap-2 border-t border-border-subtle pt-3 text-xs text-text-muted"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />Known through {[...new Set(card.sources.map(source => SOURCE_LABELS[source.sourceType] ?? 'another record'))].join(', ')}</p>}
+        {card.sources.length > 0 && <p className="mt-2 flex gap-2 border-t border-border-subtle pt-3 text-xs text-text-muted"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />{t("Known through")}{' '}{[...new Set(card.sources.map(source => SOURCE_LABELS[source.sourceType] ?? 'another record'))].join(', ')}</p>}
       </div>
 
       <div id="card-statements-pane" role="tabpanel" aria-labelledby="card-statements-tab" className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto p-3 sm:p-5" hidden={pane !== 'statements'}>
         <section ref={statementEditorRef} aria-labelledby="statement-editor-heading" className="card-surface p-3 sm:p-4">
           <div className="mb-4 flex flex-wrap items-center gap-3">
-            <h4 id="statement-editor-heading" className="text-sm font-semibold text-text-primary">{editing ? 'Edit statement' : 'New statement'}</h4>
+            <h4 id="statement-editor-heading" className="text-sm font-semibold text-text-primary">{editing ? t("Edit statement") : t("New statement")}</h4>
             <span className="flex-1" />
-            <div role="radiogroup" aria-label="Known or believed" className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
+            <div role="radiogroup" aria-label={t("Known or believed")} className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
               {(['knowledge', 'belief'] as const).map(kind => (
                 <button
                   key={kind}
@@ -956,14 +957,14 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
                   className={`inline-flex min-h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 motion-reduce:transition-none ${draft.kind === kind ? 'bg-surface-hover text-text-primary ring-1 ring-inset ring-border-strong' : 'text-text-muted hover:text-text-secondary'} disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   {kind === 'knowledge' ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : <Lightbulb className="h-3.5 w-3.5" aria-hidden="true" />}
-                  {kind === 'knowledge' ? 'Known' : 'Believed'}
+                  {kind === 'knowledge' ? t("Known") : t("Believed")}
                 </button>
               ))}
             </div>
           </div>
 
           <fieldset className="mb-4">
-            <legend className="mb-1.5 text-xs font-medium text-text-muted">Kind</legend>
+            <legend className="mb-1.5 text-xs font-medium text-text-muted">{t("Kind")}</legend>
             <div className="flex flex-wrap gap-1.5">
               {DURABLE_KNOWLEDGE_CATEGORIES.map(category => (
                 <button
@@ -993,20 +994,20 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
             />
           )}
 
-          <label htmlFor="knowledge-statement" className="mb-1.5 mt-4 block text-xs font-medium text-text-muted">Statement</label>
-          <SpoilerCover field={entryKey(editing)}><SpoilerTextArea ref={statementInputRef} id="knowledge-statement" rows={4} value={draft.statement} onChange={event => setDraft(current => ({ ...current, statement: event.target.value }))} placeholder="Add a specific statement about this subject" /></SpoilerCover>
+          <label htmlFor="knowledge-statement" className="mb-1.5 mt-4 block text-xs font-medium text-text-muted">{t("Statement")}</label>
+          <SpoilerCover field={entryKey(editing)}><SpoilerTextArea ref={statementInputRef} id="knowledge-statement" rows={4} value={draft.statement} onChange={event => setDraft(current => ({ ...current, statement: event.target.value }))} placeholder={t("Add a specific statement about this subject")} /></SpoilerCover>
           <div className="mt-3 flex justify-end gap-2">
-            <Button variant="ghost" onClick={cancelEditing} disabled={saving || (!editing && !draft.statement.trim())}>{editing ? 'Cancel' : 'Clear'}</Button>
-            <Button onClick={saveStatement} loading={saving} disabled={!draft.statement.trim()}>{editing ? 'Save changes' : 'Add statement'}</Button>
+            <Button variant="ghost" onClick={cancelEditing} disabled={saving || (!editing && !draft.statement.trim())}>{editing ? t("Cancel") : t("Clear")}</Button>
+            <Button onClick={saveStatement} loading={saving} disabled={!draft.statement.trim()}>{editing ? t("Save changes") : t("Add statement")}</Button>
           </div>
         </section>
 
         <section aria-labelledby="recorded-statements-heading">
           <div className="mb-1 flex flex-wrap items-center gap-2 border-b border-border-subtle pb-3">
-            <h4 id="recorded-statements-heading" className="text-sm font-semibold text-text-primary">Recorded</h4>
+            <h4 id="recorded-statements-heading" className="text-sm font-semibold text-text-primary">{t("Recorded")}</h4>
             <span className="text-xs tabular-nums text-text-subtle">{statements.length}</span>
             <span className="flex-1" />
-            <div role="radiogroup" aria-label="Show statements" className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
+            <div role="radiogroup" aria-label={t("Show statements")} className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
               {([['all', 'All'], ['knowledge', 'Known'], ['belief', 'Believed']] as const).map(([value, text]) => (
                 <button key={value} type="button" role="radio" aria-checked={kindFilter === value} onClick={() => setKindFilter(value)}
                   className={`min-h-7 rounded-md px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${kindFilter === value ? 'bg-surface-hover text-text-primary ring-1 ring-inset ring-border-strong' : 'text-text-muted hover:text-text-primary'}`}>{text}</button>
@@ -1023,19 +1024,19 @@ function KnowledgeCardModal({ workspaceId, owner, card, entity, entities, roster
                 onDelete={entry.managed ? undefined : () => setDeleting(entry)}
               />
             ))}
-            {!statements.length && <p className="rounded-card border border-dashed border-border-subtle px-4 py-8 text-center text-xs text-text-subtle">No statements recorded.</p>}
-            {Boolean(statements.length) && !visibleStatements.length && <p className="rounded-card border border-dashed border-border-subtle px-4 py-8 text-center text-xs text-text-subtle">No statements of this kind.</p>}
+            {!statements.length && <p className="rounded-card border border-dashed border-border-subtle px-4 py-8 text-center text-xs text-text-subtle">{t("No statements recorded.")}</p>}
+            {Boolean(statements.length) && !visibleStatements.length && <p className="rounded-card border border-dashed border-border-subtle px-4 py-8 text-center text-xs text-text-subtle">{t("No statements of this kind.")}</p>}
           </div>
         </section>
       </div>
     </Modal>
     {deleting && (
       <ConfirmDialog
-        title="Delete Statement"
-        message="Delete this Statement? This removes it from the subject's current perspective."
+        title={t("Delete Statement")}
+        message={t("Delete this Statement? This removes it from the subject's current perspective.")}
         actions={[
-          { label: 'Cancel', variant: 'ghost', onClick: () => setDeleting(null) },
-          { label: 'Delete', variant: 'danger', onClick: removeStatement },
+          { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleting(null) },
+          { label: t("Delete"), variant: 'danger', onClick: removeStatement },
         ]}
         onClose={() => setDeleting(null)}
       />
@@ -1071,6 +1072,7 @@ function AcquisitionPicker({ owner, entities, acquisition, informantIds, onChang
   informantIds: string[];
   onChange(patch: Partial<StatementDraft>): void;
 }) {
+  const { t } = useI18n();
   const options = useMemo(() => entities
     .filter(item => item.id !== owner.id && item.status !== 'proposed' && canInform(item))
     .map(item => ({ id: item.id, label: item.canonicalName, aliases: item.aliases, group: meta(item.type).label })),
@@ -1078,7 +1080,7 @@ function AcquisitionPicker({ owner, entities, acquisition, informantIds, onChang
   return (
     <>
       <fieldset>
-        <legend className="mb-1.5 text-xs font-medium text-text-muted">How they learned it</legend>
+        <legend className="mb-1.5 text-xs font-medium text-text-muted">{t("How they learned it")}</legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {AUTHORED_ACQUISITIONS.map(value => {
             const state = ACQUISITION_META[value];
@@ -1101,21 +1103,20 @@ function AcquisitionPicker({ owner, entities, acquisition, informantIds, onChang
       </fieldset>
       {acquisition === 'reported' && (
         <div className="mt-3">
-          <label className="mb-1.5 block text-xs font-medium text-text-muted">Told by</label>
+          <label className="mb-1.5 block text-xs font-medium text-text-muted">{t("Told by")}</label>
           <SearchableSelect
             multiple
             values={informantIds}
             onChange={(next: string[]) => onChange({ informantIds: next })}
             options={options}
-            ariaLabel="Who reported this to the subject"
-            placeholder="Name who told them"
+            ariaLabel={t("Who reported this to the subject")}
+            placeholder={t("Name who told them")}
           />
           <p className="caption mt-1.5">
             {owner.type === 'Factions'
-              ? 'A group usually learns through one of its own. Naming them keeps the report traceable.'
-              : 'Optional, but naming the source lets the story hold them to it later.'}
-            {' '}Whoever is named here becomes someone {owner.canonicalName} is aware of.
-          </p>
+              ? t("A group usually learns through one of its own. Naming them keeps the report traceable.")
+              : t("Optional, but naming the source lets the story hold them to it later.")}
+            {' '}{t("Whoever is named here becomes someone")}{' '}{owner.canonicalName}{t("is aware of.")}</p>
         </div>
       )}
     </>
@@ -1190,6 +1191,7 @@ function KnownConnections({ subjectId, subjectName, relationships, currentIds, s
   busy: boolean;
   onChange(next: string[]): void;
 }) {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const typeById = useMemo(() => new Map(entities.map(item => [item.id, item.type])), [entities]);
   const current = useMemo(() => new Set(currentIds), [currentIds]);
@@ -1223,8 +1225,7 @@ function KnownConnections({ subjectId, subjectName, relationships, currentIds, s
     return (
       <div className="p-3 sm:p-4">
         <p className="rounded-card border border-dashed border-border-subtle px-4 py-8 text-center text-xs text-text-subtle">
-          {subjectName} has no ties recorded yet. Add them on the subject&apos;s own Connections tab.
-        </p>
+          {subjectName}{t("has no ties recorded yet. Add them on the subject's own Connections tab.")}</p>
       </div>
     );
   }
@@ -1241,14 +1242,14 @@ function KnownConnections({ subjectId, subjectName, relationships, currentIds, s
       />
       {relationships.length > 8 && (
         <label className="relative mt-3 block">
-          <span className="sr-only">Filter connections</span>
+          <span className="sr-only">{t("Filter connections")}</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-subtle" aria-hidden="true" />
           <input
             type="search"
             autoComplete="off"
             value={query}
             onChange={event => setQuery(event.target.value)}
-            placeholder="Filter by name or connection…"
+            placeholder={t("Filter by name or connection…")}
             className="wb-input field-input py-2 pl-9 pr-3 text-sm [&::-webkit-search-cancel-button]:hidden"
           />
         </label>
@@ -1277,7 +1278,7 @@ function KnownConnections({ subjectId, subjectName, relationships, currentIds, s
                   onClick={() => setMany(ids, !all)}
                   className="rounded px-1.5 py-0.5 text-xs text-text-subtle transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:cursor-wait disabled:opacity-60 motion-reduce:transition-none"
                 >
-                  {all ? 'Clear' : 'Select all'}
+                  {all ? t("Clear") : t("Select all")}
                 </button>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
@@ -1296,7 +1297,7 @@ function KnownConnections({ subjectId, subjectName, relationships, currentIds, s
                       <span className="min-w-0 flex-1">
                         <span className={`block truncate text-sm font-medium ${checked ? 'text-text-primary' : 'text-text-secondary'}`}>{row.counterpartName}</span>
                         <span className="mt-0.5 block truncate text-xs text-text-muted">{row.verb}</span>
-                        {!current.has(row.relationshipId) && <span className="mt-0.5 block text-xs text-status-warning/80">No longer current in canon</span>}
+                        {!current.has(row.relationshipId) && <span className="mt-0.5 block text-xs text-status-warning/80">{t("No longer current in canon")}</span>}
                       </span>
                     </button>
                   );
@@ -1306,9 +1307,7 @@ function KnownConnections({ subjectId, subjectName, relationships, currentIds, s
           );
         })}
         {!groups.length && (
-          <p className="rounded-card border border-dashed border-border-subtle px-4 py-8 text-center text-xs text-text-subtle">
-            No connections match your filter.
-          </p>
+          <p className="rounded-card border border-dashed border-border-subtle px-4 py-8 text-center text-xs text-text-subtle">{t("No connections match your filter.")}</p>
         )}
       </div>
     </div>
@@ -1333,6 +1332,7 @@ function FactionAudience({ roster, entities, audienceType, selectedMemberIds, bu
   busy: boolean;
   onChange(next: 'all-members' | 'selected-members', memberIds?: string[]): void;
 }) {
+  const { t } = useI18n();
   const byId = useMemo(() => new Map(entities.map(item => [item.id, item])), [entities]);
   const options = useMemo(() => {
     const onRoster = new Set(roster);
@@ -1352,11 +1352,9 @@ function FactionAudience({ roster, entities, audienceType, selectedMemberIds, bu
   return (
     <div className="space-y-3 pl-6">
       {!roster.length && (
-        <p className="rounded-card border border-dashed border-border-subtle px-4 py-6 text-center text-xs text-text-subtle">
-          Nobody is on the roster yet. Add members on the faction&apos;s Members tab and this perspective reaches them.
-        </p>
+        <p className="rounded-card border border-dashed border-border-subtle px-4 py-6 text-center text-xs text-text-subtle">{t("Nobody is on the roster yet. Add members on the faction's Members tab and this perspective reaches them.")}</p>
       )}
-      <div role="radiogroup" aria-label="Shared with" className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
+      <div role="radiogroup" aria-label={t("Shared with")} className="inline-flex gap-1 rounded-control border border-border-default bg-surface-input p-1">
         {([['all-members', 'Every member', Users], ['selected-members', 'Every member except…', UserMinus]] as const).map(([value, label, Icon]) => (
           <button
             key={value}
@@ -1378,14 +1376,14 @@ function FactionAudience({ roster, entities, audienceType, selectedMemberIds, bu
           disabled={busy}
           onChange={(left: string[]) => onChange('selected-members', roster.filter(id => !left.includes(id)))}
           options={options.filter(option => roster.includes(option.id))}
-          ariaLabel="Members left out"
-          placeholder="Add members to leave out"
+          ariaLabel={t("Members left out")}
+          placeholder={t("Add members to leave out")}
         />
       )}
       {roster.length > 0 && (
         <p className="caption">
           {readers === 0
-            ? 'Nobody on the roster reads this in play. Switch back to Every member, or leave fewer people out.'
+            ? t("Nobody on the roster reads this in play. Switch back to Every member, or leave fewer people out.")
             : audienceType === 'all-members'
               ? `In play, all ${roster.length} ${roster.length === 1 ? 'member reads' : 'members read'} this. Anyone who joins later reads it too; anyone who leaves keeps what they knew.`
               : `In play, the other ${readers} ${readers === 1 ? 'member reads' : 'members read'} this. Anyone who leaves keeps what they knew.`}
@@ -1401,11 +1399,12 @@ function SharingRule({ entity, groups, entities, onOpenEntity }: {
   entity: WorldbuildEntity; groups: string[]; entities: WorldbuildEntity[];
   onOpenEntity?(entityId: string, options?: { tab?: string }): void;
 }) {
+  const { t } = useI18n();
   const found = groups.map(id => entities.find(item => item.id === id)).filter((item): item is WorldbuildEntity => Boolean(item));
   if (!found.length) return null;
   return (
     <>
-      {' '}In play {firstName(entity.canonicalName)} also reads what{' '}
+      {' '}{t("In play")}{' '}{firstName(entity.canonicalName)}{' '}{t("also reads what")}{' '}
       {found.map((group, index) => (
         <Fragment key={group.id}>
           {index > 0 && (index === found.length - 1 ? ' and ' : ', ')}
@@ -1413,7 +1412,7 @@ function SharingRule({ entity, groups, entities, onOpenEntity }: {
             className="rounded font-medium text-text-secondary underline decoration-border-strong underline-offset-2 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{group.canonicalName}</button>
         </Fragment>
       ))}
-      {' '}{found.length > 1 ? 'share' : 'shares'}.
+      {' '}{found.length > 1 ? t("share") : t("shares")}.
     </>
   );
 }
@@ -1421,15 +1420,15 @@ function SharingRule({ entity, groups, entities, onOpenEntity }: {
 function BulkActions({ selected, total, busy, noun, onAll, onNone }: {
   selected: number; total: number; busy: boolean; noun: string; onAll(): void; onNone(): void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
       <span className="text-xs text-text-muted">
-        <span className="font-semibold tabular-nums text-text-secondary">{selected}</span> of {total} {noun}{total === 1 ? '' : 's'} known
-      </span>
+        <span className="font-semibold tabular-nums text-text-secondary">{selected}</span>{' '}{t("of")}{' '}{total} {noun}{total === 1 ? '' : 's'}{t("known")}</span>
       <span aria-hidden="true" className="h-px flex-1 bg-border-subtle" />
       <span className="flex shrink-0 gap-1">
-        <Button variant="ghost" size="sm" onClick={onAll} disabled={busy || selected === total}>Select all</Button>
-        <Button variant="ghost" size="sm" onClick={onNone} disabled={busy || !selected}>Clear</Button>
+        <Button variant="ghost" size="sm" onClick={onAll} disabled={busy || selected === total}>{t("Select all")}</Button>
+        <Button variant="ghost" size="sm" onClick={onNone} disabled={busy || !selected}>{t("Clear")}</Button>
       </span>
     </div>
   );
@@ -1455,6 +1454,7 @@ function Memories({ hidden, loading, workspaceId, owner, projection, api, reload
   api: WorldbuildApi; reload(options?: { cardIdToSelect?: string; preserveSelection?: boolean }): Promise<boolean>; showToast: Toast;
   onOpenEntity?(entityId: string, options?: { tab?: string }): void;
 }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState<MemoryDraft>(EMPTY_MEMORY);
   const [editing, setEditing] = useState<WorldbuildKnowledgeEntry | null>(null);
   const [composing, setComposing] = useState(false);
@@ -1583,18 +1583,18 @@ function Memories({ hidden, loading, workspaceId, owner, projection, api, reload
       {composerOpen && (
         <div ref={memoryEditorRef} className="animate-rise-in rounded-card border border-border-default bg-surface-canvas/40 p-4">
           <div className="mb-3">
-            <h4 className="text-sm font-semibold text-text-primary">{editing ? 'Edit memory' : 'New memory'}</h4>
-            <p className="caption mt-1">Write what {name} remembers, then say whether {name} can recall it.</p>
+            <h4 className="text-sm font-semibold text-text-primary">{editing ? t("Edit memory") : t("New memory")}</h4>
+            <p className="caption mt-1">{t("Write what")}{' '}{name}{' '}{t("remembers, then say whether")}{' '}{name}{' '}{t("can recall it.")}</p>
           </div>
 
-          <label htmlFor="memory-summary" className="mb-1.5 block text-xs font-medium text-text-muted">Memory</label>
+          <label htmlFor="memory-summary" className="mb-1.5 block text-xs font-medium text-text-muted">{t("Memory")}</label>
           <SpoilerCover field={entryKey(editing)}><SpoilerTextArea ref={memoryInputRef} id="memory-summary" rows={4} value={draft.summary} onChange={event => setDraft(current => ({ ...current, summary: event.target.value }))} placeholder={`What does ${name} remember?`} /></SpoilerCover>
 
           {calendar && (
             <div className="mt-4">
-              <span className="mb-1.5 block text-xs font-medium text-text-muted">When it happened</span>
+              <span className="mb-1.5 block text-xs font-medium text-text-muted">{t("When it happened")}</span>
               <WorldDateInput
-                label="When it happened"
+                label={t("When it happened")}
                 emptyLabel="Set the day"
                 calendar={calendar}
                 value={draft.occurredOn}
@@ -1605,7 +1605,7 @@ function Memories({ hidden, loading, workspaceId, owner, projection, api, reload
           )}
 
           <fieldset className="mt-4">
-            <legend className="mb-2 text-xs font-medium text-text-muted">Can {name} recall it?</legend>
+            <legend className="mb-2 text-xs font-medium text-text-muted">{t("Can")}{' '}{name}{' '}{t("recall it?")}</legend>
             <div className="grid gap-2 md:grid-cols-3">
               {(Object.entries(MEMORY_STATES) as Array<[MemoryAccessibility, typeof MEMORY_STATES[MemoryAccessibility]]>).map(([value, state]) => {
                 const StateIcon = state.icon;
@@ -1627,15 +1627,15 @@ function Memories({ hidden, loading, workspaceId, owner, projection, api, reload
           </fieldset>
 
           <div className="mt-4 flex justify-end gap-2">
-            <Button variant="ghost" onClick={cancelEditing} disabled={saving}>Cancel</Button>
-            <Button onClick={save} loading={saving} disabled={!draft.summary.trim()}>{editing ? 'Save changes' : 'Add memory'}</Button>
+            <Button variant="ghost" onClick={cancelEditing} disabled={saving}>{t("Cancel")}</Button>
+            <Button onClick={save} loading={saving} disabled={!draft.summary.trim()}>{editing ? t("Save changes") : t("Add memory")}</Button>
           </div>
         </div>
       )}
 
       <div>
-        <div role="group" aria-label="Show memories" className="flex flex-wrap items-center gap-1.5 border-b border-border-subtle pb-3">
-          <span className="mr-1 text-xs text-text-subtle">Show</span>
+        <div role="group" aria-label={t("Show memories")} className="flex flex-wrap items-center gap-1.5 border-b border-border-subtle pb-3">
+          <span className="mr-1 text-xs text-text-subtle">{t("Show")}</span>
           {([['all', 'All', projection?.memories.length ?? 0], ...(Object.entries(MEMORY_STATES) as Array<[MemoryAccessibility, typeof MEMORY_STATES[MemoryAccessibility]]>).map(([value, state]) => [value, state.label, projection?.memories.filter(entry => entry.accessibility === value).length ?? 0])] as Array<[MemoryAccessibility | 'all', string, number]>).map(([value, label, count]) => (
             <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)}
               className={`inline-flex min-h-7 items-center gap-1.5 rounded-full border px-2.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${filter === value ? 'border-border-strong bg-surface-hover text-text-primary' : count ? 'border-border-subtle text-text-secondary hover:text-text-primary' : 'border-border-subtle text-text-disabled'}`}>
@@ -1660,20 +1660,18 @@ function Memories({ hidden, loading, workspaceId, owner, projection, api, reload
           })}
           {!loading && !projection?.memories.length && (
             <button type="button" onClick={() => setComposing(true)} className="mt-3 w-full rounded-card border border-dashed border-border-subtle px-5 py-9 text-center text-xs text-text-subtle transition-colors duration-200 ease-standard hover:border-border-strong hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 motion-reduce:transition-none">
-              <Plus className="mx-auto mb-2 h-5 w-5" aria-hidden="true" />
-              No memories recorded yet.
-            </button>
+              <Plus className="mx-auto mb-2 h-5 w-5" aria-hidden="true" />{t("No memories recorded yet.")}</button>
           )}
         </div>
       </div>
     </div>
     {deleting && (
       <ConfirmDialog
-        title="Delete Memory"
-        message="Delete this Memory? This removes it from the subject's current perspective."
+        title={t("Delete Memory")}
+        message={t("Delete this Memory? This removes it from the subject's current perspective.")}
         actions={[
-          { label: 'Cancel', variant: 'ghost', onClick: () => setDeleting(null) },
-          { label: 'Delete', variant: 'danger', onClick: remove },
+          { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleting(null) },
+          { label: t("Delete"), variant: 'danger', onClick: remove },
         ]}
         onClose={() => setDeleting(null)}
       />
@@ -1693,6 +1691,7 @@ function Statement({ entry, entities = [], calendar = null, onEdit, onDelete, on
   entry: WorldbuildKnowledgeEntry; entities?: WorldbuildEntity[]; calendar?: Record<string, any> | null;
   onEdit?(): void; onDelete?(): void; onOpenOrigin?(): void;
 }) {
+  const { t } = useI18n();
   const menuRef = useRef<HTMLButtonElement | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const memoryState = entry.kind === 'memory' ? MEMORY_STATES[entry.accessibility] : null;
@@ -1740,9 +1739,9 @@ function Statement({ entry, entities = [], calendar = null, onEdit, onDelete, on
         <>
           <IconButton ref={menuRef} icon={MoreHorizontal} size="sm" label={`${label} entry actions`} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(value => !value)} />
           <Menu anchorRef={menuRef} open={menuOpen} onClose={() => setMenuOpen(false)} label={`${label} entry actions`} className="w-48" align="right">
-            {onEdit && <MenuItem icon={Pencil} label="Edit" onSelect={() => { setMenuOpen(false); onEdit(); }} />}
+            {onEdit && <MenuItem icon={Pencil} label={t("Edit")} onSelect={() => { setMenuOpen(false); onEdit(); }} />}
             <SpoilerMenuItem field={entryKey(entry)} onDone={() => setMenuOpen(false)} />
-            {onDelete && <MenuItem icon={Trash2} label="Delete" danger onSelect={() => { setMenuOpen(false); onDelete(); }} />}
+            {onDelete && <MenuItem icon={Trash2} label={t("Delete")} danger onSelect={() => { setMenuOpen(false); onDelete(); }} />}
           </Menu>
         </>
       )}
@@ -1754,6 +1753,7 @@ function AddCardModal({ owner, entities, existing, onClose, onAdd }: {
   owner: WorldbuildEntity; entities: WorldbuildEntity[]; existing: WorldbuildKnowledgeCard[];
   onClose(): void; onAdd(targetId: string): Promise<void>;
 }) {
+  const { t } = useI18n();
   const [targetId, setTargetId] = useState('');
   const options = useMemo(() => {
     const known = new Set(existing.map(card => card.targetId));
@@ -1762,14 +1762,14 @@ function AddCardModal({ owner, entities, existing, onClose, onAdd }: {
     }));
   }, [entities, existing, owner.id]);
   return (
-    <Modal onClose={onClose} size="md" title="Add Knowledge card" icon={KnowledgeGlyph} iconClassName="text-text-muted">
+    <Modal onClose={onClose} size="md" title={t("Add Knowledge card")} icon={KnowledgeGlyph} iconClassName="text-text-muted">
       <div className="space-y-4 p-4 sm:p-5">
-        <p className="text-sm leading-relaxed text-text-muted">Choose a subject whose existence {owner.canonicalName} knows about.</p>
-        <SearchableSelect value={targetId} onChange={setTargetId} options={options} ariaLabel="Choose known subject" placeholder="Search for an entity" />
+        <p className="text-sm leading-relaxed text-text-muted">{t("Choose a subject whose existence")}{' '}{owner.canonicalName}{' '}{t("knows about.")}</p>
+        <SearchableSelect value={targetId} onChange={setTargetId} options={options} ariaLabel={t("Choose known subject")} placeholder={t("Search for an entity")} />
       </div>
       <footer className="flex justify-end gap-2 border-t border-border-subtle px-4 py-4 sm:px-5">
-        <Button variant="ghost" onClick={onClose}>Cancel</Button>
-        <Button onClick={() => onAdd(targetId)} disabled={!targetId}>Add card</Button>
+        <Button variant="ghost" onClick={onClose}>{t("Cancel")}</Button>
+        <Button onClick={() => onAdd(targetId)} disabled={!targetId}>{t("Add card")}</Button>
       </footer>
     </Modal>
   );
@@ -1780,9 +1780,10 @@ function EmptyState({ text, onClick }: { text: string; onClick(): void }) {
 }
 
 function CardStats({ counts }: { counts: Array<{ value: number; label: string }> }) {
+  const { t } = useI18n();
   const filled = counts.filter(entry => entry.value > 0);
   if (!filled.length) {
-    return <span className="block text-xs text-text-subtle">Knows it exists</span>;
+    return <span className="block text-xs text-text-subtle">{t("Knows it exists")}</span>;
   }
   return (
     <span className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-text-subtle">

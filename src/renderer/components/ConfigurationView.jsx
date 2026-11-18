@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Drama, Palette } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -25,6 +26,7 @@ const SECTIONS = [
 ];
 
 export default function ConfigurationView({ onTriggerSummarize }) {
+  const { t } = useI18n();
   const { activeChat, handleSaveChat, writingProfiles, workflows, activeMessages, electronAPI, refreshChats, showToast } = useApp();
   const [activeSection, setActiveSection] = useState('agents');
   const [roleplayStatus, setRoleplayStatus] = useState({ enabled: false, pendingCount: 0 });
@@ -81,8 +83,8 @@ export default function ConfigurationView({ onTriggerSummarize }) {
 
   return (
     <div className="ws-clear flex h-full w-full overflow-hidden bg-surface-canvas">
-      <nav aria-label="Configuration sections" className="ws-rail flex w-62 shrink-0 select-none flex-col gap-0.5 border-r border-border-subtle bg-surface-sidebar/70 px-3 py-5">
-        <span className="px-2.5 pb-3 text-[0.9375rem] font-bold text-text-primary">Configuration</span>
+      <nav aria-label={t("Configuration sections")} className="ws-rail flex w-62 shrink-0 select-none flex-col gap-0.5 border-r border-border-subtle bg-surface-sidebar/70 px-3 py-5">
+        <span className="px-2.5 pb-3 text-[0.9375rem] font-bold text-text-primary">{t("Configuration")}</span>
         {SECTIONS.map(section => {
           const Icon = section.icon;
           const showChildren = section.children && roleplayStatus.enabled;
@@ -113,7 +115,7 @@ export default function ConfigurationView({ onTriggerSummarize }) {
         <div className="mx-auto flex max-w-[55rem] flex-col gap-5 px-6 pb-10 pt-8 lg:px-12">
           <header className="pb-1">
             <h1 className="text-[1.625rem] font-bold tracking-tight text-text-primary">{activeChat.title}</h1>
-            <p className="mt-1 text-[0.8125rem] text-text-muted">Workspace settings. They apply to this workspace only.</p>
+            <p className="mt-1 text-[0.8125rem] text-text-muted">{t("Workspace settings. They apply to this workspace only.")}</p>
           </header>
 
           <ProfilesWorkflowsSection sectionRef={registerSection('agents')} activeChat={activeChat} writingProfiles={writingProfiles} workflows={workflows} handleSaveChat={handleSaveChat} />

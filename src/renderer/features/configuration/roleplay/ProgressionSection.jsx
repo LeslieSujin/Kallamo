@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { Gamepad2, MoreHorizontal, Pencil, Plus, Sprout, Trash2, X } from 'lucide-react';
 import Button from '../../../components/ui/Button';
@@ -41,6 +42,7 @@ function xpExample(xp) {
 
 /** How characters grow: one style per campaign, who grows, and the rules the AI follows. */
 export default function ProgressionSection({ sectionRef, workspaceId, api, showToast, progression, traits, definitions, groups, names, onChanged, embedded = false }) {
+  const { t } = useI18n();
   const [config, setConfigState] = useState(progression.config);
   const configRef = useRef(progression.config);
   const setConfig = next => {
@@ -99,88 +101,88 @@ export default function ProgressionSection({ sectionRef, workspaceId, api, showT
       sectionRef={sectionRef}
       embedded={embedded}
       icon={Sprout}
-      title="Progression"
-      description="How characters grow over the campaign: XP raises their level, and the AI raises attributes when the story earns it."
+      title={t("Progression")}
+      description={t("How characters grow over the campaign: XP raises their level, and the AI raises attributes when the story earns it.")}
     >
       <div className="flex flex-col gap-5">
-        <div role="radiogroup" aria-label="Progression style" className="grid gap-2.5 md:grid-cols-2">
+        <div role="radiogroup" aria-label={t("Progression style")} className="grid gap-2.5 md:grid-cols-2">
           {MODES.map(option => (
-            <ChoiceCard key={option.value} name="progression-mode" selected={mode === option.value} onSelect={() => persist({ mode: option.value })} title={option.title} description={option.description} />
+            <ChoiceCard key={option.value} name="progression-mode" selected={mode === option.value} onSelect={() => persist({ mode: option.value })} title={t(option.title)} description={t(option.description)} />
           ))}
         </div>
 
         {mode !== 'off' && (
           <>
-            <Block title="Who progresses">
+            <Block title={t("Who progresses")}>
               <WhoProgresses progression={progression} groups={groups} names={names} onChange={setMembers} />
             </Block>
 
-            <Block title="Experience">
+            <Block title={t("Experience")}>
               <div className="flex flex-wrap items-end gap-x-3 gap-y-2.5">
                 <label className="flex w-40 flex-col gap-1">
-                  <span className="text-xs text-text-muted">Level 2 needs</span>
-                  <span className="field-input flex h-10 items-center gap-2 px-3"><NumberInput aria-label="XP for level 2" className="min-w-0 flex-1 bg-transparent text-sm tabular-nums outline-none" min={1} value={config.xp.firstGoal} onChange={firstGoal => draftXp({ firstGoal })} onBlur={commit} /><span className="text-xs text-text-subtle">XP</span></span>
+                  <span className="text-xs text-text-muted">{t("Level 2 needs")}</span>
+                  <span className="field-input flex h-10 items-center gap-2 px-3"><NumberInput aria-label={t("XP for level 2")} className="min-w-0 flex-1 bg-transparent text-sm tabular-nums outline-none" min={1} value={config.xp.firstGoal} onChange={firstGoal => draftXp({ firstGoal })} onBlur={commit} /><span className="text-xs text-text-subtle">{t("XP")}</span></span>
                 </label>
                 <label className="flex min-w-0 flex-col gap-1">
-                  <span className="text-xs text-text-muted">Each next level</span>
-                  <SegmentedControl className="!flex-nowrap" label="How the goal grows" value={config.xp.growth} onChange={growth => saveConfig({ xp: { ...config.xp, growth } })} options={GROWTH_OPTIONS} />
+                  <span className="text-xs text-text-muted">{t("Each next level")}</span>
+                  <SegmentedControl className="!flex-nowrap" label={t("How the goal grows")} value={config.xp.growth} onChange={growth => saveConfig({ xp: { ...config.xp, growth } })} options={GROWTH_OPTIONS.map(option => ({ ...option, label: t(option.label) }))} />
                 </label>
                 {config.xp.growth !== 'same' ? (
-                  <NumberInput aria-label="How much it grows" className="field-input h-10 w-24 px-3 text-sm tabular-nums" min={0} integer={config.xp.growth === 'add'} value={config.xp.growthAmount} onChange={growthAmount => draftXp({ growthAmount })} onBlur={commit} />
+                  <NumberInput aria-label={t("How much it grows")} className="field-input h-10 w-24 px-3 text-sm tabular-nums" min={0} integer={config.xp.growth === 'add'} value={config.xp.growthAmount} onChange={growthAmount => draftXp({ growthAmount })} onBlur={commit} />
                 ) : null}
                 <label className="flex w-28 flex-col gap-1">
-                  <span className="text-xs text-text-muted">Highest level</span>
+                  <span className="text-xs text-text-muted">{t("Highest level")}</span>
                   <MaxLevelInput value={config.xp.maxLevel} onCommit={maxLevel => saveConfig({ xp: { ...configRef.current.xp, maxLevel } })} />
                 </label>
               </div>
               <Help className="tabular-nums">{xpExample(config.xp)}</Help>
-              <Checkbox checked={config.xp.aiOnlyAdds} onChange={aiOnlyAdds => saveConfig({ xp: { ...config.xp, aiOnlyAdds } })} label="The AI only adds XP" />
-              <Help className="-mt-2 pl-8">It can never take XP away. You still can, on the sheet.</Help>
+              <Checkbox checked={config.xp.aiOnlyAdds} onChange={aiOnlyAdds => saveConfig({ xp: { ...config.xp, aiOnlyAdds } })} label={t("The AI only adds XP")} />
+              <Help className="-mt-2 pl-8">{t("It can never take XP away. You still can, on the sheet.")}</Help>
               <div className="flex flex-col gap-1.5">
-                <FieldLabel>When to give XP</FieldLabel>
-                <ResizableTextarea storageKey="rules-xp-guidance" value={config.xp.guidance} onChange={event => draftXp({ guidance: event.target.value })} onBlur={commit} placeholder="Winning fights, finishing quests and clever solutions. About 50 for a small win, 300 for a quest." />
+                <FieldLabel>{t("When to give XP")}</FieldLabel>
+                <ResizableTextarea storageKey="rules-xp-guidance" value={config.xp.guidance} onChange={event => draftXp({ guidance: event.target.value })} onBlur={commit} placeholder={t("Winning fights, finishing quests and clever solutions. About 50 for a small win, 300 for a quest.")} />
               </div>
             </Block>
 
-            <Block title="Attributes" aside="Numbers that describe what a character is good at.">
+            <Block title={t("Attributes")} aside={t("Numbers that describe what a character is good at.")}>
               <TraitTable
                 traits={traits}
                 onEdit={trait => setTraitDraft(trait)}
                 onDelete={trait => setDeletingTrait(trait)}
                 onStart={(trait, initialValue) => saveTrait({ ...trait, initialValue })}
               />
-              <Button variant="ghost" size="sm" icon={Plus} className="self-start" onClick={() => setTraitDraft({ name: '', description: '', initialValue: 10, minimum: 1, maximum: 20 })}>Add attribute</Button>
+              <Button variant="ghost" size="sm" icon={Plus} className="self-start" onClick={() => setTraitDraft({ name: '', description: '', initialValue: 10, minimum: 1, maximum: 20 })}>{t("Add attribute")}</Button>
               <div className="flex flex-col gap-2.5 rounded-card border border-border-subtle bg-surface-inset p-3.5">
-                <span className="text-[0.8125rem] font-semibold text-text-secondary">How attributes change</span>
-                <CheckRow checked={config.attributes.aiRaises} onChange={aiRaises => saveConfig({ attributes: { ...config.attributes, aiRaises } })} label="The AI raises them when the story earns it" help="Training, a hard-won fight, a new level. One point at a time, and it says why." />
+                <span className="text-[0.8125rem] font-semibold text-text-secondary">{t("How attributes change")}</span>
+                <CheckRow checked={config.attributes.aiRaises} onChange={aiRaises => saveConfig({ attributes: { ...config.attributes, aiRaises } })} label={t("The AI raises them when the story earns it")} help={t("Training, a hard-won fight, a new level. One point at a time, and it says why.")} />
                 {config.attributes.aiRaises && (
                   <div className="flex flex-col gap-1.5 pl-8">
-                    <FieldLabel>When attributes go up</FieldLabel>
-                    <ResizableTextarea storageKey="rules-attribute-guidance" value={config.attributes.guidance} onChange={event => draftAttributes({ guidance: event.target.value })} onBlur={commit} placeholder="Only after weeks of focused training or a fight that pushed them to the limit. An ordinary fight does not count. Above 15, only rare milestones." />
-                    <Help>Leave it empty and the AI uses a general rule: lasting training, a hard-won lesson or a breakthrough.</Help>
+                    <FieldLabel>{t("When attributes go up")}</FieldLabel>
+                    <ResizableTextarea storageKey="rules-attribute-guidance" value={config.attributes.guidance} onChange={event => draftAttributes({ guidance: event.target.value })} onBlur={commit} placeholder={t("Only after weeks of focused training or a fight that pushed them to the limit. An ordinary fight does not count. Above 15, only rare milestones.")} />
+                    <Help>{t("Leave it empty and the AI uses a general rule: lasting training, a hard-won lesson or a breakthrough.")}</Help>
                   </div>
                 )}
-                <CheckRow checked={config.attributes.aiLowers} onChange={aiLowers => saveConfig({ attributes: { ...config.attributes, aiLowers } })} label="The AI can also lower them" help="For lasting injuries, curses or age. Off by default." />
-                <Help>You can change any attribute, level or XP on the character's sheet whenever you want.</Help>
+                <CheckRow checked={config.attributes.aiLowers} onChange={aiLowers => saveConfig({ attributes: { ...config.attributes, aiLowers } })} label={t("The AI can also lower them")} help={t("For lasting injuries, curses or age. Off by default.")} />
+                <Help>{t("You can change any attribute, level or XP on the character's sheet whenever you want.")}</Help>
               </div>
             </Block>
 
-            <Block title="On each new level">
+            <Block title={t("On each new level")}>
               {growing.length > 0 ? (
                 <p className="text-[0.8125rem] leading-relaxed text-text-secondary">
                   {growing.map((definition, index) => (
                     <span key={definition.id}>
                       {index ? ', ' : ''}
                       <span aria-hidden="true" className="mr-1.5 inline-block h-2.5 w-2.5 rounded-[0.1875rem] align-[-0.0625rem]" style={{ backgroundColor: definition.color }} />
-                      {definition.name} <b className="font-semibold tabular-nums text-text-primary">{formatSigned(definition.growthPerLevel)}</b>{definition.refillOnLevelUp ? ' and refills' : ''}
+                      {definition.name} <b className="font-semibold tabular-nums text-text-primary">{formatSigned(definition.growthPerLevel)}</b>{definition.refillOnLevelUp ? t(" and refills") : ''}
                     </span>
                   ))}
                 </p>
               ) : null}
-              <Help>How much each resource grows per level is set on the resource, in Resources. A race or species can grow differently.</Help>
+              <Help>{t("How much each resource grows per level is set on the resource, in Resources. A race or species can grow differently.")}</Help>
             </Block>
 
-            <PolicyBlock label="How AI changes are applied" help="Covers XP and attribute changes. Review shows each one in Narrative State first." value={config.policy} onChange={policy => saveConfig({ policy })} />
+            <PolicyBlock label={t("How AI changes are applied")} help={t("Covers XP and attribute changes. Review shows each one in Narrative State first.")} value={config.policy} onChange={policy => saveConfig({ policy })} />
           </>
         )}
       </div>
@@ -192,8 +194,8 @@ export default function ProgressionSection({ sectionRef, workspaceId, api, showT
           title={`Delete ${deletingTrait.name}?`}
           message={`Every character loses ${deletingTrait.name}, with what they had in it. Race bonuses for it go too.`}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDeletingTrait(null) },
-            { label: 'Delete', variant: 'danger', autoFocus: true, onClick: () => removeTrait(deletingTrait) }
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDeletingTrait(null) },
+            { label: t("Delete"), variant: 'danger', autoFocus: true, onClick: () => removeTrait(deletingTrait) }
           ]}
           onClose={() => setDeletingTrait(null)}
         />
@@ -219,6 +221,7 @@ const PROGRESS_WORDING = {
 
 /** The player always grows; everyone else through a line. Skills reuse it for who learns. */
 export function WhoProgresses({ progression, groups, names, onChange, wording = PROGRESS_WORDING }) {
+  const { t } = useI18n();
   const [adding, setAdding] = useState(false);
   const members = progression.members || [];
   const everyone = members.some(member => member.targetType === 'everyone');
@@ -261,7 +264,7 @@ export function WhoProgresses({ progression, groups, names, onChange, wording = 
         label={wording.label}
         value={everyone ? 'everyone' : 'chosen'}
         onChange={value => onChange(value === 'everyone' ? [...members, { targetType: 'everyone', targetId: '' }] : members.filter(member => member.targetType !== 'everyone'))}
-        options={[{ value: 'chosen', label: 'Only who I choose' }, { value: 'everyone', label: 'Everyone' }]}
+        options={[{ value: 'chosen', label: t("Only who I choose") }, { value: 'everyone', label: t("Everyone") }]}
       />
       {everyone ? (
         <Help>{wording.everyone(count)}</Help>
@@ -271,8 +274,8 @@ export function WhoProgresses({ progression, groups, names, onChange, wording = 
             {player && (
               <span className={`${chip} pr-2.5`}>
                 <span aria-hidden="true" className={`h-2 w-2 rounded-full ${meta(actorType.get(player) || 'Characters').dot}`} />
-                {names.get(player) || 'Unknown'}
-                <span className="inline-flex items-center gap-1 text-xs text-text-subtle"><Gamepad2 aria-hidden="true" className="h-3.5 w-3.5" />You play them</span>
+                {names.get(player) || t("Unknown")}
+                <span className="inline-flex items-center gap-1 text-xs text-text-subtle"><Gamepad2 aria-hidden="true" className="h-3.5 w-3.5" />{t("You play them")}</span>
               </span>
             )}
             {lines.map(member => {
@@ -281,7 +284,7 @@ export function WhoProgresses({ progression, groups, names, onChange, wording = 
                 <span key={lineKey(member)} className={`${chip} pr-1`}>
                   <span aria-hidden="true" className={`h-2 w-2 rounded-full ${view.dot}`} />
                   {view.name}
-                  {view.kind && <span className="text-xs text-text-subtle">whole {view.kind.toLowerCase()}</span>}
+                  {view.kind && <span className="text-xs text-text-subtle">{t("whole")}{' '}{view.kind.toLowerCase()}</span>}
                   <button type="button" onClick={() => onChange(members.filter(item => lineKey(item) !== lineKey(member)))} aria-label={`Remove ${view.name}`} className="inline-flex h-5 w-5 items-center justify-center rounded text-text-subtle hover:bg-tint/10 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><X aria-hidden="true" className="h-3.5 w-3.5" /></button>
                 </span>
               );
@@ -294,15 +297,14 @@ export function WhoProgresses({ progression, groups, names, onChange, wording = 
                 onClose={() => setAdding(false)}
                 options={options}
                 placeholder={`Add ${wording.label.toLowerCase()}`}
-                searchPlaceholder="Search characters, races, species"
+                searchPlaceholder={t("Search characters, races, species")}
                 ariaLabel={`Add ${wording.label.toLowerCase()}`}
                 searchInTrigger
                 autoOpen
               />
             ) : (
               <button type="button" onClick={() => setAdding(true)} className="inline-flex h-7 items-center gap-1 rounded-control border border-dashed border-border-default px-2.5 text-xs font-semibold text-text-muted hover:border-border-strong hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                <Plus aria-hidden="true" className="h-3.5 w-3.5" />Add
-              </button>
+                <Plus aria-hidden="true" className="h-3.5 w-3.5" />{t("Add")}</button>
             )}
           </div>
           <Help>{wording.chosen(count)}</Help>
@@ -315,6 +317,7 @@ export function WhoProgresses({ progression, groups, names, onChange, wording = 
 
 // Empty means no highest level, which a number field cannot express.
 function MaxLevelInput({ value, onCommit }) {
+  const { t } = useI18n();
   const [text, setText] = useState(value ? String(value) : '');
   useEffect(() => setText(value ? String(value) : ''), [value]);
   const commit = () => {
@@ -324,7 +327,7 @@ function MaxLevelInput({ value, onCommit }) {
     if (next !== (value ?? null)) onCommit(next);
   };
   return (
-    <input aria-label="Highest level" inputMode="numeric" className="field-input h-10 px-3 text-sm tabular-nums" value={text} placeholder="None" onChange={event => { if (/^\d*$/.test(event.target.value)) setText(event.target.value); }} onBlur={commit} onKeyDown={event => {
+    <input aria-label={t("Highest level")} inputMode="numeric" className="field-input h-10 px-3 text-sm tabular-nums" value={text} placeholder={t("None")} onChange={event => { if (/^\d*$/.test(event.target.value)) setText(event.target.value); }} onBlur={commit} onKeyDown={event => {
       if (event.key === 'Enter') event.currentTarget.blur();
       if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
         event.preventDefault();
@@ -358,13 +361,14 @@ export function CheckRow({ checked, onChange, label, help }) {
 }
 
 export function PolicyBlock({ label, help, value, onChange }) {
+  const { t } = useI18n();
   return (
     <div className="flex flex-wrap items-center gap-3 border-t border-border-subtle pt-5">
       <span className="min-w-[14rem] flex-1">
         <span className="block text-[0.8125rem] font-semibold text-text-secondary">{label}</span>
         <Help>{help}</Help>
       </span>
-      <SegmentedControl label={label} value={value} onChange={onChange} options={POLICY_OPTIONS} />
+      <SegmentedControl label={label} value={value} onChange={onChange} options={POLICY_OPTIONS.map(option => ({ ...option, label: t(option.label) }))} />
     </div>
   );
 }
@@ -372,16 +376,17 @@ export function PolicyBlock({ label, help, value, onChange }) {
 const TRAIT_COLUMNS = 'grid-cols-[9rem_4.5rem_5.5rem_minmax(0,1fr)_2rem]';
 
 function TraitTable({ traits, onEdit, onDelete, onStart }) {
+  const { t } = useI18n();
   if (!traits.length) {
-    return <p className="rounded-card border border-dashed border-border-subtle px-4 py-5 text-center text-[0.8125rem] text-text-muted">No attributes yet.</p>;
+    return <p className="rounded-card border border-dashed border-border-subtle px-4 py-5 text-center text-[0.8125rem] text-text-muted">{t("No attributes yet.")}</p>;
   }
   return (
     <div className="overflow-hidden rounded-card border border-border-subtle bg-surface-inset">
       <div className={`grid ${TRAIT_COLUMNS} items-center gap-3 bg-tint/[0.025] py-2 pl-3.5 pr-2 text-xs font-semibold text-text-subtle`}>
-        <span>Attribute</span>
-        <span>Starts at</span>
-        <span>Range</span>
-        <span>What it means to the AI</span>
+        <span>{t("Attribute")}</span>
+        <span>{t("Starts at")}</span>
+        <span>{t("Range")}</span>
+        <span>{t("What it means to the AI")}</span>
         <span />
       </div>
       {traits.map(trait => (
@@ -392,6 +397,7 @@ function TraitTable({ traits, onEdit, onDelete, onStart }) {
 }
 
 function TraitRow({ trait, onEdit, onDelete, onStart }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   const startRef = useRef(trait.initialValue);
@@ -399,19 +405,20 @@ function TraitRow({ trait, onEdit, onDelete, onStart }) {
     <div className={`grid ${TRAIT_COLUMNS} items-center gap-3 border-t border-border-subtle py-1.5 pl-3.5 pr-2`}>
       <span className="truncate text-[0.8125rem] font-semibold text-text-secondary">{trait.name}</span>
       <NumberInput aria-label={`${trait.name} starts at`} className="field-input h-8 px-2 text-right text-[0.8125rem] tabular-nums" min={trait.minimum} max={trait.maximum} value={trait.initialValue} onChange={value => { startRef.current = value; }} onBlur={() => { if (startRef.current !== trait.initialValue) onStart(startRef.current); }} />
-      <span className="text-xs tabular-nums text-text-muted">{formatNumber(trait.minimum)} to {formatNumber(trait.maximum)}</span>
+      <span className="text-xs tabular-nums text-text-muted">{formatNumber(trait.minimum)}{' '}{t("to")}{' '}{formatNumber(trait.maximum)}</span>
       <span className="truncate text-xs text-text-muted" data-tooltip={trait.description?.length > 70 ? trait.description : undefined}>{trait.description || '—'}</span>
       <IconButton ref={anchorRef} icon={MoreHorizontal} size="sm" label={`${trait.name} actions`} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(value => !value)} />
       <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={`${trait.name} actions`} className="w-48">
-        <MenuItem icon={Pencil} label="Edit" onSelect={() => { setOpen(false); onEdit(); }} />
+        <MenuItem icon={Pencil} label={t("Edit")} onSelect={() => { setOpen(false); onEdit(); }} />
         <MenuSeparator />
-        <MenuItem icon={Trash2} label="Delete" danger onSelect={() => { setOpen(false); onDelete(); }} />
+        <MenuItem icon={Trash2} label={t("Delete")} danger onSelect={() => { setOpen(false); onDelete(); }} />
       </Menu>
     </div>
   );
 }
 
 function TraitModal({ initial, onCancel, onSave }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState(initial);
   const [saving, setSaving] = useState(false);
   const set = patch => setDraft(current => ({ ...current, ...patch }));
@@ -423,11 +430,11 @@ function TraitModal({ initial, onCancel, onSave }) {
     try { await onSave(draft); } finally { setSaving(false); }
   };
   return (
-    <Modal title={initial.id ? `Edit ${initial.name}` : 'New attribute'} icon={Sprout} iconClassName="text-text-secondary" onClose={() => { if (!saving) onCancel(); }} size="md">
+    <Modal title={initial.id ? `Edit ${initial.name}` : t("New attribute")} icon={Sprout} iconClassName="text-text-secondary" onClose={() => { if (!saving) onCancel(); }} size="md">
       <form onSubmit={submit} className="flex flex-col gap-4 px-6 py-5">
         <label className="flex flex-col gap-1.5">
-          <span className="text-[0.8125rem] font-semibold text-text-secondary">Name</span>
-          <input autoFocus className="field-input h-10 px-3 text-sm" value={draft.name || ''} onChange={event => set({ name: event.target.value })} placeholder="Strength" />
+          <span className="text-[0.8125rem] font-semibold text-text-secondary">{t("Name")}</span>
+          <input autoFocus className="field-input h-10 px-3 text-sm" value={draft.name || ''} onChange={event => set({ name: event.target.value })} placeholder={t("Strength")} />
         </label>
         <div className="grid grid-cols-3 gap-2.5">
           {[['initialValue', 'Starts at'], ['minimum', 'Lowest'], ['maximum', 'Highest']].map(([field, label]) => (
@@ -438,12 +445,12 @@ function TraitModal({ initial, onCancel, onSave }) {
           ))}
         </div>
         <label className="flex flex-col gap-1.5">
-          <span className="text-[0.8125rem] font-semibold text-text-secondary">What it means to the AI</span>
-          <ResizableTextarea storageKey="rules-attribute-meaning" value={draft.description || ''} onChange={event => set({ description: event.target.value })} placeholder="Lifting, forcing doors, melee damage." />
+          <span className="text-[0.8125rem] font-semibold text-text-secondary">{t("What it means to the AI")}</span>
+          <ResizableTextarea storageKey="rules-attribute-meaning" value={draft.description || ''} onChange={event => set({ description: event.target.value })} placeholder={t("Lifting, forcing doors, melee damage.")} />
         </label>
         <div className="flex justify-end gap-2 pt-1">
-          <Button type="button" variant="ghost" disabled={saving} onClick={onCancel}>Cancel</Button>
-          <Button type="submit" variant="primary" loading={saving} disabled={!valid}>{initial.id ? 'Save' : 'Add attribute'}</Button>
+          <Button type="button" variant="ghost" disabled={saving} onClick={onCancel}>{t("Cancel")}</Button>
+          <Button type="submit" variant="primary" loading={saving} disabled={!valid}>{initial.id ? t("Save") : t("Add attribute")}</Button>
         </div>
       </form>
     </Modal>

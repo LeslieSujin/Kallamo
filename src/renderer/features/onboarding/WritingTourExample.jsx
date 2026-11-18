@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useRef } from 'react';
 import { useEditor } from '@tiptap/react';
 import { Check, ChevronDown, Download, FileCog, PanelLeftClose, Pin, Search, X } from 'lucide-react';
@@ -31,6 +32,7 @@ function withSelection(text, part) {
 // The Writing Desk tour's chapter, drawn with the editor's own parts. Nothing here is saved, read
 // or sent, and its controls do nothing, so a workspace's own chapters never show in the tour.
 export default function WritingTourExample({ stage, toolbarMode }) {
+  const { t } = useI18n();
   const { writingProfiles } = useApp();
   const memoryRef = useRef(null);
   // Only the toolbar reads this editor; the sheet below is drawn directly.
@@ -44,9 +46,9 @@ export default function WritingTourExample({ stage, toolbarMode }) {
   const reviewing = stage === 'review';
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden" aria-label="Example chapter">
+    <div className="relative flex flex-1 flex-col overflow-hidden" aria-label={t("Example chapter")}>
       <div className="@container ws-clear glass-panel flex h-[3.25rem] shrink-0 items-center gap-1 border-b border-border-subtle pl-3 pr-3">
-        <IconButton icon={PanelLeftClose} label="Hide chapters" size="sm" tooltipSide="bottom" onClick={noop} />
+        <IconButton icon={PanelLeftClose} label={t("Hide chapters")} size="sm" tooltipSide="bottom" onClick={noop} />
         <span className="ml-1 flex min-w-0 flex-1 items-center gap-2">
           <span className="min-w-0 truncate px-1 py-1 text-base font-bold text-text-primary">{chapter.title}</span>
           <ExampleChip />
@@ -64,25 +66,25 @@ export default function WritingTourExample({ stage, toolbarMode }) {
           {pill.label}
           <ChevronDown className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />
         </button>
-        <Menu anchorRef={memoryRef} open={stage === 'memory'} onClose={noop} label="AI memory" className="w-72" tourId="wd-memory-menu">
+        <Menu anchorRef={memoryRef} open={stage === 'memory'} onClose={noop} label={t("AI memory")} className="w-72" tourId="wd-memory-menu">
           <MenuNote>{MEMORY_NOTES.never}</MenuNote>
           <div className="px-1 pb-2 pt-1">
-            <Button fullWidth role="menuitem" onClick={noop} icon={IndexOutdatedGlyph}>Update the AI's memory</Button>
-            <p className="mt-1.5 px-1.5 text-xs leading-snug text-text-muted">Reads the paragraphs you added or changed. Do this after writing.</p>
+            <Button fullWidth role="menuitem" onClick={noop} icon={IndexOutdatedGlyph}>{t("Update the AI's memory")}</Button>
+            <p className="mt-1.5 px-1.5 text-xs leading-snug text-text-muted">{t("Reads the paragraphs you added or changed. Do this after writing.")}</p>
           </div>
           <MenuSeparator />
-          <MenuItem label="Refresh entity tags" description="Re-tags what the AI already has, without reading it again. Use after changing your Worldbuild entities." onSelect={noop} />
+          <MenuItem label={t("Refresh entity tags")} description={t("Re-tags what the AI already has, without reading it again. Use after changing your Worldbuild entities.")} onSelect={noop} />
         </Menu>
 
         <Divider />
-        <IconButton icon={Search} label="Find and replace (Ctrl F)" size="sm" tooltipSide="bottom" onClick={noop} />
-        <IconButton icon={FileCog} label="Page setup" size="sm" tooltipSide="bottom" onClick={noop} />
-        <IconButton icon={Download} label="Export" size="sm" tooltipSide="bottom" onClick={noop} />
+        <IconButton icon={Search} label={t("Find and replace (Ctrl F)")} size="sm" tooltipSide="bottom" onClick={noop} />
+        <IconButton icon={FileCog} label={t("Page setup")} size="sm" tooltipSide="bottom" onClick={noop} />
+        <IconButton icon={Download} label={t("Export")} size="sm" tooltipSide="bottom" onClick={noop} />
         <Divider />
         <span data-tour="wd-panels" className="flex shrink-0 items-center gap-1">
-          <PanelToggle icon={NoteGlyph} label="Notes" count={0} active={false} onClick={noop} />
-          <PanelToggle icon={AiGlyph} label="Analyses" count={0} active={false} onClick={noop} />
-          <PanelToggle icon={Pin} label="Directives" count={0} active={false} onClick={noop} />
+          <PanelToggle icon={NoteGlyph} label={t("Notes")} count={0} active={false} onClick={noop} />
+          <PanelToggle icon={AiGlyph} label={t("Analyses")} count={0} active={false} onClick={noop} />
+          <PanelToggle icon={Pin} label={t("Directives")} count={0} active={false} onClick={noop} />
         </span>
       </div>
 
@@ -109,8 +111,7 @@ export default function WritingTourExample({ stage, toolbarMode }) {
                     onClick={noop}
                     className="inline-flex h-8 items-center gap-1.5 rounded-md bg-accent px-3 text-xs font-semibold leading-none text-on-accent transition-[filter] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                   >
-                    <AiGlyph className="h-4 w-4" /> Invoke AI
-                  </button>
+                    <AiGlyph className="h-4 w-4" />{t("Invoke AI")}</button>
                   <button
                     type="button"
                     data-tour="wd-link"
@@ -118,8 +119,7 @@ export default function WritingTourExample({ stage, toolbarMode }) {
                     onClick={noop}
                     className="inline-flex h-8 items-center gap-1.5 rounded-md bg-tint/[0.06] px-2.5 text-xs font-semibold leading-none text-text-secondary transition-colors hover:bg-tint/10 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                   >
-                    <WorldbuildGlyph className="h-4 w-4" /> Link to world
-                    <ChevronDown aria-hidden="true" className="h-3.5 w-3.5 text-text-subtle" />
+                    <WorldbuildGlyph className="h-4 w-4" />{t("Link to world")}<ChevronDown aria-hidden="true" className="h-3.5 w-3.5 text-text-subtle" />
                   </button>
                 </div>
               )}
@@ -128,7 +128,7 @@ export default function WritingTourExample({ stage, toolbarMode }) {
               <div key={index} data-tour="wd-suggestion">
                 <p><span className="wd-diff-removed">{text}</span></p>
                 <div className="wd-diff-block-added">
-                  <div className="wd-diff-block-tag">Suggested replacement</div>
+                  <div className="wd-diff-block-tag">{t("Suggested replacement")}</div>
                   <div><p>{chapter.suggestion.proposed}</p></div>
                 </div>
               </div>
@@ -138,23 +138,21 @@ export default function WritingTourExample({ stage, toolbarMode }) {
 
         {reviewing && (
           <div className="pointer-events-none sticky bottom-4 z-20 mt-4 flex flex-col items-center gap-2">
-            <div data-tour="wd-review" role="group" aria-label="Review suggestion" className="pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border-default bg-surface-panel/95 py-1 pl-3 pr-1 shadow-overlay">
+            <div data-tour="wd-review" role="group" aria-label={t("Review suggestion")} className="pointer-events-auto flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border-default bg-surface-panel/95 py-1 pl-3 pr-1 shadow-overlay">
               <SuggestionPendingGlyph className="h-4 w-4" style={{ color: editing?.color || undefined }} />
-              <span className="text-xs font-semibold text-text-primary">{editing?.name || 'Editing'}</span>
-              <span className="text-xs text-text-subtle">· Replace</span>
+              <span className="text-xs font-semibold text-text-primary">{editing?.name || t("Editing")}</span>
+              <span className="text-xs text-text-subtle">{t("· Replace")}</span>
               <span aria-hidden="true" className="mx-1 h-4 w-px bg-border-default" />
               <span className="text-xs tabular-nums">
                 <span className="text-status-success">+{delta.added}</span>
                 <span className="ml-1.5 text-status-danger">−{delta.removed}</span>
-                <span className="ml-1 text-text-subtle">words</span>
+                <span className="ml-1 text-text-subtle">{t("words")}</span>
               </span>
               <span aria-hidden="true" className="mx-1 h-4 w-px bg-border-default" />
               <button type="button" onClick={noop} className="inline-flex h-8 items-center gap-1 rounded-full px-3 text-xs font-semibold text-text-secondary transition-colors hover:bg-tint/[0.08] hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                <X className="h-3.5 w-3.5" aria-hidden="true" /> Reject
-              </button>
+                <X className="h-3.5 w-3.5" aria-hidden="true" />{t("Reject")}</button>
               <button type="button" onClick={noop} className="inline-flex h-8 items-center gap-1 rounded-full bg-accent px-3 text-xs font-semibold text-on-accent transition-[filter] hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                <Check className="h-3.5 w-3.5" aria-hidden="true" /> Accept
-              </button>
+                <Check className="h-3.5 w-3.5" aria-hidden="true" />{t("Accept")}</button>
             </div>
           </div>
         )}

@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { Check, ChevronRight, CircleAlert, FileDown, Lock, Package, X } from 'lucide-react';
 import Checkbox from '../ui/Checkbox';
@@ -57,10 +58,11 @@ function Column({ title, icon: Icon, color, items }) {
 
 // What a file carries and what stays on this computer. Optional parts move between the two as they are chosen.
 export function PackageColumns({ inside, stays }) {
+  const { t } = useI18n();
   return (
     <div className="flex gap-3">
-      <Column title="In the file" icon={Package} color="var(--theme-status-success)" items={inside} />
-      <Column title="Stays here" icon={Lock} color="var(--theme-text-muted)" items={stays} />
+      <Column title={t("In the file")} icon={Package} color="var(--theme-status-success)" items={inside} />
+      <Column title={t("Stays here")} icon={Lock} color="var(--theme-text-muted)" items={stays} />
     </div>
   );
 }
@@ -93,6 +95,7 @@ export const megabytes = bytes => (bytes >= 1024 * 1024 ? `${(bytes / (1024 * 10
 
 // A workflow's steps as pens. Up to four read as named cards; longer chains become a numbered strip with the names below.
 export function StepChain({ steps, failedIndex = null }) {
+  const { t } = useI18n();
   const markOf = index => (failedIndex == null ? null : index < failedIndex ? 'done' : index === failedIndex ? 'failed' : null);
   const dimOf = index => failedIndex != null && index > failedIndex;
   if (steps.length <= 4) {
@@ -103,7 +106,7 @@ export function StepChain({ steps, failedIndex = null }) {
             <div className="flex min-w-0 flex-1 flex-col items-center gap-1.5 text-center" style={dimOf(index) ? { opacity: 0.45 } : undefined}>
               <MarkedAvatar color={step.color} size={36} mark={markOf(index)} />
               <span className="max-w-full truncate text-xs font-semibold text-text-secondary">{step.name}</span>
-              <span className="text-xs text-text-subtle">Step {index + 1}</span>
+              <span className="text-xs text-text-subtle">{t("Step")}{' '}{index + 1}</span>
             </div>
             {index < steps.length - 1 && <ChevronRight className="mt-2.5 h-4 w-4 shrink-0 text-text-disabled" aria-hidden="true" />}
           </React.Fragment>
@@ -136,10 +139,11 @@ export function StepChain({ steps, failedIndex = null }) {
 }
 
 export function ProviderError({ source, message }) {
+  const { t } = useI18n();
   return (
     <div className="overflow-hidden rounded-control border" style={{ background: 'color-mix(in srgb, var(--theme-status-danger) 8%, transparent)', borderColor: 'color-mix(in srgb, var(--theme-status-danger) 24%, transparent)' }}>
       <p className="flex items-center gap-2 border-b px-4 py-2 text-xs font-semibold text-status-danger" style={{ borderColor: 'color-mix(in srgb, var(--theme-status-danger) 18%, transparent)' }}>
-        <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />{source ? `${source} said` : 'The provider said'}
+        <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />{source ? `${source} said` : t("The provider said")}
       </p>
       <p className="custom-scrollbar max-h-48 select-text overflow-y-auto whitespace-pre-wrap px-4 py-3 font-mono text-xs leading-relaxed text-text-secondary">{message}</p>
     </div>

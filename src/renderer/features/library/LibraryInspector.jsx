@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { ArrowLeft, BookOpen, ChevronDown, ChevronUp, Copy, Download, MessageSquare, MoreHorizontal, Pencil, Plus, Reply, Search, Trash2, Upload, Workflow } from 'lucide-react';
 import Logo, { ReedPen } from '../../logo';
@@ -10,16 +11,16 @@ import { parseMarkdown } from '../../utils/markdown';
 const SETUP = 'text-status-setup';
 
 export function LibraryRail({ tabs, activeTab, onTab, search, onSearch, onBack, newLabel, onNew, onImport, children }) {
+  const { t } = useI18n();
   return (
     <aside className="flex w-[21.25rem] shrink-0 flex-col border-r border-tint/[0.05] surface-rail px-4 pb-4 pt-16">
       <button type="button" onClick={onBack} className="inline-flex items-center gap-1.5 self-start rounded-md px-1 text-[0.8125rem] font-semibold text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />Workspaces
-      </button>
+        <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />{t("Workspaces")}</button>
       <div className="mt-3 flex items-center gap-3 px-1">
         <Logo size={26} className="shrink-0" />
-        <h1 className="text-[1.375rem] font-extrabold tracking-[-0.02em] text-text-primary">Library</h1>
+        <h1 className="text-[1.375rem] font-extrabold tracking-[-0.02em] text-text-primary">{t("Library")}</h1>
       </div>
-      <div role="tablist" aria-label="Library sections" className="mt-[1.125rem] flex gap-0.5 rounded-[0.5625rem] bg-tint/[0.04] p-[3px]">
+      <div role="tablist" aria-label={t("Library sections")} className="mt-[1.125rem] flex gap-0.5 rounded-[0.5625rem] bg-tint/[0.04] p-[3px]">
         {tabs.map(tab => {
           const active = tab.id === activeTab;
           return (
@@ -38,11 +39,11 @@ export function LibraryRail({ tabs, activeTab, onTab, search, onSearch, onBack, 
       </div>
       <div className="mt-3 flex gap-2">
         <Button size="sm" icon={Plus} onClick={onNew} className="min-h-9 flex-[1.4]">{newLabel}</Button>
-        {onImport && <Button variant="ghost" size="sm" icon={Upload} onClick={onImport} className="min-h-9 flex-1">Import</Button>}
+        {onImport && <Button variant="ghost" size="sm" icon={Upload} onClick={onImport} className="min-h-9 flex-1">{t("Import")}</Button>}
       </div>
       <div className="relative mt-2.5">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-subtle" aria-hidden="true" />
-        <input value={search} onChange={e => onSearch(e.target.value)} placeholder="Search" aria-label="Search the library" className="h-8 w-full rounded-control border border-border-default bg-surface-input pl-9 pr-3 text-[0.8125rem] text-text-secondary placeholder:text-text-subtle focus:border-accent focus:outline-none" />
+        <input value={search} onChange={e => onSearch(e.target.value)} placeholder={t("Search")} aria-label={t("Search the library")} className="h-8 w-full rounded-control border border-border-default bg-surface-input pl-9 pr-3 text-[0.8125rem] text-text-secondary placeholder:text-text-subtle focus:border-accent focus:outline-none" />
       </div>
       <div data-tour="library-rail" className="mt-2.5 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto custom-scrollbar pr-0.5">{children}</div>
     </aside>
@@ -113,6 +114,7 @@ function SetupNotice({ title, text, action, onAction }) {
 
 // Long text shows its start; the footer can open the whole of it in place and fold it back.
 function Excerpt({ html, text, info, actions = null }) {
+  const { t } = useI18n();
   const bodyRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
@@ -132,7 +134,7 @@ function Excerpt({ html, text, info, actions = null }) {
         {actions}
         {(overflows || expanded) && (
           <Button variant="subtle" size="sm" icon={expanded ? ChevronUp : ChevronDown} aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>
-            {expanded ? 'Show less' : 'Show all'}
+            {expanded ? t("Show less") : t("Show all")}
           </Button>
         )}
       </div>
@@ -144,11 +146,12 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 const chars = n => `${n.toLocaleString()} character${n === 1 ? '' : 's'}`;
 
 function MoreMenu({ label, children }) {
+  const { t } = useI18n();
   const ref = useRef(null);
   const [open, setOpen] = useState(false);
   return (
     <>
-      <span ref={ref}><IconButton icon={MoreHorizontal} label="More" onClick={() => setOpen(value => !value)} /></span>
+      <span ref={ref}><IconButton icon={MoreHorizontal} label={t("More")} onClick={() => setOpen(value => !value)} /></span>
       <Menu anchorRef={ref} open={open} onClose={() => setOpen(false)} label={label} className="w-56">
         {typeof children === 'function' ? children(() => setOpen(false)) : children}
       </Menu>
@@ -170,6 +173,7 @@ function DetailHeader({ leading, title, meta, actions }) {
 }
 
 export function ProfileDetail({ profile, apiName, workspaces, workflows, knowledgeCount, onEdit, onSetUp, onSearchInstructions, onKnowledge, onDuplicate, onExport, onDelete }) {
+  const { t } = useI18n();
   const color = profile.color || '#FBCB2D';
   const ready = !profile.needsSetup;
   const rules = profile.systemPrompt || '';
@@ -187,18 +191,18 @@ export function ProfileDetail({ profile, apiName, workspaces, workflows, knowled
           title={profile.name}
           meta={ready
             ? <>{apiName} · <span className="font-mono text-[0.8125rem]">{profile.model}</span></>
-            : <button type="button" onClick={onSetUp} className={`font-semibold ${SETUP} hover:brightness-110`}>No connection yet · Set up</button>}
+            : <button type="button" onClick={onSetUp} className={`font-semibold ${SETUP} hover:brightness-110`}>{t("No connection yet · Set up")}</button>}
           actions={(
             <>
-              <Button variant="ghost" size="sm" icon={Download} onClick={onExport}>Export</Button>
-              <Button variant="ghost" size="sm" icon={BookOpen} onClick={onKnowledge}>Knowledge base</Button>
-              <Button variant="ghost" size="sm" icon={Pencil} onClick={onEdit}>Edit</Button>
+              <Button variant="ghost" size="sm" icon={Download} onClick={onExport}>{t("Export")}</Button>
+              <Button variant="ghost" size="sm" icon={BookOpen} onClick={onKnowledge}>{t("Knowledge base")}</Button>
+              <Button variant="ghost" size="sm" icon={Pencil} onClick={onEdit}>{t("Edit")}</Button>
               <MoreMenu label={`${profile.name} actions`}>
                 {close => (
                   <>
-                    <MenuItem icon={Copy} label="Duplicate" onSelect={() => { close(); onDuplicate(); }} />
+                    <MenuItem icon={Copy} label={t("Duplicate")} onSelect={() => { close(); onDuplicate(); }} />
                     <MenuSeparator />
-                    <MenuItem icon={Trash2} label="Delete…" danger onSelect={() => { close(); onDelete(); }} />
+                    <MenuItem icon={Trash2} label={t("Delete…")} danger onSelect={() => { close(); onDelete(); }} />
                   </>
                 )}
               </MoreMenu>
@@ -206,16 +210,16 @@ export function ProfileDetail({ profile, apiName, workspaces, workflows, knowled
           )}
         />
         <p className="mt-6 text-[0.9375rem] leading-relaxed text-text-secondary select-text">
-          {profile.description || <span className="text-text-subtle">No description.</span>}
+          {profile.description || <span className="text-text-subtle">{t("No description.")}</span>}
         </p>
 
         {!ready && (
           <SetupNotice
-            title="This profile can’t reply yet"
+            title={t("This profile can’t reply yet")}
             text={blockedFlows.length
               ? `Give it a connection and a model. Until then ${blockedFlows.length === 1 ? `the workflow “${blockedFlows[0].name}” can’t run` : `${blockedFlows.length} workflows can’t run`} either.`
-              : 'Give it a connection and a model.'}
-            action="Set up"
+              : t("Give it a connection and a model.")}
+            action={t("Set up")}
             onAction={onSetUp}
           />
         )}
@@ -227,51 +231,51 @@ export function ProfileDetail({ profile, apiName, workspaces, workflows, knowled
           [(profile.maxTokens ?? 2048).toLocaleString(), 'max reply tokens'],
         ]} />
 
-        <Section title="Behavior and rules">
+        <Section title={t("Behavior and rules")}>
           {rules ? (
             <Excerpt html={parseMarkdown(rules)} info={chars(rules.length)} />
           ) : (
             <Card className="px-5 py-4">
-              <p className="text-sm font-semibold text-text-primary">No rules yet</p>
-              <p className="mt-0.5 text-[0.8125rem] text-text-muted">Rules are how it writes: voice, format, what it should never do.</p>
-              <Button variant="ghost" size="sm" icon={Pencil} className="mt-3" onClick={onEdit}>Write rules</Button>
+              <p className="text-sm font-semibold text-text-primary">{t("No rules yet")}</p>
+              <p className="mt-0.5 text-[0.8125rem] text-text-muted">{t("Rules are how it writes: voice, format, what it should never do.")}</p>
+              <Button variant="ghost" size="sm" icon={Pencil} className="mt-3" onClick={onEdit}>{t("Write rules")}</Button>
             </Card>
           )}
         </Section>
 
         <Section
-          title="Smart search"
-          aside={<span className="caption inline-flex items-center gap-2">{searchOn && <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />}{searchOn ? 'On' : 'Off'}</span>}
+          title={t("Smart search")}
+          aside={<span className="caption inline-flex items-center gap-2">{searchOn && <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />}{searchOn ? t("On") : t("Off")}</span>}
         >
           {!searchOn ? (
             <Card className="px-5 py-4">
-              <p className="text-[0.8125rem] text-text-muted">Off. Retrieval matches your message against what Kallamo has stored, word for word.</p>
+              <p className="text-[0.8125rem] text-text-muted">{t("Off. Retrieval matches your message against what Kallamo has stored, word for word.")}</p>
             </Card>
           ) : search ? (
-            <Excerpt text={search} info={`${chars(search.length)} · ${plural(rounds, 'search round')}`} actions={<Button variant="subtle" size="sm" icon={Pencil} onClick={onSearchInstructions}>Edit</Button>} />
+            <Excerpt text={search} info={`${chars(search.length)} · ${plural(rounds, 'search round')}`} actions={<Button variant="subtle" size="sm" icon={Pencil} onClick={onSearchInstructions}>{t("Edit")}</Button>} />
           ) : (
             <Card className="px-5 py-4">
-              <p className="text-sm font-semibold text-text-primary">No search instructions</p>
-              <p className="mt-0.5 text-[0.8125rem] text-text-muted">It searches with Kallamo’s built-in approach. Write instructions to tell it what to look for.</p>
+              <p className="text-sm font-semibold text-text-primary">{t("No search instructions")}</p>
+              <p className="mt-0.5 text-[0.8125rem] text-text-muted">{t("It searches with Kallamo’s built-in approach. Write instructions to tell it what to look for.")}</p>
               <div className="mt-3 flex items-center gap-3.5">
-                <Button variant="ghost" size="sm" icon={Pencil} onClick={onSearchInstructions}>Write instructions</Button>
+                <Button variant="ghost" size="sm" icon={Pencil} onClick={onSearchInstructions}>{t("Write instructions")}</Button>
                 <span className="caption">{plural(rounds, 'search round')}</span>
               </div>
             </Card>
           )}
         </Section>
 
-        <Section title="Knowledge base" aside={<Button variant="subtle" size="sm" icon={knowledgeCount ? BookOpen : Plus} onClick={onKnowledge}>{knowledgeCount ? 'Open' : 'Add files'}</Button>}>
+        <Section title={t("Knowledge base")} aside={<Button variant="subtle" size="sm" icon={knowledgeCount ? BookOpen : Plus} onClick={onKnowledge}>{knowledgeCount ? t("Open") : t("Add files")}</Button>}>
           <Card className="px-5 py-3.5">
             <p className="text-[0.8125rem] text-text-muted">
-              {knowledgeCount ? `${plural(knowledgeCount, 'file')} this profile can look up.` : 'No files yet. Add a style guide, notes or lore this profile can look up.'}
+              {knowledgeCount ? `${plural(knowledgeCount, 'file')} this profile can look up.` : t("No files yet. Add a style guide, notes or lore this profile can look up.")}
             </p>
           </Card>
         </Section>
 
-        <Section title="Used in">
+        <Section title={t("Used in")}>
           {workspaces.length === 0 && workflows.length === 0 ? (
-            <p className="text-[0.8125rem] text-text-subtle">Not in a workspace or workflow yet.</p>
+            <p className="text-[0.8125rem] text-text-subtle">{t("Not in a workspace or workflow yet.")}</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {workspaces.map(title => <span key={`w-${title}`} className="inline-flex h-7 items-center gap-1.5 rounded-md bg-tint/[0.05] px-2.5 text-xs text-text-secondary"><BookOpen className="h-3 w-3" aria-hidden="true" />{title}</span>)}
@@ -298,6 +302,7 @@ function ChainEnd({ icon: Icon, title, text }) {
 }
 
 export function WorkflowDetail({ workflow, steps, profileOf, uses, onEdit, onSetUp, onExport, onDuplicate, onDelete }) {
+  const { t } = useI18n();
   const blocked = steps.map((step, index) => ({ step, index, profile: profileOf(step.profileId) })).filter(({ profile }) => !profile || profile.needsSetup);
   const firstBlocked = blocked[0];
   return (
@@ -307,14 +312,14 @@ export function WorkflowDetail({ workflow, steps, profileOf, uses, onEdit, onSet
         meta={`${plural(steps.length, 'step')}. Each one reads what the step before it wrote.`}
         actions={(
           <>
-            <Button variant="ghost" size="sm" icon={Download} onClick={onExport}>Export</Button>
-            <Button variant="ghost" size="sm" icon={Pencil} onClick={onEdit}>Edit</Button>
+            <Button variant="ghost" size="sm" icon={Download} onClick={onExport}>{t("Export")}</Button>
+            <Button variant="ghost" size="sm" icon={Pencil} onClick={onEdit}>{t("Edit")}</Button>
             <MoreMenu label={`${workflow.name} actions`}>
               {close => (
                 <>
-                  <MenuItem icon={Copy} label="Duplicate" onSelect={() => { close(); onDuplicate(); }} />
+                  <MenuItem icon={Copy} label={t("Duplicate")} onSelect={() => { close(); onDuplicate(); }} />
                   <MenuSeparator />
-                  <MenuItem icon={Trash2} label="Delete…" danger onSelect={() => { close(); onDelete(); }} />
+                  <MenuItem icon={Trash2} label={t("Delete…")} danger onSelect={() => { close(); onDelete(); }} />
                 </>
               )}
             </MoreMenu>
@@ -323,15 +328,15 @@ export function WorkflowDetail({ workflow, steps, profileOf, uses, onEdit, onSet
       />
       {firstBlocked && (
         <SetupNotice
-          title="It can’t run yet"
+          title={t("It can’t run yet")}
           text={firstBlocked.profile ? `${firstBlocked.profile.name}, step ${firstBlocked.index + 1}, has no model.` : `Step ${firstBlocked.index + 1} uses a profile that no longer exists.`}
-          action={firstBlocked.profile ? `Set up ${firstBlocked.profile.name}` : 'Edit the workflow'}
+          action={firstBlocked.profile ? `Set up ${firstBlocked.profile.name}` : t("Edit the workflow")}
           onAction={() => (firstBlocked.profile ? onSetUp(firstBlocked.profile) : onEdit())}
         />
       )}
       <Facts items={[[steps.length, steps.length === 1 ? 'step' : 'steps'], [uses, uses === 1 ? 'workspace' : 'workspaces'], [`${steps.length - blocked.length} of ${steps.length}`, 'steps ready']]} />
-      <Section title="The chain">
-        <ChainEnd icon={MessageSquare} title="Your message" text="Starts the run" />
+      <Section title={t("The chain")}>
+        <ChainEnd icon={MessageSquare} title={t("Your message")} text={t("Starts the run")} />
         {steps.map((step, index) => {
           const profile = profileOf(step.profileId);
           const ready = profile && !profile.needsSetup;
@@ -341,14 +346,14 @@ export function WorkflowDetail({ workflow, steps, profileOf, uses, onEdit, onSet
               <div className="flex gap-4">
                 {profile ? <ProfileAvatar color={profile.color || '#FBCB2D'} size={34} muted={!ready} /> : <span className="h-[2.125rem] w-[2.125rem] shrink-0 rounded-[0.625rem] border border-dashed border-tint/20" />}
                 <Card className="min-w-0 flex-1 px-[1.125rem] py-3.5">
-                  <div className="flex items-baseline gap-2.5"><span className="caption tabular-nums">{index + 1}</span><span className="truncate text-sm font-semibold text-text-primary">{profile?.name || 'Missing profile'}</span></div>
-                  <p className={`mt-0.5 text-[0.8125rem] ${step.prompt ? 'text-text-muted' : 'italic text-text-subtle'}`}>{step.prompt || 'No extra instructions. It follows its own rules.'}</p>
+                  <div className="flex items-baseline gap-2.5"><span className="caption tabular-nums">{index + 1}</span><span className="truncate text-sm font-semibold text-text-primary">{profile?.name || t("Missing profile")}</span></div>
+                  <p className={`mt-0.5 text-[0.8125rem] ${step.prompt ? 'text-text-muted' : 'italic text-text-subtle'}`}>{step.prompt || t("No extra instructions. It follows its own rules.")}</p>
                   <div className="mt-2.5 flex flex-wrap gap-1.5">
                     {ready
                       ? <span className="rounded-md bg-tint/[0.05] px-2 py-0.5 font-mono text-[0.6875rem] text-text-secondary">{profile.model}</span>
-                      : profile && <button type="button" onClick={() => onSetUp(profile)} className={`text-[0.8125rem] font-semibold ${SETUP}`}>No model · Set up</button>}
-                    <span className="rounded-md bg-tint/[0.05] px-2 py-0.5 text-xs text-text-secondary">{step.includeContext === false ? 'No workspace context' : 'Workspace context'}</span>
-                    {index > 0 && <span className="rounded-md bg-tint/[0.05] px-2 py-0.5 text-xs text-text-secondary">{step.includeChatHistory === false ? 'No chat history' : 'Chat history'}</span>}
+                      : profile && <button type="button" onClick={() => onSetUp(profile)} className={`text-[0.8125rem] font-semibold ${SETUP}`}>{t("No model · Set up")}</button>}
+                    <span className="rounded-md bg-tint/[0.05] px-2 py-0.5 text-xs text-text-secondary">{step.includeContext === false ? t("No workspace context") : t("Workspace context")}</span>
+                    {index > 0 && <span className="rounded-md bg-tint/[0.05] px-2 py-0.5 text-xs text-text-secondary">{step.includeChatHistory === false ? t("No chat history") : t("Chat history")}</span>}
                   </div>
                 </Card>
               </div>
@@ -356,33 +361,34 @@ export function WorkflowDetail({ workflow, steps, profileOf, uses, onEdit, onSet
           );
         })}
         <ChainLink />
-        <ChainEnd icon={Reply} title="Reply in chat" text="Only the last step answers" />
+        <ChainEnd icon={Reply} title={t("Reply in chat")} text={t("Only the last step answers")} />
       </Section>
     </div>
   );
 }
 
 export function VariableDetail({ variable, usedBy, onEdit, onCopy, onDelete }) {
+  const { t } = useI18n();
   return (
     <div className="mx-auto max-w-[54rem] px-14 pb-16 pt-10">
       <DetailHeader
         title={variable.name}
-        meta={<>Type <button type="button" onClick={onCopy} className="font-mono text-accent hover:brightness-110" aria-label="Copy the tag">{`{{${variable.key}}}`}</button> in any rules or workflow step</>}
+        meta={<>{t("Type")}{' '}<button type="button" onClick={onCopy} className="font-mono text-accent hover:brightness-110" aria-label={t("Copy the tag")}>{`{{${variable.key}}}`}</button>{' '}{t("in any rules or workflow step")}</>}
         actions={(
           <>
-            <IconButton icon={Copy} label="Copy the tag" onClick={onCopy} />
-            <IconButton icon={Trash2} label="Delete" tone="danger" onClick={onDelete} />
-            <Button variant="ghost" size="sm" icon={Pencil} onClick={onEdit}>Edit</Button>
+            <IconButton icon={Copy} label={t("Copy the tag")} onClick={onCopy} />
+            <IconButton icon={Trash2} label={t("Delete")} tone="danger" onClick={onDelete} />
+            <Button variant="ghost" size="sm" icon={Pencil} onClick={onEdit}>{t("Edit")}</Button>
           </>
         )}
       />
       {variable.description && <p className="mt-6 text-[0.9375rem] leading-relaxed text-text-secondary">{variable.description}</p>}
-      <Section title="It becomes">
-        <Card className="px-5 py-4"><p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary select-text">{variable.value || <span className="text-text-subtle">Empty</span>}</p></Card>
+      <Section title={t("It becomes")}>
+        <Card className="px-5 py-4"><p className="whitespace-pre-wrap text-sm leading-relaxed text-text-primary select-text">{variable.value || <span className="text-text-subtle">{t("Empty")}</span>}</p></Card>
       </Section>
-      <Section title="Used in">
+      <Section title={t("Used in")}>
         {usedBy.length === 0
-          ? <p className="text-[0.8125rem] text-text-subtle">No profile or workflow uses it yet.</p>
+          ? <p className="text-[0.8125rem] text-text-subtle">{t("No profile or workflow uses it yet.")}</p>
           : <div className="flex flex-wrap gap-2">{usedBy.map(item => <span key={item.key} className="inline-flex h-7 items-center gap-1.5 rounded-md bg-tint/[0.05] px-2.5 text-xs text-text-secondary">{item.color ? <ReedPen size={12} color={item.color} /> : <Workflow className="h-3 w-3" aria-hidden="true" />}{item.name}</span>)}</div>}
       </Section>
     </div>

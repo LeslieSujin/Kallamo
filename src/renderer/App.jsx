@@ -1,3 +1,4 @@
+import { useI18n } from './i18n';
 import React, { Suspense, useState, useEffect } from 'react';
 import { AppProvider, useApp, useEngineDownloadProgress, useReindexingProgress, useToast } from './context/AppContext';
 import TitleBar from './components/TitleBar';
@@ -36,6 +37,7 @@ const Spinner = ({ className }) => (
 );
 
 function EngineDownloadStatus() {
+  const { t } = useI18n();
   const { setEngineDownloadProgress, cancelEngineDownload } = useApp();
   const engineDownloadProgress = useEngineDownloadProgress();
   if (!engineDownloadProgress) return null;
@@ -48,10 +50,10 @@ function EngineDownloadStatus() {
             <Spinner className="w-4 h-4" />
           </div>
           <span className="text-[0.6875rem] font-bold text-text-primary uppercase tracking-wider">
-            {engineDownloadProgress.status === 'downloading' && 'Downloading Local AI Engine...'}
-            {engineDownloadProgress.status === 'verifying' && 'Verifying Integrity...'}
-            {engineDownloadProgress.status === 'extracting' && 'Setting up AI files...'}
-            {engineDownloadProgress.status === 'completed' && 'Setup complete!'}
+            {engineDownloadProgress.status === 'downloading' && t("Downloading Local AI Engine...")}
+            {engineDownloadProgress.status === 'verifying' && t("Verifying Integrity...")}
+            {engineDownloadProgress.status === 'extracting' && t("Setting up AI files...")}
+            {engineDownloadProgress.status === 'completed' && t("Setup complete!")}
           </span>
         </div>
         {engineDownloadProgress.status === 'downloading' && (
@@ -64,14 +66,11 @@ function EngineDownloadStatus() {
             </div>
             <div className="flex justify-between items-center mt-1.5">
               <span className="caption font-medium">
-                {engineDownloadProgress.percent || 0}% completed
-              </span>
+                {engineDownloadProgress.percent || 0}{t("% completed")}</span>
               <button
                 onClick={() => cancelEngineDownload()}
                 className="text-[0.625rem] text-gray-400 hover:text-text-primary transition-colors cursor-pointer underline"
-              >
-                Cancel
-              </button>
+              >{t("Cancel")}</button>
             </div>
           </div>
         )}
@@ -93,18 +92,18 @@ function EngineDownloadStatus() {
         </div>
 
         <h2 className="text-xl font-bold text-text-primary capitalize">
-          {engineDownloadProgress.status === 'downloading' && 'Downloading Local AI Engine'}
-          {engineDownloadProgress.status === 'verifying' && 'Verifying Integrity Check'}
-          {engineDownloadProgress.status === 'extracting' && 'Extracting Local AI Files'}
-          {engineDownloadProgress.status === 'completed' && 'Installation Successful'}
-          {engineDownloadProgress.status === 'error' && 'Installation Error'}
+          {engineDownloadProgress.status === 'downloading' && t("Downloading Local AI Engine")}
+          {engineDownloadProgress.status === 'verifying' && t("Verifying Integrity Check")}
+          {engineDownloadProgress.status === 'extracting' && t("Extracting Local AI Files")}
+          {engineDownloadProgress.status === 'completed' && t("Installation Successful")}
+          {engineDownloadProgress.status === 'error' && t("Installation Error")}
         </h2>
 
         <p className="text-sm text-gray-400 leading-relaxed">
-          {engineDownloadProgress.status === 'downloading' && 'This needs a one-time download of the native runtime (~25 MB). Please do not close the application.'}
-          {engineDownloadProgress.status === 'verifying' && 'Validating SHA-256 package checksum.'}
-          {engineDownloadProgress.status === 'extracting' && 'Decompressing binary modules into the application workspace. This may take up to a minute.'}
-          {engineDownloadProgress.status === 'completed' && 'Engine successfully set up! Directing to dashboard...'}
+          {engineDownloadProgress.status === 'downloading' && t("This needs a one-time download of the native runtime (~25 MB). Please do not close the application.")}
+          {engineDownloadProgress.status === 'verifying' && t("Validating SHA-256 package checksum.")}
+          {engineDownloadProgress.status === 'extracting' && t("Decompressing binary modules into the application workspace. This may take up to a minute.")}
+          {engineDownloadProgress.status === 'completed' && t("Engine successfully set up! Directing to dashboard...")}
           {engineDownloadProgress.status === 'error' && `Error during setup: ${engineDownloadProgress.error}`}
         </p>
 
@@ -119,8 +118,7 @@ function EngineDownloadStatus() {
 
         {engineDownloadProgress.status === 'downloading' && (
           <p className="caption font-medium">
-            {engineDownloadProgress.percent || 0}% completed
-            {engineDownloadProgress.loaded && engineDownloadProgress.total && (
+            {engineDownloadProgress.percent || 0}{t("% completed")}{engineDownloadProgress.loaded && engineDownloadProgress.total && (
               ` (${(engineDownloadProgress.loaded / (1024 * 1024)).toFixed(1)} / ${(engineDownloadProgress.total / (1024 * 1024)).toFixed(1)} MB)`
             )}
           </p>
@@ -130,18 +128,14 @@ function EngineDownloadStatus() {
           <button
             onClick={() => cancelEngineDownload()}
             className="mt-2 px-5 py-2 bg-transparent hover:bg-gray-800/50 text-gray-400 hover:text-text-primary rounded-lg text-xs font-semibold transition-colors cursor-pointer border border-gray-700/50"
-          >
-            Cancel Download
-          </button>
+          >{t("Cancel Download")}</button>
         )}
 
         {engineDownloadProgress.status === 'error' && (
           <button
             onClick={() => setEngineDownloadProgress(null)}
             className="mt-4 px-5 py-2 bg-danger-solid hover:bg-danger-solid-hover text-on-danger rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-          >
-            Close
-          </button>
+          >{t("Close")}</button>
         )}
       </div>
     </div>
@@ -149,6 +143,7 @@ function EngineDownloadStatus() {
 }
 
 function ReindexOverlay() {
+  const { t } = useI18n();
   const reindexingProgress = useReindexingProgress();
   if (!reindexingProgress || (reindexingProgress.status !== 'started' && reindexingProgress.status !== 'running')) return null;
   return (
@@ -157,18 +152,15 @@ function ReindexOverlay() {
         <div className="relative">
           <Spinner className="w-12 h-12" />
         </div>
-        <h2 className="text-xl font-bold text-text-primary">Upgrading Knowledge Base</h2>
-        <p className="text-sm text-gray-400 leading-relaxed">
-          Kallamo is upgrading your local AI to a new multilingual model.
-          This only happens once and may take a few minutes depending on your data.
-        </p>
+        <h2 className="text-xl font-bold text-text-primary">{t("Upgrading Knowledge Base")}</h2>
+        <p className="text-sm text-gray-400 leading-relaxed">{t("Kallamo is upgrading your local AI to a new multilingual model. This only happens once and may take a few minutes depending on your data.")}</p>
         <div className="w-full bg-surface-panel rounded-full h-2 overflow-hidden">
           <div
             className="bg-accent h-full rounded-full transition-[width] duration-500"
             style={{ width: reindexingProgress.total ? `${Math.round((reindexingProgress.current / reindexingProgress.total) * 100)}%` : '30%' }}
           />
         </div>
-        <p className="caption font-medium">{reindexingProgress.message || 'Processing...'}</p>
+        <p className="caption font-medium">{reindexingProgress.message || t("Processing...")}</p>
       </div>
     </div>
   );

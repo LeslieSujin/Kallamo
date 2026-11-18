@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 
@@ -12,6 +13,7 @@ const signed = (value: number) => `${value > 0 ? '+' : ''}${value}`;
 export default function RelationshipSlider({ value, onChange, label, ends = true }: {
   value: number; onChange(value: number): void; label: string; ends?: boolean;
 }) {
+  const { t } = useI18n();
   const current = clampFeeling(value);
   const [draft, setDraft] = useState(signed(current));
   useEffect(() => setDraft(signed(current)), [current]);
@@ -26,10 +28,10 @@ export default function RelationshipSlider({ value, onChange, label, ends = true
   } as CSSProperties;
   return (
     <div className="flex items-center gap-3">
-      {ends && <span className="shrink-0 text-xs text-text-subtle">Hostile</span>}
+      {ends && <span className="shrink-0 text-xs text-text-subtle">{t("Hostile")}</span>}
       <input type="range" min="-100" max="100" step="1" value={current} aria-label={label}
         onChange={event => onChange(clampFeeling(event.target.value))} className="relationship-range min-w-0 flex-1" style={fill} />
-      {ends && <span className="shrink-0 text-xs text-text-subtle">Close</span>}
+      {ends && <span className="shrink-0 text-xs text-text-subtle">{t('relationship.close', 'Close')}</span>}
       <input type="text" inputMode="numeric" value={draft} aria-label={`${label}, as a number`}
         onChange={event => { if (/^[+-]?\d{0,3}$/.test(event.target.value)) setDraft(event.target.value); }}
         onBlur={commit} onKeyDown={event => { if (event.key === 'Enter') event.currentTarget.blur(); }}

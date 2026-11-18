@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, FileText, GitMerge, Info, Loader2, Lock, Plus, Search, Sparkles, Upload, UserRound, BookOpen, X } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
@@ -21,9 +22,10 @@ const TYPE_COLOR = {
 const STEPS = [['sources', 'Sources'], ['review', 'Review'], ['estimate', 'Fill']];
 
 function Stepper({ step, labels }) {
+  const { t } = useI18n();
   const current = STEPS.findIndex(([key]) => key === step);
   return (
-    <ol aria-label="Steps" className="mr-2 flex items-center gap-2 text-[0.8125rem]">
+    <ol aria-label={t("Steps")} className="mr-2 flex items-center gap-2 text-[0.8125rem]">
       {STEPS.map(([key, label], index) => {
         const done = index < current;
         const active = index === current;
@@ -34,8 +36,8 @@ function Stepper({ step, labels }) {
               {done ? <Check className="h-3 w-3" aria-hidden="true" /> : index + 1}
             </span>
             {(labels || active)
-              ? <span className={`whitespace-nowrap ${active ? 'font-semibold text-text-primary' : done ? 'text-text-muted' : 'text-text-subtle'}`}>{label}</span>
-              : <span className="sr-only">{label}</span>}
+              ? <span className={`whitespace-nowrap ${active ? 'font-semibold text-text-primary' : done ? 'text-text-muted' : 'text-text-subtle'}`}>{t(label)}</span>
+              : <span className="sr-only">{t(label)}</span>}
           </li>
         );
       })}
@@ -44,16 +46,17 @@ function Stepper({ step, labels }) {
 }
 
 function TypeMedallion({ type, size = 'sm' }) {
-  const t = typeMeta(type);
-  const Icon = t.icon;
+  const localValue = typeMeta(type);
+  const Icon = localValue.icon;
   const box = { sm: 'h-[1.875rem] w-[1.875rem] rounded-md', lg: 'h-11 w-11 rounded-[0.6875rem]' }[size];
   const icon = size === 'lg' ? 'h-5 w-5' : 'h-3.5 w-3.5';
   return type
-    ? <span aria-hidden="true" className={`inline-flex ${box} shrink-0 items-center justify-center border ${t.medallion}`}><Icon className={icon} /></span>
+    ? <span aria-hidden="true" className={`inline-flex ${box} shrink-0 items-center justify-center border ${localValue.medallion}`}><Icon className={icon} /></span>
     : <span aria-hidden="true" className={`inline-flex ${box} shrink-0 items-center justify-center border border-status-warning/40 text-status-warning`}><Info className={icon} /></span>;
 }
 
 function TypeDots({ counts, extra = null }) {
+  const { t } = useI18n();
   const shown = TYPE_ORDER.filter(type => counts?.[type] > 0);
   if (!shown.length && !extra) return null;
   return (
@@ -61,7 +64,7 @@ function TypeDots({ counts, extra = null }) {
       {shown.map(type => (
         <span key={type} className="inline-flex items-center gap-2 whitespace-nowrap">
           <span aria-hidden="true" className={`h-2 w-2 rounded-full ${typeMeta(type).dot}`} />
-          {counts[type]} {(counts[type] === 1 ? typeMeta(type).label : typeMeta(type).plural).toLowerCase()}
+          {counts[type]} {t(counts[type] === 1 ? typeMeta(type).label : typeMeta(type).plural)}
         </span>
       ))}
       {extra && <span className="inline-flex items-center gap-2 whitespace-nowrap"><span aria-hidden="true" className="h-2 w-2 rounded-full bg-text-subtle" />{extra}</span>}
@@ -104,6 +107,7 @@ function SourceRow({ source, onRemove }) {
 }
 
 function SourcesStep({ electronAPI, sources, setSources, showToast }) {
+  const { t } = useI18n();
   const [pasting, setPasting] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [dragging, setDragging] = useState(false);
@@ -127,7 +131,7 @@ function SourcesStep({ electronAPI, sources, setSources, showToast }) {
 
   return (
     <div className="custom-scrollbar flex min-h-0 flex-col gap-[1.375rem] overflow-y-auto px-[1.625rem] py-6">
-      <p className="text-sm leading-relaxed text-text-secondary">Add what you already have. Kallamo lists the characters, places and things it finds, and nothing is written to your world until you approve the list.</p>
+      <p className="text-sm leading-relaxed text-text-secondary">{t("Add what you already have. Kallamo lists the characters, places and things it finds, and nothing is written to your world until you approve the list.")}</p>
       <div
         onDragOver={event => { event.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
@@ -136,22 +140,22 @@ function SourcesStep({ electronAPI, sources, setSources, showToast }) {
       >
         {adding ? <Loader2 className="h-5 w-5 shrink-0 animate-spin text-text-muted" aria-hidden="true" /> : <Upload className="h-5 w-5 shrink-0 text-text-muted" aria-hidden="true" />}
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-text-primary">Drop files here</p>
-          <p className="mt-0.5 text-balance text-xs text-text-subtle">SillyTavern cards and lorebooks, text, Markdown, Word or PDF</p>
+          <p className="text-sm font-semibold text-text-primary">{t("Drop files here")}</p>
+          <p className="mt-0.5 text-balance text-xs text-text-subtle">{t("SillyTavern cards and lorebooks, text, Markdown, Word or PDF")}</p>
         </div>
-        <Button variant="ghost" size="sm" disabled={adding} onClick={() => add(() => electronAPI.pickImportSources())}>Choose files</Button>
-        <Button variant="ghost" size="sm" disabled={adding} aria-expanded={pasting} onClick={() => setPasting(open => !open)}>Paste text</Button>
+        <Button variant="ghost" size="sm" disabled={adding} onClick={() => add(() => electronAPI.pickImportSources())}>{t("Choose files")}</Button>
+        <Button variant="ghost" size="sm" disabled={adding} aria-expanded={pasting} onClick={() => setPasting(open => !open)}>{t("Paste text")}</Button>
       </div>
       {pasting && (
         <div className="space-y-2">
-          <textarea value={pasteText} onChange={event => setPasteText(event.target.value)} rows={5} aria-label="Pasted text" placeholder="Notes, a wiki page, a chapter…" className={`${FIELD} resize-y leading-relaxed`} />
+          <textarea value={pasteText} onChange={event => setPasteText(event.target.value)} rows={5} aria-label={t("Pasted text")} placeholder={t("Notes, a wiki page, a chapter…")} className={`${FIELD} resize-y leading-relaxed`} />
           <div className="flex justify-end gap-2">
-            <Button variant="subtle" size="sm" onClick={() => { setPasting(false); setPasteText(''); }}>Cancel</Button>
+            <Button variant="subtle" size="sm" onClick={() => { setPasting(false); setPasteText(''); }}>{t("Cancel")}</Button>
             <Button size="sm" icon={Plus} disabled={!pasteText.trim() || adding} onClick={async () => {
               const text = pasteText;
               await add(() => electronAPI.inspectImportSources({ pasted: { name: `Pasted text ${sources.filter(source => source.fileName.startsWith('Pasted text')).length + 1}`, text } }));
               setPasteText(''); setPasting(false);
-            }}>Add text</Button>
+            }}>{t("Add text")}</Button>
           </div>
         </div>
       )}
@@ -159,31 +163,32 @@ function SourcesStep({ electronAPI, sources, setSources, showToast }) {
         <div>
           <div className="flex items-baseline justify-between px-1 pb-2.5">
             <p className="text-[0.8125rem] font-semibold text-text-primary">{plural(valid.length, 'source', 'sources')}</p>
-            <p className="text-xs text-text-subtle">{plural(passageCount, 'passage', 'passages')} · about {thousands(tokenCount)} tokens of text</p>
+            <p className="text-xs text-text-subtle">{plural(passageCount, 'passage', 'passages')}{' '}{t("· about")}{' '}{thousands(tokenCount)}{' '}{t("tokens of text")}</p>
           </div>
           {sources.map(source => <SourceRow key={source.key} source={source} onRemove={() => remove(source.key)} />)}
         </div>
       )}
       {valid.some(source => source.kind === 'card') && (
-        <p className="text-xs leading-relaxed text-text-subtle">From a card, only the description and personality are read: its scenario and opening message set up one roleplay, not the world.</p>
+        <p className="text-xs leading-relaxed text-text-subtle">{t("From a card, only the description and personality are read: its scenario and opening message set up one roleplay, not the world.")}</p>
       )}
     </div>
   );
 }
 
 function ReadingStep({ sources, progress }) {
+  const { t } = useI18n();
   const percent = progress?.total ? Math.round((progress.done / progress.total) * 100) : 0;
   return (
     <div className="flex flex-col gap-5 px-[1.625rem] py-6">
       <div className="space-y-2.5">
         <div className="flex items-baseline justify-between gap-3">
-          <p className="text-sm font-semibold text-text-primary">Listing what is in your sources</p>
-          {progress?.total ? <p className="text-xs tabular-nums text-text-muted">{progress.done} of {plural(progress.total, 'passage', 'passages')}</p> : null}
+          <p className="text-sm font-semibold text-text-primary">{t("Listing what is in your sources")}</p>
+          {progress?.total ? <p className="text-xs tabular-nums text-text-muted">{progress.done}{' '}{t("of")}{' '}{plural(progress.total, 'passage', 'passages')}</p> : null}
         </div>
-        <div role="progressbar" aria-label="Reading progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} className="h-1.5 overflow-hidden rounded-full bg-tint/10">
+        <div role="progressbar" aria-label={t("Reading progress")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} className="h-1.5 overflow-hidden rounded-full bg-tint/10">
           <div className="h-full rounded-full bg-accent transition-[width] duration-300" style={{ width: `${percent}%` }} />
         </div>
-        <p className="text-xs text-text-subtle">Only names and types for now. Sheets are filled later, from what you keep.</p>
+        <p className="text-xs text-text-subtle">{t("Only names and types for now. Sheets are filled later, from what you keep.")}</p>
       </div>
       <div>{sources.map(source => <SourceRow key={source.key} source={source} />)}</div>
     </div>
@@ -218,6 +223,7 @@ const FILTERS = [
 ];
 
 function AliasEditor({ aliases, merged, onChange }) {
+  const { t } = useI18n();
   const [draft, setDraft] = useState('');
   const commit = () => {
     const value = draft.trim();
@@ -230,7 +236,7 @@ function AliasEditor({ aliases, merged, onChange }) {
         const fromMerge = merged.has(alias.toLowerCase());
         return (
           <span key={alias} className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full border pl-3 pr-1 text-[0.8125rem] ${fromMerge ? 'border-status-info/45 bg-status-info/[0.08] text-text-primary' : 'border-border-default text-text-secondary'}`}>
-            {fromMerge && <GitMerge className="h-3.5 w-3.5 text-status-info" aria-label="From a merge" />}
+            {fromMerge && <GitMerge className="h-3.5 w-3.5 text-status-info" aria-label={t("From a merge")} />}
             {alias}
             <button type="button" aria-label={`Remove alias ${alias}`} onClick={() => onChange(aliases.filter(item => item !== alias))}
               className="inline-flex h-5 w-5 items-center justify-center rounded-full text-text-subtle hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
@@ -241,7 +247,7 @@ function AliasEditor({ aliases, merged, onChange }) {
       })}
       <input value={draft} onChange={event => setDraft(event.target.value)} onBlur={commit}
         onKeyDown={event => { if (event.key === 'Enter') { event.preventDefault(); commit(); } }}
-        aria-label="Add alias" placeholder="Add alias"
+        aria-label={t("Add alias")} placeholder={t("Add alias")}
         className="h-7 w-28 rounded-full border border-dashed border-border-strong bg-transparent px-3 text-[0.8125rem] text-text-primary placeholder:text-text-muted focus:border-accent/70 focus:outline-none" />
     </div>
   );
@@ -272,7 +278,8 @@ function FormRow({ label, hint = null, children }) {
 }
 
 function CandidateDetail({ item, items, passages, onChange, onMerge, onSeparate }) {
-  const t = typeMeta(item.type);
+  const { t } = useI18n();
+  const localValue = typeMeta(item.type);
   const matchFits = item.match && item.match.type === item.type;
   const merged = item.merged || [];
   const mergedNames = new Set(merged.flatMap(entry => [entry.name, ...entry.aliases]).map(name => name.toLowerCase()));
@@ -300,72 +307,71 @@ function CandidateDetail({ item, items, passages, onChange, onMerge, onSeparate 
       <div className="flex items-center gap-3.5 pb-[1.125rem]">
         <TypeMedallion type={item.type} size="lg" />
         <label className="min-w-0 flex-1">
-          <span className="sr-only">Name</span>
-          <input value={item.name} onChange={event => onChange({ name: event.target.value })} placeholder="Name"
+          <span className="sr-only">{t("Name")}</span>
+          <input value={item.name} onChange={event => onChange({ name: event.target.value })} placeholder={t("Name")}
             className="h-11 w-full rounded-control border border-transparent bg-transparent px-3 text-[1.375rem] font-semibold text-text-primary placeholder:text-text-subtle hover:border-border-subtle focus:border-accent/70 focus:outline-none focus:ring-2 focus:ring-accent/20" />
         </label>
         <div className="w-48 shrink-0">
-          <SelectMenu ariaLabel="Type" value={item.type || ''} options={item.type ? TYPE_OPTIONS : [{ value: '', label: 'Choose a type' }, ...TYPE_OPTIONS]}
+          <SelectMenu ariaLabel={t("Type")} value={item.type || ''} options={(item.type ? TYPE_OPTIONS : [{ value: '', label: t("Choose a type") }, ...TYPE_OPTIONS]).map(option => ({ ...option, label: t(option.label) }))}
             onChange={type => onChange({ type: type || null, targetId: item.match && item.match.type === type ? item.targetId : null })} />
         </div>
       </div>
 
       {matchFits && (
-        <FormRow label="In your world">
-          <div role="radiogroup" aria-label="Where it goes" className="space-y-2">
+        <FormRow label={t("In your world")}>
+          <div role="radiogroup" aria-label={t("Where it goes")} className="space-y-2">
             <RadioCard name={`target-${item.id}`} selected={Boolean(item.targetId)} onSelect={() => onChange({ targetId: item.match.id })}
-              title={`Add to ${item.match.name}`} description="Its sheet gets suggestions from these sources, reviewed like any update." />
+              title={`Add to ${item.match.name}`} description={t("Its sheet gets suggestions from these sources, reviewed like any update.")} />
             <RadioCard name={`target-${item.id}`} selected={!item.targetId} onSelect={() => onChange({ targetId: null })}
-              title={`Create a new ${t.label.toLowerCase()}`} description="Keeps both. You can merge them later." />
+              title={`Create a new ${localValue.label.toLowerCase()}`} description={t("Keeps both. You can merge them later.")} />
           </div>
         </FormRow>
       )}
 
-      <FormRow label="Fill the sheet">
+      <FormRow label={t("Fill the sheet")}>
         <div className="flex items-start gap-3">
-          <Toggle checked={item.fill} onChange={fill => onChange({ fill })} ariaLabel="Fill the sheet from the sources" />
+          <Toggle checked={item.fill} onChange={fill => onChange({ fill })} ariaLabel={t("Fill the sheet from the sources")} />
           <p className="text-[0.8125rem] leading-relaxed text-text-muted">
             {item.fill
               ? `The AI reads ${item.passageIds.length === 1 ? 'the passage' : `the ${item.passageIds.length} passages`} below and suggests fields, links and lore.`
-              : 'Created with its name only. The sources are not kept after the import, so turn this on when the passages really describe it.'}
+              : t("Created with its name only. The sources are not kept after the import, so turn this on when the passages really describe it.")}
           </p>
         </div>
       </FormRow>
 
-      <FormRow label="Aliases">
+      <FormRow label={t("Aliases")}>
         <AliasEditor aliases={item.aliases} merged={mergedNames} onChange={aliases => onChange({ aliases })} />
       </FormRow>
 
-      <FormRow label="Same as" hint="When two entries are one">
+      <FormRow label={t("Same as")} hint={t("When two entries are one")}>
         <div className="space-y-2.5">
           {merged.length > 0 && (
             <div className="flex items-center gap-3">
               <p className="min-w-0 flex-1 text-[0.8125rem] leading-relaxed text-text-secondary">
-                <span className="font-semibold text-text-primary">{merged.map(entry => entry.name).join(', ')}</span> {merged.length === 1 ? 'was' : 'were'} merged here: {merged.length === 1 ? 'its name is an alias and its passages are' : 'their names are aliases and their passages are'} read with these.
-              </p>
-              <Button variant="ghost" size="sm" onClick={onSeparate}>Separate</Button>
+                <span className="font-semibold text-text-primary">{merged.map(entry => entry.name).join(', ')}</span> {merged.length === 1 ? t("was") : t("were")}{' '}{t("merged here:")}{' '}{merged.length === 1 ? t("its name is an alias and its passages are") : t("their names are aliases and their passages are")}{t("read with these.")}</p>
+              <Button variant="ghost" size="sm" onClick={onSeparate}>{t("Separate")}</Button>
             </div>
           )}
           {mergeOptions.length > 0 && (
-            <SearchableSelect searchInTrigger clearable={false} value="" options={mergeOptions} ariaLabel="Merge into another entry"
-              placeholder="Merge into another entry" searchPlaceholder="Search the list" emptyMessage="No entry with that name."
+            <SearchableSelect searchInTrigger clearable={false} value="" options={mergeOptions} ariaLabel={t("Merge into another entry")}
+              placeholder={t("Merge into another entry")} searchPlaceholder={t("Search the list")} emptyMessage={t("No entry with that name.")}
               onChange={intoId => { if (intoId) onMerge(intoId); }} />
           )}
         </div>
       </FormRow>
 
-      <FormRow label="Where it comes from" hint={plural(item.passageIds.length, 'passage', 'passages')}>
+      <FormRow label={t("Where it comes from")} hint={plural(item.passageIds.length, 'passage', 'passages')}>
         <div className="space-y-3.5">
           {shown.map(passage => (
             <div key={passage.id}>
               <p className="mb-1 flex min-w-0 items-center gap-2 text-xs font-semibold text-text-subtle">
                 <span className="truncate">{passage.label ? `${passage.fileName} · ${passage.label}` : passage.fileName}</span>
-                {broughtBy.has(passage.id) && <Chip tone="match">from {broughtBy.get(passage.id)}</Chip>}
+                {broughtBy.has(passage.id) && <Chip tone="match">{t("from")}{' '}{broughtBy.get(passage.id)}</Chip>}
               </p>
               <p className="line-clamp-4 whitespace-pre-line text-[0.8125rem] leading-relaxed text-text-secondary"><MarkedText text={passage.text} names={names} color={color} /></p>
             </div>
           ))}
-          {item.passageIds.length > shown.length && <p className="text-xs text-text-subtle">And {plural(item.passageIds.length - shown.length, 'more passage', 'more passages')}.</p>}
+          {item.passageIds.length > shown.length && <p className="text-xs text-text-subtle">{t("And")}{' '}{plural(item.passageIds.length - shown.length, 'more passage', 'more passages')}.</p>}
         </div>
       </FormRow>
     </div>
@@ -373,6 +379,7 @@ function CandidateDetail({ item, items, passages, onChange, onMerge, onSeparate 
 }
 
 function ReviewStep({ items, setItems, passages, notes }) {
+  const { t } = useI18n();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [selectedId, setSelectedId] = useState(items[0]?.id || null);
@@ -421,8 +428,8 @@ function ReviewStep({ items, setItems, passages, notes }) {
   if (!items.length) {
     return (
       <div className="flex flex-col items-center gap-2 px-6 py-16 text-center">
-        <p className="text-sm font-semibold text-text-primary">Nothing to add was found</p>
-        <p className="max-w-md text-sm leading-relaxed text-text-muted">{notes || 'The sources did not name any character, place or thing the Tagger could list.'}</p>
+        <p className="text-sm font-semibold text-text-primary">{t("Nothing to add was found")}</p>
+        <p className="max-w-md text-sm leading-relaxed text-text-muted">{notes || t("The sources did not name any character, place or thing the Tagger could list.")}</p>
       </div>
     );
   }
@@ -433,9 +440,9 @@ function ReviewStep({ items, setItems, passages, notes }) {
         <div className="space-y-3 px-4 pb-2.5 pt-4">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-subtle" aria-hidden="true" />
-            <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Search names and aliases" aria-label="Search names and aliases" className={`${FIELD} pl-9`} />
+            <input value={search} onChange={event => setSearch(event.target.value)} placeholder={t("Search names and aliases")} aria-label={t("Search names and aliases")} className={`${FIELD} pl-9`} />
           </div>
-          <div role="tablist" aria-label="Show" className="flex flex-wrap gap-1.5">
+          <div role="tablist" aria-label={t("Show")} className="flex flex-wrap gap-1.5">
             {FILTERS.map(([key, label, match]) => {
               const count = items.filter(match).length;
               if (key !== 'all' && !count) return null;
@@ -451,15 +458,15 @@ function ReviewStep({ items, setItems, passages, notes }) {
           {notes && <p className="flex items-start gap-2 text-xs leading-relaxed text-status-warning"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />{notes}</p>}
         </div>
         <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-2 pb-3">
-          {!groups.length && <p className="px-3 py-6 text-center text-[0.8125rem] text-text-subtle">Nothing here matches.</p>}
+          {!groups.length && <p className="px-3 py-6 text-center text-[0.8125rem] text-text-subtle">{t("Nothing here matches.")}</p>}
           {groups.map(group => {
             const ids = new Set(group.items.map(item => item.id));
             const allKept = group.items.every(item => item.keep);
             return (
               <div key={group.type || 'untyped'}>
                 <div className="flex items-center justify-between px-3 pb-1.5 pt-3.5">
-                  <p className="text-xs font-semibold text-text-muted">{group.type ? typeMeta(group.type).plural : 'Needs a type'} <span className="font-medium tabular-nums text-text-subtle">{group.items.length}</span></p>
-                  <button type="button" onClick={() => setKeep(ids, !allKept)} className="rounded-md px-1.5 py-0.5 text-xs text-text-subtle hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{allKept ? 'Keep none' : 'Keep all'}</button>
+                  <p className="text-xs font-semibold text-text-muted">{group.type ? typeMeta(group.type).plural : t("Needs a type")} <span className="font-medium tabular-nums text-text-subtle">{group.items.length}</span></p>
+                  <button type="button" onClick={() => setKeep(ids, !allKept)} className="rounded-md px-1.5 py-0.5 text-xs text-text-subtle hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{allKept ? t("Keep none") : t("Keep all")}</button>
                 </div>
                 {group.items.map(item => {
                   const sourceCount = item.sources?.length || 0;
@@ -470,7 +477,7 @@ function ReviewStep({ items, setItems, passages, notes }) {
                       <button type="button" onClick={() => setSelectedId(item.id)} className="flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline-none">
                         <span className={item.keep ? '' : 'opacity-55'}><TypeMedallion type={item.type} /></span>
                         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                          <span className={`truncate text-[0.8125rem] ${item.keep ? 'font-semibold text-text-primary' : 'font-medium text-text-subtle'}`}>{item.name || 'Unnamed'}</span>
+                          <span className={`truncate text-[0.8125rem] ${item.keep ? 'font-semibold text-text-primary' : 'font-medium text-text-subtle'}`}>{item.name || t("Unnamed")}</span>
                           <span className="truncate text-xs text-text-subtle">{detail}</span>
                         </span>
                         {candidateChip(item)}
@@ -486,12 +493,13 @@ function ReviewStep({ items, setItems, passages, notes }) {
       {selected
         ? <CandidateDetail key={selected.id} item={selected} items={items} passages={passages} onChange={change => update(selected.id, change)}
             onMerge={intoId => merge(selected.id, intoId)} onSeparate={() => separate(selected.id)} />
-        : <div className="flex flex-1 items-center justify-center text-sm text-text-subtle">Choose an entry to see where it comes from.</div>}
+        : <div className="flex flex-1 items-center justify-center text-sm text-text-subtle">{t("Choose an entry to see where it comes from.")}</div>}
     </div>
   );
 }
 
 function EstimateStep({ items, estimate }) {
+  const { t } = useI18n();
   const counts = {};
   for (const item of items) counts[item.type] = (counts[item.type] || 0) + 1;
   for (const name of estimate?.locked || []) {
@@ -499,7 +507,7 @@ function EstimateStep({ items, estimate }) {
     if (item) counts[item.type] -= 1;
   }
   if (!estimate) {
-    return <p className="flex items-center gap-2 px-[1.625rem] py-8 text-[0.8125rem] text-text-muted"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />Working it out…</p>;
+    return <p className="flex items-center gap-2 px-[1.625rem] py-8 text-[0.8125rem] text-text-muted"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />{t("Working it out…")}</p>;
   }
   const created = estimate.sheets - estimate.existing;
   const lands = [
@@ -515,7 +523,7 @@ function EstimateStep({ items, estimate }) {
     <div className="flex flex-col gap-6 px-[1.625rem] pb-[1.375rem] pt-[1.625rem]">
       <div>
         <p className="text-[2rem] font-semibold leading-tight tracking-[-0.01em] text-text-primary tabular-nums">{plural(estimate.sheets, 'sheet', 'sheets')}</p>
-        <p className="mt-0.5 text-[0.8125rem] text-text-muted">filled from your sources, one request each</p>
+        <p className="mt-0.5 text-[0.8125rem] text-text-muted">{t("filled from your sources, one request each")}</p>
       </div>
       <TypeDots counts={counts} extra={estimate.unfilled > 0 ? `${estimate.unfilled} name only, at no cost` : null} />
       <dl>
@@ -528,10 +536,10 @@ function EstimateStep({ items, estimate }) {
       </dl>
       {(estimate.locked || []).map(name => (
         <p key={name} className="flex items-center gap-2.5 text-[0.8125rem] leading-relaxed text-text-secondary">
-          <Lock className="h-4 w-4 shrink-0 text-status-warning" aria-hidden="true" /><span><b className="font-semibold text-text-primary">{name}</b> is locked and will be skipped.</span>
+          <Lock className="h-4 w-4 shrink-0 text-status-warning" aria-hidden="true" /><span><b className="font-semibold text-text-primary">{name}</b>{' '}{t("is locked and will be skipped.")}</span>
         </p>
       ))}
-      <p className="text-xs leading-relaxed text-text-subtle">The tokens used show when the fill ends.</p>
+      <p className="text-xs leading-relaxed text-text-subtle">{t("The tokens used show when the fill ends.")}</p>
     </div>
   );
 }
@@ -540,6 +548,7 @@ const flattenMerged = item => (item.merged || []).flatMap(entry => [entry.id, ..
 
 /** Sources in, a list to approve, an estimate, then the fill runs as an entity update. */
 export default function CreateWithAiModal({ electronAPI, workspaceId, workspaceName = null, hasSystemAi, updating = false, showToast, onClose, onFill }) {
+  const { t } = useI18n();
   const [step, setStep] = useState('sources');
   const [sources, setSources] = useState([]);
   const [progress, setProgress] = useState(null);
@@ -606,7 +615,7 @@ export default function CreateWithAiModal({ electronAPI, workspaceId, workspaceN
       onClose={close}
       closeOnOverlay={false}
       size={step === 'review' ? '2xl' : step === 'estimate' ? 'lg' : 'xl'}
-      title="Create with AI"
+      title={t("Create with AI")}
       subtitle={subtitle}
       leading={<ToneTile icon={Sparkles} color="var(--theme-status-info)" />}
       aside={<Stepper step={stepKey} labels={step === 'review'} />}
@@ -621,25 +630,25 @@ export default function CreateWithAiModal({ electronAPI, workspaceId, workspaceN
         {step === 'review' && items.length > 0 && (
           <p className={`mr-auto min-w-0 truncate text-[0.8125rem] ${untyped || missingName ? 'text-status-warning' : 'text-text-muted'}`}>
             {untyped ? `Choose a type for ${plural(untyped, 'entry', 'entries')} to continue.`
-              : missingName ? 'Every kept entry needs a name.'
-              : <><span className="font-semibold text-text-primary">{kept.length} kept</span> · {matched} add to sheets you have · {kept.length - matched} new · {kept.filter(item => item.fill).length} filled from the sources</>}
+              : missingName ? t("Every kept entry needs a name.")
+              : <><span className="font-semibold text-text-primary">{kept.length}{' '}{t("kept")}</span> · {matched}{' '}{t("add to sheets you have ·")}{' '}{kept.length - matched}{' '}{t("new ·")}{' '}{kept.filter(item => item.fill).length}{' '}{t("filled from the sources")}</>}
           </p>
         )}
         {step === 'sources' && <>
-          <Button variant="subtle" onClick={close}>Cancel</Button>
-          <Button icon={Search} disabled={!valid.length} onClick={read}>Read {plural(valid.length, 'source', 'sources')}</Button>
+          <Button variant="subtle" onClick={close}>{t("Cancel")}</Button>
+          <Button icon={Search} disabled={!valid.length} onClick={read}>{t("Read")}{' '}{plural(valid.length, 'source', 'sources')}</Button>
         </>}
         {step === 'reading' && <>
-          <Button variant="ghost" onClick={() => { readToken.current++; electronAPI.cancelDiscoverImportSources?.(workspaceId); setStep('sources'); }}>Stop</Button>
-          <Button disabled loading>Review what was found</Button>
+          <Button variant="ghost" onClick={() => { readToken.current++; electronAPI.cancelDiscoverImportSources?.(workspaceId); setStep('sources'); }}>{t("Stop")}</Button>
+          <Button disabled loading>{t("Review what was found")}</Button>
         </>}
         {step === 'review' && <>
-          <Button variant="subtle" onClick={() => setStep('sources')}>Back</Button>
-          <Button disabled={!kept.length || untyped > 0 || missingName} onClick={toEstimate}>Continue with {kept.length}</Button>
+          <Button variant="subtle" onClick={() => setStep('sources')}>{t("Back")}</Button>
+          <Button disabled={!kept.length || untyped > 0 || missingName} onClick={toEstimate}>{t("Continue with")}{' '}{kept.length}</Button>
         </>}
         {step === 'estimate' && <>
-          <Button variant="subtle" disabled={busy} onClick={() => setStep('review')}>Back</Button>
-          <span data-tooltip={!fillable ? undefined : !hasSystemAi ? 'Choose an API connection and a model for System AI in Settings to fill sheets' : updating ? 'Wait for the entity update that is running to finish' : undefined}>
+          <Button variant="subtle" disabled={busy} onClick={() => setStep('review')}>{t("Back")}</Button>
+          <span data-tooltip={!fillable ? undefined : !hasSystemAi ? t("Choose an API connection and a model for System AI in Settings to fill sheets") : updating ? t("Wait for the entity update that is running to finish") : undefined}>
             <Button icon={fillable ? Sparkles : Plus} loading={busy} disabled={!estimate || !kept.length || (fillable > 0 && (!hasSystemAi || updating))} onClick={fill}>
               {fillable ? `Fill ${plural(fillable, 'sheet', 'sheets')}` : `Create ${plural(kept.length, 'entry', 'entries')}`}
             </Button>
@@ -652,6 +661,7 @@ export default function CreateWithAiModal({ electronAPI, workspaceId, workspaceN
 
 /** How the fill ended, in the terms of the update that ran it. */
 export function CreateWithAiDone({ summary, result, onClose, onReview }) {
+  const { t } = useI18n();
   const staged = result?.staged || 0;
   const updated = result?.updated || 0;
   const created = summary.created?.length || 0;
@@ -684,9 +694,9 @@ export function CreateWithAiDone({ summary, result, onClose, onReview }) {
         <ToneTile icon={Check} color="var(--theme-status-success)" />
         <div className="min-w-0 flex-1">
           <h2 className="text-[1.0625rem] font-semibold text-text-primary">{title}</h2>
-          {staged > 0 && <p className="mt-1 text-sm leading-relaxed text-text-muted">Their current values stay as they are. Open each one to accept or dismiss what changed.</p>}
+          {staged > 0 && <p className="mt-1 text-sm leading-relaxed text-text-muted">{t("Their current values stay as they are. Open each one to accept or dismiss what changed.")}</p>}
         </div>
-        <button type="button" onClick={onClose} aria-label="Close dialog"
+        <button type="button" onClick={onClose} aria-label={t("Close dialog")}
           className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
           <X className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -711,8 +721,8 @@ export function CreateWithAiDone({ summary, result, onClose, onReview }) {
         )}
       </div>
       <div className="flex items-center justify-end gap-2.5 border-t border-border-subtle px-[1.375rem] py-3.5">
-        <Button variant="subtle" onClick={onClose}>Later</Button>
-        <Button disabled={!staged} onClick={onReview}>Review now</Button>
+        <Button variant="subtle" onClick={onClose}>{t("Later")}</Button>
+        <Button disabled={!staged} onClick={onReview}>{t("Review now")}</Button>
       </div>
     </Modal>
   );

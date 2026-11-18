@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { SendHorizontal, Square } from 'lucide-react';
 
@@ -17,6 +18,7 @@ export default function ChatInput({
   leading,
   trailing
 }) {
+  const { t } = useI18n();
   const [inputValue, setInputValue] = useState(() => sessionDrafts.get(workspaceId) || '');
   const inputRef = useRef(null);
 
@@ -57,7 +59,7 @@ export default function ChatInput({
         onChange={(event) => updateInputValue(event.target.value)}
         onKeyDown={handleKeyDown}
         rows={1}
-        aria-label="Message"
+        aria-label={t("Message")}
         placeholder={placeholder}
         className="w-full resize-none border-0 bg-transparent px-1 py-1.5 font-sans text-sm leading-relaxed text-text-primary placeholder:text-text-subtle focus:outline-none custom-scrollbar"
       />
@@ -65,10 +67,10 @@ export default function ChatInput({
         {leading}
         <span className="flex-1" />
         {trailing}
-        <span data-tooltip={(!isGenerating && !canSend) ? 'This AI Profile needs setup: create an API profile in Settings, then link it in the Library.' : undefined} className="ml-1 shrink-0">
+        <span data-tooltip={(!isGenerating && !canSend) ? t("This AI Profile needs setup: create an API profile in Settings, then link it in the Library.") : undefined} className="ml-1 shrink-0">
           <button
             type="button"
-            aria-label={isGenerating ? 'Stop generating' : 'Send message'}
+            aria-label={isGenerating ? t("Stop generating") : t("Send message")}
             onClick={isGenerating ? onCancel : submit}
             disabled={isDisabled}
             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-[filter,background-color,transform] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:pointer-events-none disabled:opacity-50 cursor-pointer ${isGenerating

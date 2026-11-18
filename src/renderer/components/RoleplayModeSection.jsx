@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Drama, Scale } from 'lucide-react';
 import Button from './ui/Button';
@@ -32,6 +33,7 @@ const eventTime = record => Date.parse(record.resolvedAt || record.proposal?.pro
  * (resources, progression, time costs) live in Worldbuild and are only summarised here.
  */
 export default function RoleplayModeSection({ workspaceId, api, showToast, registerSection, onStatusChange, onScrollTo }) {
+  const { t } = useI18n();
   const [enabled, setEnabled] = useState(false);
   const [config, setConfig] = useState(null);
   const [settings, setSettings] = useState(EMPTY_SETTINGS);
@@ -245,15 +247,15 @@ export default function RoleplayModeSection({ workspaceId, api, showToast, regis
       tone: 'warning',
       title: job.status === 'failed' ? 'A turn failed to update' : 'A turn stopped while updating',
       detail: `${job.error ? `${job.error} ` : ''}The record may be behind the chat until this turn is read again.`,
-      action: 'Try again',
+      action: t("Try again"),
       onFix: () => reprocess(job.originId)
     })),
     ...(config?.pendingNarrativeTurn && !rereading.has(config.pendingNarrativeTurn.originId) ? [{
       key: 'kept-reply',
       tone: 'info',
-      title: "The reply you kept isn't in the record yet",
+      title: t("The reply you kept isn't in the record yet"),
       detail: 'A switched or regenerated reply is read once, when you continue. Update now to see it sooner.',
-      action: 'Update now',
+      action: t("Update now"),
       onFix: () => reprocess(config.pendingNarrativeTurn.originId)
     }] : [])
   ];
@@ -261,10 +263,10 @@ export default function RoleplayModeSection({ workspaceId, api, showToast, regis
   const player = entities.find(entity => entity.id === settings.playerEntityId);
   const location = entities.find(entity => entity.id === scene.locationId);
   const narrativeSummary = updating
-    ? { text: 'Reading the last reply', className: 'text-status-info' }
+    ? { text: t("Reading the last reply"), className: 'text-status-info' }
     : pending.length
       ? { text: `${pending.length} ${pending.length === 1 ? 'change' : 'changes'} to review`, className: 'text-status-warning' }
-      : { text: 'Up to date', className: 'text-text-primary' };
+      : { text: t("Up to date"), className: 'text-text-primary' };
 
   return (
     <>
@@ -272,32 +274,32 @@ export default function RoleplayModeSection({ workspaceId, api, showToast, regis
         id="roleplay"
         sectionRef={registerSection?.('roleplay')}
         icon={Drama}
-        title="Roleplay"
+        title={t("Roleplay")}
         description={enabled
-          ? 'Turning it off keeps every scene, value and history entry for later.'
-          : 'Play inside the story. The AI keeps track of the scene, the clock, resources such as Health, and what each character knows.'}
-        action={<Toggle checked={enabled} onChange={toggle} ariaLabel="Roleplay" />}
+          ? t("Turning it off keeps every scene, value and history entry for later.")
+          : t("Play inside the story. The AI keeps track of the scene, the clock, resources such as Health, and what each character knows.")}
+        action={<Toggle checked={enabled} onChange={toggle} ariaLabel={t("Roleplay")} />}
       >
         {enabled && config && (
           <div className="flex flex-col gap-5">
             <div className="grid overflow-hidden rounded-card border border-border-subtle bg-surface-inset sm:grid-cols-3">
-              <StatusCell label="Playing as" value={player?.canonicalName || 'No one yet'} dot={player ? meta(player.type).dot : null} />
-              <StatusCell label="Location" value={location?.canonicalName || 'Not set'} dot={location ? meta('Locations').dot : null} divided />
+              <StatusCell label={t("Playing as")} value={player?.canonicalName || 'No one yet'} dot={player ? meta(player.type).dot : null} />
+              <StatusCell label={t("Location")} value={location?.canonicalName || 'Not set'} dot={location ? meta('Locations').dot : null} divided />
               <div className="flex min-w-0 items-center gap-2.5 border-t border-border-subtle px-4 py-3 sm:border-l sm:border-t-0">
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-xs text-text-subtle">Narrative State</span>
+                  <span className="text-xs text-text-subtle">{t("Narrative State")}</span>
                   <span className={`truncate text-sm font-semibold ${narrativeSummary.className}`}>{narrativeSummary.text}</span>
                 </span>
-                {pending.length > 0 && <Button variant="ghost" size="sm" onClick={() => onScrollTo?.('narrative-state')}>Review</Button>}
+                {pending.length > 0 && <Button variant="ghost" size="sm" onClick={() => onScrollTo?.('narrative-state')}>{t("Review")}</Button>}
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3.5 rounded-card border border-border-subtle bg-surface-inset px-4 py-3.5">
               <Scale aria-hidden="true" className="h-4.5 w-4.5 shrink-0 text-text-muted" />
               <span className="min-w-0 flex-1">
-                <span className="block text-[0.8125rem] font-semibold text-text-secondary">World rules</span>
-                <span className="block text-xs leading-relaxed text-text-subtle">{describeRules(definitions, progression, config.timeMatrix, config.skills)} They belong to the world, in Worldbuild.</span>
+                <span className="block text-[0.8125rem] font-semibold text-text-secondary">{t("World rules")}</span>
+                <span className="block text-xs leading-relaxed text-text-subtle">{describeRules(definitions, progression, config.timeMatrix, config.skills)}{' '}{t("They belong to the world, in Worldbuild.")}</span>
               </span>
-              <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('open-worldbuild-surface', { detail: { surface: 'rules' } }))}>Open in Worldbuild</Button>
+              <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new CustomEvent('open-worldbuild-surface', { detail: { surface: 'rules' } }))}>{t("Open in Worldbuild")}</Button>
             </div>
             <SceneBlock
               sectionRef={registerSection?.('roleplay-scene')}

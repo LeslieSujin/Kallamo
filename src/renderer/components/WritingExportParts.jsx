@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React from 'react';
 import { ChevronLeft, ChevronRight, Download, FileText, FileType } from 'lucide-react';
 import Button from './ui/Button';
@@ -13,8 +14,9 @@ const FORMATS = [
 export const formatLabel = (format) => (format === 'docx' ? 'Word' : 'PDF');
 
 export function FormatChoice({ value, onChange }) {
+  const { t } = useI18n();
   return (
-    <div role="radiogroup" aria-label="Format" className="grid grid-cols-2 gap-2">
+    <div role="radiogroup" aria-label={t("Format")} className="grid grid-cols-2 gap-2">
       {FORMATS.map(f => {
         const on = value === f.value;
         return (
@@ -59,19 +61,20 @@ export function ToggleRow({ label, checked, onChange, disabled = false, bold = f
 }
 
 export function PageNumberOptions({ enabled, onEnabled, position, onPosition, format, start, onStart }) {
+  const { t } = useI18n();
   return (
     <>
-      <ToggleRow label="Page numbers" checked={enabled} onChange={onEnabled} bold />
+      <ToggleRow label={t("Page numbers")} checked={enabled} onChange={onEnabled} bold />
       {enabled && (
         <>
           <div>
-            <span className="mb-1.5 block text-xs font-medium text-text-subtle">Position</span>
-            <SegmentedControl label="Page number position" value={position} onChange={onPosition} className="w-full [&>button]:flex-1 [&>button]:justify-center"
-              options={[{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }]} />
+            <span className="mb-1.5 block text-xs font-medium text-text-subtle">{t("Position")}</span>
+            <SegmentedControl label={t("Page number position")} value={position} onChange={onPosition} className="w-full [&>button]:flex-1 [&>button]:justify-center"
+              options={[{ value: 'left', label: t("Left") }, { value: 'center', label: t("Center") }, { value: 'right', label: t("Right") }]} />
           </div>
           {format === 'docx' ? (
             <label className="block">
-              <span className="mb-1.5 block text-xs font-medium text-text-subtle">Start at page</span>
+              <span className="mb-1.5 block text-xs font-medium text-text-subtle">{t("Start at page")}</span>
               <NumberInput
                 min={1}
                 value={start}
@@ -79,7 +82,7 @@ export function PageNumberOptions({ enabled, onEnabled, position, onPosition, fo
                 className="h-9 w-24 rounded-control border border-border-default bg-surface-input px-2.5 text-sm tabular-nums text-text-primary focus:border-accent/70 focus:outline-none"
               />
             </label>
-          ) : <p className="text-xs text-text-subtle">Word also lets you choose the first page number.</p>}
+          ) : <p className="text-xs text-text-subtle">{t("Word also lets you choose the first page number.")}</p>}
         </>
       )}
     </>
@@ -87,23 +90,25 @@ export function PageNumberOptions({ enabled, onEnabled, position, onPosition, fo
 }
 
 export function PageNav({ index, total, onChange }) {
+  const { t } = useI18n();
   if (total <= 1) return null;
   const nav = 'inline-flex h-8 w-8 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-tint/[0.07] disabled:opacity-30 disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40';
   return (
     <div className="mt-4 flex items-center gap-3">
-      <button type="button" aria-label="Previous page" disabled={index === 0} onClick={() => onChange(index - 1)} className={nav}><ChevronLeft className="h-4 w-4" /></button>
-      <span className="text-xs font-semibold tabular-nums text-text-secondary">Page {index + 1} of {total}</span>
-      <button type="button" aria-label="Next page" disabled={index === total - 1} onClick={() => onChange(index + 1)} className={nav}><ChevronRight className="h-4 w-4" /></button>
+      <button type="button" aria-label={t("Previous page")} disabled={index === 0} onClick={() => onChange(index - 1)} className={nav}><ChevronLeft className="h-4 w-4" /></button>
+      <span className="text-xs font-semibold tabular-nums text-text-secondary">{t("Page")}{' '}{index + 1}{' '}{t("of")}{' '}{total}</span>
+      <button type="button" aria-label={t("Next page")} disabled={index === total - 1} onClick={() => onChange(index + 1)} className={nav}><ChevronRight className="h-4 w-4" /></button>
     </div>
   );
 }
 
 export function ExportFooter({ format, exporting, disabled, onCancel, onExport }) {
+  const { t } = useI18n();
   return (
     <div className="flex gap-2 border-t border-border-subtle px-5 py-3.5">
-      <Button variant="ghost" onClick={onCancel} className="flex-1">Cancel</Button>
+      <Button variant="ghost" onClick={onCancel} className="flex-1">{t("Cancel")}</Button>
       <Button variant="primary" icon={Download} onClick={onExport} disabled={disabled || exporting} loading={exporting} className="flex-1">
-        {exporting ? 'Exporting…' : `Export ${formatLabel(format)}`}
+        {exporting ? t("Exporting…") : `Export ${formatLabel(format)}`}
       </Button>
     </div>
   );

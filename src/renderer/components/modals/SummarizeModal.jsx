@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Archive, MessageSquare, EyeOff, AlertTriangle, User } from 'lucide-react';
 import Modal from '../ui/Modal';
@@ -39,6 +40,7 @@ export default function SummarizeModal({
   progress,
   workspaceName = null
 }) {
+  const { t } = useI18n();
   const [customTitle, setCustomTitle] = useState('');
   const [pendingList, setPendingList] = useState([]);
   const [reservedList, setReservedList] = useState([]);
@@ -151,7 +153,7 @@ export default function SummarizeModal({
       closeOnEsc={!isVectorizing}
       showClose={!isVectorizing}
       size="editor"
-      title="Archive to memory"
+      title={t("Archive to memory")}
       subtitle={`${workspaceName ? `${workspaceName} · ` : ''}${pendingList.length} ${pendingList.length === 1 ? 'message can' : 'messages can'} be archived`}
       leading={<ToneTile icon={Archive} color="var(--app-accent)" />}
       className="!max-w-[64rem] max-h-[85vh] min-h-[28rem]"
@@ -159,7 +161,7 @@ export default function SummarizeModal({
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         <aside className="custom-scrollbar space-y-5 overflow-y-auto border-b border-border-subtle p-5 md:w-72 md:shrink-0 md:border-b-0 md:border-r">
           <label className="block">
-            <span className="mb-1.5 block text-xs font-semibold text-text-secondary">Title</span>
+            <span className="mb-1.5 block text-xs font-semibold text-text-secondary">{t("Title")}</span>
             <input
               type="text"
               value={customTitle}
@@ -171,7 +173,7 @@ export default function SummarizeModal({
           </label>
 
           <div className="rounded-control border px-3.5 py-3" style={{ background: 'var(--theme-surface-well)', borderColor: 'var(--theme-border-well)' }}>
-            <p className="text-xs font-semibold text-text-secondary">What the prompt carries</p>
+            <p className="text-xs font-semibold text-text-secondary">{t("What the prompt carries")}</p>
             <div className="mt-2 flex h-2 overflow-hidden rounded-full" style={{ background: 'var(--theme-surface-well)' }}>
               <span style={{ width: share(totals.keepTokens), background: 'var(--theme-text-muted)' }} />
               <span style={{ width: share(totals.archiveTokens), background: 'var(--app-accent)' }} />
@@ -199,8 +201,8 @@ export default function SummarizeModal({
             <div className="flex items-start gap-3 border-t border-border-subtle pt-4">
               <span className="mt-0.5"><Checkbox checked={includeRecent} disabled={isVectorizing} onChange={setIncludeRecent} ariaLabel={`Include the last ${reservedList.length} messages`} /></span>
               <button type="button" disabled={isVectorizing} onClick={() => setIncludeRecent(value => !value)} className="min-w-0 text-left focus-visible:outline-none">
-                <span className="block text-sm text-text-secondary">Include the last {reservedList.length} {reservedList.length === 1 ? 'message' : 'messages'}</span>
-                <span className="block text-xs leading-relaxed text-text-subtle">They are held back so the next reply keeps its thread. Include them when this closes a scene.</span>
+                <span className="block text-sm text-text-secondary">{t("Include the last")}{' '}{reservedList.length} {reservedList.length === 1 ? t("message") : t("messages")}</span>
+                <span className="block text-xs leading-relaxed text-text-subtle">{t("They are held back so the next reply keeps its thread. Include them when this closes a scene.")}</span>
               </button>
             </div>
           )}
@@ -209,22 +211,20 @@ export default function SummarizeModal({
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 px-5 pb-3 pt-4">
             <p className="text-[0.8125rem] text-text-muted">
-              <b className="font-semibold tabular-nums text-accent">{totals.archiveCount}</b> to archive · <b className="font-semibold tabular-nums text-text-primary">{totals.keepCount}</b> kept · <b className="font-semibold tabular-nums text-status-danger">{totals.dropCount}</b> dropped
-            </p>
+              <b className="font-semibold tabular-nums text-accent">{totals.archiveCount}</b>{' '}{t("to archive ·")}{' '}<b className="font-semibold tabular-nums text-text-primary">{totals.keepCount}</b>{' '}{t("kept ·")}{' '}<b className="font-semibold tabular-nums text-status-danger">{totals.dropCount}</b>{t("dropped")}</p>
             <div className="flex gap-1">
-              <Button variant="subtle" size="sm" disabled={isVectorizing} onClick={() => setAll(ARCHIVE)}>Archive all</Button>
-              <Button variant="subtle" size="sm" disabled={isVectorizing} onClick={() => setAll(KEEP)}>Keep all</Button>
+              <Button variant="subtle" size="sm" disabled={isVectorizing} onClick={() => setAll(ARCHIVE)}>{t("Archive all")}</Button>
+              <Button variant="subtle" size="sm" disabled={isVectorizing} onClick={() => setAll(KEEP)}>{t("Keep all")}</Button>
             </div>
           </div>
 
           <div className="custom-scrollbar mx-5 mb-5 min-h-0 flex-1 select-text overflow-y-auto rounded-xl border border-tint/[0.08] surface-card">
-            {loading && <p className="caption px-4 py-6 text-center">Reading the history…</p>}
+            {loading && <p className="caption px-4 py-6 text-center">{t("Reading the history…")}</p>}
             {!loading && loadError && (
               <p className="flex items-start gap-2 px-4 py-4 text-sm text-status-danger"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />{loadError}</p>
             )}
             {!loading && !loadError && visibleList.length === 0 && (
-              <p className="caption px-4 py-6 text-center leading-relaxed">
-                Nothing left to archive. Everything older is already in memory{reservedList.length > 0 ? ', and the rest is the recent part kept for the next reply.' : ', and there is no older history yet.'}
+              <p className="caption px-4 py-6 text-center leading-relaxed">{t("Nothing left to archive. Everything older is already in memory")}{reservedList.length > 0 ? t(", and the rest is the recent part kept for the next reply.") : t(", and there is no older history yet.")}
               </p>
             )}
             {!loading && visibleList.map((msgObj, index) => {
@@ -238,12 +238,12 @@ export default function SummarizeModal({
                     : <ProfileAvatar color={msgObj.aiColor || '#94a3b8'} size={24} />}
                   <div className="min-w-0 flex-1">
                     <span className={`text-xs font-semibold ${isUser ? 'text-accent' : 'text-text-secondary'}`}>
-                      {isUser ? 'User' : msgObj.aiName || 'AI'}
-                      {msgObj.reserved && <span className="ml-1.5 font-normal text-text-subtle">recent</span>}
+                      {isUser ? t("User") : msgObj.aiName || 'AI'}
+                      {msgObj.reserved && <span className="ml-1.5 font-normal text-text-subtle">{t("recent")}</span>}
                     </span>
                     <p className={`mt-0.5 line-clamp-2 whitespace-pre-wrap text-[0.8125rem] leading-relaxed ${tone}`}>{msgObj.content}</p>
                   </div>
-                  <div role="radiogroup" aria-label="What happens to this message" className="inline-flex shrink-0 gap-0.5 rounded-control border border-border-default bg-surface-input p-0.5">
+                  <div role="radiogroup" aria-label={t("What happens to this message")} className="inline-flex shrink-0 gap-0.5 rounded-control border border-border-default bg-surface-input p-0.5">
                     {[
                       [ARCHIVE, Archive, 'Archive', 'bg-accent/[0.13] text-accent ring-1 ring-inset ring-accent/45'],
                       [KEEP, MessageSquare, 'Keep', 'bg-surface-hover text-text-primary ring-1 ring-inset ring-border-strong'],
@@ -272,9 +272,9 @@ export default function SummarizeModal({
       </div>
 
       <div className="flex shrink-0 items-center justify-end gap-2 border-t border-border-subtle px-5 py-3.5">
-        <Button variant="subtle" disabled={isVectorizing} onClick={onClose}>Cancel</Button>
+        <Button variant="subtle" disabled={isVectorizing} onClick={onClose}>{t("Cancel")}</Button>
         <Button icon={isVectorizing ? null : Archive} loading={isVectorizing} disabled={loading || nothingToDo} onClick={handleConfirmSubmit}>
-          {isVectorizing ? progressLabel(progress) : 'Archive'}
+          {isVectorizing ? progressLabel(progress) : t("Archive")}
         </Button>
       </div>
     </Modal>

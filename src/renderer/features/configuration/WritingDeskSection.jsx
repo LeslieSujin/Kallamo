@@ -1,8 +1,10 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useState } from 'react';
 import { WritingGlyph } from '../../components/ui/glyphs';
 import { ConfigSection, SettingsList, SwitchRow, UnitNumberField } from './ConfigParts';
 
 export default function WritingDeskSection({ sectionRef, activeChat, handleSaveChat }) {
+  const { t } = useI18n();
   const [readingSize, setReadingSize] = useState(8192);
   useEffect(() => setReadingSize(Number(activeChat.wdContextWindow ?? 8192) || 8192), [activeChat.id, activeChat.wdContextWindow]);
 
@@ -17,25 +19,25 @@ export default function WritingDeskSection({ sectionRef, activeChat, handleSaveC
       id="writing"
       sectionRef={sectionRef}
       icon={WritingGlyph}
-      title="Writing Desk"
-      description="What the AI reads when you ask it about a highlighted passage."
+      title={t("Writing Desk")}
+      description={t("What the AI reads when you ask it about a highlighted passage.")}
     >
       <div className="grid gap-6 md:grid-cols-2">
         <UnitNumberField
-          label="Reading size"
+          label={t("Reading size")}
           unit="tokens"
           value={readingSize}
           min={1024}
           step={1024}
           onChange={setReadingSize}
           onCommit={commit}
-          help="A chapter that fits is read whole. A longer one is read around your selection, with related notes. Lower it for tighter, faster answers."
+          help={t("A chapter that fits is read whole. A longer one is read around your selection, with related notes. Lower it for tighter, faster answers.")}
         />
       </div>
       <SettingsList className="mt-4">
         <SwitchRow
-          label="Include chat history"
-          description="Lets the Desk see this workspace's conversation. Turn it off if the chat's tone or language is leaking into your prose."
+          label={t("Include chat history")}
+          description={t("Lets the Desk see this workspace's conversation. Turn it off if the chat's tone or language is leaking into your prose.")}
           checked={activeChat.wdUseChatHistory !== 0}
           onChange={checked => handleSaveChat({ ...activeChat, wdUseChatHistory: checked ? 1 : 0 })}
         />

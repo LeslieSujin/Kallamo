@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { CalendarRange, Clock, X } from 'lucide-react';
 import NumberInput from '../../components/ui/NumberInput';
@@ -84,6 +85,7 @@ function RemoveButton({ label, onClick }) {
 
 // Weeks can hold any number of days, so the picker wraps into even rows instead of one long strip.
 export function WeekdayPicker({ calendar, value, onChange }) {
+  const { t } = useI18n();
   const picked = new Set(pickedWeekdays(calendar, { weekdays: value }));
   const toggle = index => {
     const next = new Set(picked);
@@ -92,7 +94,7 @@ export function WeekdayPicker({ calendar, value, onChange }) {
     onChange([...next].sort((a, b) => a - b));
   };
   return (
-    <div role="group" aria-label="On these days" className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1 rounded-control border border-border-default bg-surface-input p-1">
+    <div role="group" aria-label={t("On these days")} className="grid grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))] gap-1 rounded-control border border-border-default bg-surface-input p-1">
       {calendar.weekdays.map((name, index) => {
         const on = picked.has(index);
         return (
@@ -107,15 +109,16 @@ export function WeekdayPicker({ calendar, value, onChange }) {
 }
 
 export function LengthInput({ value, onChange, onRemove }) {
+  const { t } = useI18n();
   return (
     <div className="flex items-center gap-1.5">
       <div className={`${BOX} min-w-0 flex-1`}>
         <label className={`${SEGMENT} block`}>
-          <span className={SEGMENT_LABEL}>Days</span>
-          <NumberInput className={SEGMENT_NUMBER} aria-label="Days each time" min={2} max={366} value={value} onChange={onChange} />
+          <span className={SEGMENT_LABEL}>{t("Days")}</span>
+          <NumberInput className={SEGMENT_NUMBER} aria-label={t("Days each time")} min={2} max={366} value={value} onChange={onChange} />
         </label>
       </div>
-      <RemoveButton label="Remove length" onClick={onRemove} />
+      <RemoveButton label={t("Remove length")} onClick={onRemove} />
     </div>
   );
 }
@@ -138,14 +141,15 @@ function TimeSegment({ label, time, nullable, onChange }) {
 
 // From and Until on the world's own clock. An empty Until makes the event a single moment.
 export function HoursInput({ calendar, value, onChange, onRemove }) {
+  const { t } = useI18n();
   const max = Math.max(0, (calendar?.hoursPerDay || 24) - 1);
   return (
     <div className="flex items-center gap-1.5">
       <div className={`${BOX} grid min-w-0 flex-1 grid-cols-2 gap-px`}>
-        <TimeSegment label="From" time={{ ...value?.from, max }} onChange={from => from && onChange({ ...value, from })} />
-        <TimeSegment label="Until" time={value?.until ? { ...value.until, max } : { max }} nullable onChange={until => onChange({ ...value, until })} />
+        <TimeSegment label={t("From")} time={{ ...value?.from, max }} onChange={from => from && onChange({ ...value, from })} />
+        <TimeSegment label={t("Until")} time={value?.until ? { ...value.until, max } : { max }} nullable onChange={until => onChange({ ...value, until })} />
       </div>
-      <RemoveButton label="Remove hours" onClick={onRemove} />
+      <RemoveButton label={t("Remove hours")} onClick={onRemove} />
     </div>
   );
 }

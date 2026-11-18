@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Loader2, MoreHorizontal, Pencil, RefreshCw, Trash2 } from 'lucide-react';
 import { MemoryGlyph } from '../../components/ui/glyphs';
@@ -24,6 +25,7 @@ const parseBlocks = value => {
 };
 
 export default function ContextMemorySection({ sectionRef, activeChat, handleSaveChat, electronAPI, refreshChats, showToast, activeMessages, onTriggerSummarize }) {
+  const { t } = useI18n();
   const [maxContext, setMaxContext] = useState(payloadBudgetContract.defaultMaxPayloadTokens);
   const [archiveThreshold, setArchiveThreshold] = useState(60000);
   const [archiveMessages, setArchiveMessages] = useState([]);
@@ -161,12 +163,12 @@ export default function ContextMemorySection({ sectionRef, activeChat, handleSav
       id="context"
       sectionRef={sectionRef}
       icon={MemoryGlyph}
-      title="Context & memory"
-      description="How much the AI reads on each request, and when older messages are archived."
+      title={t("Context & memory")}
+      description={t("How much the AI reads on each request, and when older messages are archived.")}
     >
       <div className="grid gap-6 md:grid-cols-2">
         <UnitNumberField
-          label="Max API payload"
+          label={t("Max API payload")}
           unit="tokens"
           value={maxContext}
           min={payloadBudgetContract.minimumMaxPayloadTokens}
@@ -174,48 +176,48 @@ export default function ContextMemorySection({ sectionRef, activeChat, handleSav
           step={1024}
           onChange={setMaxContext}
           onCommit={commitMaxContext}
-          help="Everything sent on one request. Retrieved context and older history are trimmed to fit. A smaller limit on the API connection wins."
+          help={t("Everything sent on one request. Retrieved context and older history are trimmed to fit. A smaller limit on the API connection wins.")}
         />
         <UnitNumberField
-          label="Archive threshold"
+          label={t("Archive threshold")}
           unit="tokens"
           value={archiveThreshold}
           min={1000}
           step={1000}
           onChange={setArchiveThreshold}
           onCommit={commitThreshold}
-          help="When the active conversation reaches this size, older messages are ready to be summarized."
+          help={t("When the active conversation reaches this size, older messages are ready to be summarized.")}
         />
       </div>
 
       <div className="mt-5 rounded-card border border-border-subtle bg-surface-inset p-4">
         <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-          <span className="text-[0.8125rem] font-semibold text-text-secondary">Active conversation</span>
-          <span className="flex-1 text-xs tabular-nums text-text-subtle">{active.length} {active.length === 1 ? 'message' : 'messages'}</span>
-          <span className="text-[0.8125rem] tabular-nums text-text-muted"><b className="font-semibold text-text-primary">{formatNumber(tokensUsed)}</b> of {formatNumber(archiveThreshold)} tokens</span>
+          <span className="text-[0.8125rem] font-semibold text-text-secondary">{t("Active conversation")}</span>
+          <span className="flex-1 text-xs tabular-nums text-text-subtle">{active.length} {active.length === 1 ? t("message") : t("messages")}</span>
+          <span className="text-[0.8125rem] tabular-nums text-text-muted"><b className="font-semibold text-text-primary">{formatNumber(tokensUsed)}</b>{' '}{t("of")}{' '}{formatNumber(archiveThreshold)}{' '}{t("tokens")}</span>
         </div>
-        <Track percent={percentage} color={meterColor} className="my-3 h-1.5" label="Active conversation size" value={Math.round(percentage)} />
+        <Track percent={percentage} color={meterColor} className="my-3 h-1.5" label={t("Active conversation size")} value={Math.round(percentage)} />
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={summarizeNow}>Summarize now</Button>
+          <Button variant="ghost" size="sm" onClick={summarizeNow}>{t("Summarize now")}</Button>
           <span className="flex-1 text-xs tabular-nums text-text-subtle">
-            {formatNumber(stats.archived)} archived · {formatNumber(stats.active)} active{stats.excluded > 0 ? ` · ${formatNumber(stats.excluded)} dropped` : ''}
+            {formatNumber(stats.archived)}{' '}{t("archived ·")}{' '}{formatNumber(stats.active)}{' '}{t("active")}{stats.excluded > 0 ? ` · ${formatNumber(stats.excluded)} dropped` : ''}
           </span>
           {(stats.archived > 0 || stats.excluded > 0) && (
-            <Button variant="subtle" size="sm" icon={RefreshCw} onClick={() => setDialog({ kind: 'reset' })}>Rebuild everything</Button>
+            <Button variant="subtle" size="sm" icon={RefreshCw} onClick={() => setDialog({ kind: 'reset' })}>{t("Rebuild everything")}</Button>
           )}
         </div>
       </div>
 
       <SettingsList className="mt-3">
         <SwitchRow
-          label="Summarize automatically"
-          description="Archive older messages on their own when the threshold is reached."
+          label={t("Summarize automatically")}
+          description={t("Archive older messages on their own when the threshold is reached.")}
           checked={activeChat.autoSummarize === 1}
           onChange={checked => save({ autoSummarize: checked ? 1 : 0 })}
         />
         <SwitchRow
-          label="Context meter in the message box"
-          description="Shows how full the active conversation is next to the attach button."
+          label={t("Context meter in the message box")}
+          description={t("Shows how full the active conversation is next to the attach button.")}
           checked={activeChat.showContextBar === 1}
           onChange={checked => save({ showContextBar: checked ? 1 : 0 })}
         />
@@ -224,11 +226,11 @@ export default function ContextMemorySection({ sectionRef, activeChat, handleSav
       {summaries.length > 0 && (
         <div className="mt-6">
           <div className="mb-2.5 flex items-center gap-2">
-            <span className="text-xs font-semibold text-text-muted">Summaries</span>
-            <span className="flex-1 text-xs tabular-nums text-text-subtle">{summaries.length}, newest first</span>
+            <span className="text-xs font-semibold text-text-muted">{t("Summaries")}</span>
+            <span className="flex-1 text-xs tabular-nums text-text-subtle">{summaries.length}{t(", newest first")}</span>
             {summaries.length > SUMMARY_PREVIEW && (
               <Button variant="subtle" size="sm" onClick={() => setShowAll(value => !value)}>
-                {showAll ? 'Show fewer' : `Show all ${summaries.length}`}
+                {showAll ? t("Show fewer") : `Show all ${summaries.length}`}
               </Button>
             )}
           </div>
@@ -258,17 +260,11 @@ export default function ContextMemorySection({ sectionRef, activeChat, handleSav
         <ConfirmDialog
           tone="warning"
           icon={RefreshCw}
-          title="Rebuild the whole archive?"
-          message={<>
-            Every summary in this workspace is deleted and the entire conversation returns to active
-            context, starting from the very first message. Messages dropped by deleting a summary come back too.
-            <br /><br />
-            Nothing is lost, but your context jumps back to its full size and you will have to archive
-            again from scratch. Custom memory and uploaded files are not affected.
-          </>}
+          title={t("Rebuild the whole archive?")}
+          message={<>{t("Every summary in this workspace is deleted and the entire conversation returns to active context, starting from the very first message. Messages dropped by deleting a summary come back too.")}<br /><br />{t("Nothing is lost, but your context jumps back to its full size and you will have to archive again from scratch. Custom memory and uploaded files are not affected.")}</>}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDialog(null) },
-            { label: 'Rebuild everything', variant: 'primary', loading: busy, onClick: resetSummaries }
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDialog(null) },
+            { label: t("Rebuild everything"), variant: 'primary', loading: busy, onClick: resetSummaries }
           ]}
           onClose={() => setDialog(null)}
         />
@@ -278,10 +274,10 @@ export default function ContextMemorySection({ sectionRef, activeChat, handleSav
           tone="question"
           icon={RefreshCw}
           title={`Rebuild "${dialog.block.title}"?`}
-          message="This summary is deleted and the messages it covered return to the conversation, ready to be archived differently. Your other summaries stay exactly as they are."
+          message={t("This summary is deleted and the messages it covered return to the conversation, ready to be archived differently. Your other summaries stay exactly as they are.")}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDialog(null) },
-            { label: 'Rebuild this summary', variant: 'primary', loading: busy, onClick: () => rebuildSummary(dialog.block) }
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDialog(null) },
+            { label: t("Rebuild this summary"), variant: 'primary', loading: busy, onClick: () => rebuildSummary(dialog.block) }
           ]}
           onClose={() => setDialog(null)}
         />
@@ -290,16 +286,10 @@ export default function ContextMemorySection({ sectionRef, activeChat, handleSav
         <ConfirmDialog
           tone="danger"
           title={`Delete "${dialog.block.title}"?`}
-          message={<>
-            The recap and the stored history both go, and every message this summary covered is
-            dropped: it stays in your log but never reaches the AI again.
-            <br /><br />
-            Rebuild everything is the only way to bring those messages back. To keep them in the
-            conversation instead, use Rebuild on this summary.
-          </>}
+          message={<>{t("The recap and the stored history both go, and every message this summary covered is dropped: it stays in your log but never reaches the AI again.")}<br /><br />{t("Rebuild everything is the only way to bring those messages back. To keep them in the conversation instead, use Rebuild on this summary.")}</>}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDialog(null) },
-            { label: 'Delete and drop messages', variant: 'danger', loading: busy, onClick: () => deleteSummary(dialog.block) }
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDialog(null) },
+            { label: t("Delete and drop messages"), variant: 'danger', loading: busy, onClick: () => deleteSummary(dialog.block) }
           ]}
           onClose={() => setDialog(null)}
         />
@@ -309,6 +299,7 @@ export default function ContextMemorySection({ sectionRef, activeChat, handleSav
 }
 
 function SummaryCard({ block, progress, finishing, renaming, renameDraft, onRenameDraft, onStartRename, onRename, onCancelRename, onRebuild, onDelete, onFinish }) {
+  const { t } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const anchorRef = useRef(null);
   const messageCount = Array.isArray(block.messages) ? block.messages.length : 0;
@@ -325,19 +316,19 @@ function SummaryCard({ block, progress, finishing, renaming, renameDraft, onRena
               if (event.key === 'Enter') event.currentTarget.blur();
               if (event.key === 'Escape') onCancelRename();
             }}
-            aria-label="Summary name"
+            aria-label={t("Summary name")}
             className="field-input h-7 min-w-0 flex-1 px-2 text-[0.8125rem] font-semibold"
           />
         ) : (
           <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-primary">{block.title}</span>
         )}
-        {messageCount > 0 && <span className="shrink-0 text-xs tabular-nums text-text-subtle">{messageCount} {messageCount === 1 ? 'message' : 'messages'}</span>}
+        {messageCount > 0 && <span className="shrink-0 text-xs tabular-nums text-text-subtle">{messageCount} {messageCount === 1 ? t("message") : t("messages")}</span>}
         <IconButton ref={anchorRef} icon={MoreHorizontal} size="sm" label={`${block.title} actions`} aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(value => !value)} />
         <Menu anchorRef={anchorRef} open={menuOpen} onClose={() => setMenuOpen(false)} label={`${block.title} actions`} className="w-56">
-          <MenuItem icon={Pencil} label="Rename" onSelect={() => { setMenuOpen(false); onStartRename(); }} />
-          {block.type === 'summarized' && <MenuItem icon={RefreshCw} label="Rebuild this summary" onSelect={() => { setMenuOpen(false); onRebuild(); }} />}
+          <MenuItem icon={Pencil} label={t("Rename")} onSelect={() => { setMenuOpen(false); onStartRename(); }} />
+          {block.type === 'summarized' && <MenuItem icon={RefreshCw} label={t("Rebuild this summary")} onSelect={() => { setMenuOpen(false); onRebuild(); }} />}
           <MenuSeparator />
-          <MenuItem icon={Trash2} label="Delete" danger onSelect={() => { setMenuOpen(false); onDelete(); }} />
+          <MenuItem icon={Trash2} label={t("Delete")} danger onSelect={() => { setMenuOpen(false); onDelete(); }} />
         </Menu>
       </div>
       <SummaryState block={block} progress={progress} busy={finishing} onFinish={onFinish} />
@@ -347,6 +338,7 @@ function SummaryCard({ block, progress, finishing, renaming, renameDraft, onRena
 
 // Recap and tags report separately, so a tagging failure never hides a written recap.
 function SummaryState({ block, progress, busy, onFinish }) {
+  const { t } = useI18n();
   const recapPending = busy || block.recapStatus === 'pending';
   const recapFailed = block.recapStatus === 'failed';
   const taggingPending = block.taggingStatus === 'pending';
@@ -363,10 +355,10 @@ function SummaryState({ block, progress, busy, onFinish }) {
         {block.summary
           ? block.summary
           : summarized && recapPending
-            ? <span className="italic text-text-subtle">Writing the recap...</span>
+            ? <span className="italic text-text-subtle">{t("Writing the recap...")}</span>
             : summarized && recapFailed
-              ? <span className="text-status-warning">{block.recapError || 'The recap could not be written.'}</span>
-              : <span className="italic text-text-subtle">No recap was written for this archive.</span>}
+              ? <span className="text-status-warning">{block.recapError || t("The recap could not be written.")}</span>
+              : <span className="italic text-text-subtle">{t("No recap was written for this archive.")}</span>}
       </p>
       {summarized && taggingFailed && (
         <span className="flex items-center gap-1.5 text-xs text-status-warning">
@@ -374,9 +366,9 @@ function SummaryState({ block, progress, busy, onFinish }) {
           <span className="min-w-0 flex-1" data-tooltip={block.taggingError || undefined}>
             {block.tagChunksPending > 0 && block.tagChunkTotal
               ? `Names not tagged in ${block.tagChunksPending} of ${block.tagChunkTotal} passages`
-              : 'Names not tagged yet'}
+              : t("Names not tagged yet")}
           </span>
-          {needsFinish && <Button variant="ghost" size="sm" className="!min-h-7" onClick={onFinish}>Finish</Button>}
+          {needsFinish && <Button variant="ghost" size="sm" className="!min-h-7" onClick={onFinish}>{t("Finish")}</Button>}
         </span>
       )}
       {summarized && taggingPending && !taggingFailed && (
@@ -386,13 +378,11 @@ function SummaryState({ block, progress, busy, onFinish }) {
         </span>
       )}
       {needsFinish && !taggingFailed && (
-        <span className="flex justify-end"><Button variant="ghost" size="sm" className="!min-h-7" onClick={onFinish}>Finish</Button></span>
+        <span className="flex justify-end"><Button variant="ghost" size="sm" className="!min-h-7" onClick={onFinish}>{t("Finish")}</Button></span>
       )}
       {busy && !taggingPending && (
         <span className="flex items-center gap-1.5 text-xs text-text-muted">
-          <Loader2 aria-hidden="true" className="h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none" />
-          Finishing
-        </span>
+          <Loader2 aria-hidden="true" className="h-3.5 w-3.5 shrink-0 animate-spin motion-reduce:animate-none" />{t("Finishing")}</span>
       )}
     </>
   );

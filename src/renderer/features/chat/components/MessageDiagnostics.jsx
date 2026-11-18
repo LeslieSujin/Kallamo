@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { Activity, ChevronDown, ChevronRight, ChevronUp, Copy } from 'lucide-react';
 import { describeSpanCheck, formatFrameTime } from '../frame-format';
@@ -56,6 +57,7 @@ export function diagnosticsFor(debug, flags) {
 
 /** The report lies inside the reply, so it scrolls with its button and never pushes the thread down. */
 export function MessageDiagnostics({ debug, items, names, onCopy, copiedKey }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
   const buttonRef = useRef(null);
@@ -94,11 +96,11 @@ export function MessageDiagnostics({ debug, items, names, onCopy, copiedKey }) {
           : 'chat-action rounded-lg border-border-subtle text-text-muted hover:border-border-default hover:text-text-secondary'}`}
       >
         <Activity aria-hidden="true" className="h-3.5 w-3.5" />
-        {totals ? `${compactNumber(totals.total)} tokens` : 'Diagnostics'}
+        {totals ? `${compactNumber(totals.total)} tokens` : t("Diagnostics")}
         {open ? <ChevronUp aria-hidden="true" className="h-3 w-3" /> : <ChevronDown aria-hidden="true" className="h-3 w-3" />}
       </button>
       {open && (
-        <div role="dialog" aria-label="Reply diagnostics" className="absolute right-0 top-full -mt-px">
+        <div role="dialog" aria-label={t("Reply diagnostics")} className="absolute right-0 top-full -mt-px">
           <DiagnosticsPanel debug={debug} items={items} names={names} onCopy={onCopy} copiedKey={copiedKey} />
         </div>
       )}
@@ -155,6 +157,7 @@ const CACHE_STAGES = [['main', 'Main generation'], ['agentic', 'Agentic retrieva
 const CACHE_MODES = { explicit: 'Marked by Kallamo', automatic: 'Cached by the provider', mixed: 'Marked and automatic' };
 
 function TokensView({ debug }) {
+  const { t } = useI18n();
   const usage = debug.usage;
   const legacy = debug.tokens || {};
   const totals = tokenTotals(debug);
@@ -170,13 +173,13 @@ function TokensView({ debug }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-2">
-        <Stat label="Input" value={fmt(totals.input)} sub={usage?.accuracy === 'estimated' || !usage ? 'Estimated' : usage.accuracy} />
-        <Stat label="Output" value={fmt(totals.output)} />
-        <Stat label="Total" value={fmt(totals.total)} tone="text-accent" />
+        <Stat label={t("Input")} value={fmt(totals.input)} sub={usage?.accuracy === 'estimated' || !usage ? 'Estimated' : usage.accuracy} />
+        <Stat label={t("Output")} value={fmt(totals.output)} />
+        <Stat label={t("Total")} value={fmt(totals.total)} tone="text-accent" />
       </div>
 
       <div>
-        <SectionTitle>Main input</SectionTitle>
+        <SectionTitle>{t("Main input")}</SectionTitle>
         <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-tint/[0.06]" role="img" aria-label={parts.map(part => `${part.label} ${fmt(part.value)}`).join(', ')}>
           {parts.map(part => part.value > 0 && <span key={part.label} className={part.tone} style={{ width: `${(part.value / partsTotal) * 100}%` }} />)}
         </div>
@@ -191,34 +194,34 @@ function TokensView({ debug }) {
       </div>
 
       <div>
-        <SectionTitle>By stage</SectionTitle>
+        <SectionTitle>{t("By stage")}</SectionTitle>
         <div className="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] gap-x-6 gap-y-1.5 text-xs tabular-nums">
-          <span className="text-text-subtle">Stage</span><span className="text-right text-text-subtle">Input</span><span className="text-right text-text-subtle">From cache</span><span className="text-right text-text-subtle">Output</span>
-          <span className="text-text-secondary">Main generation</span><span className="text-right text-text-primary">{fmt(main.input)}</span><span className="text-right text-text-muted">{fmt(stageCache('main'))}</span><span className="text-right text-text-primary">{fmt(main.output)}</span>
-          {(agentic.input || agentic.output) > 0 && <><span className="text-text-secondary">Agentic retrieval</span><span className="text-right text-text-primary">{fmt(agentic.input)}</span><span className="text-right text-text-muted">{fmt(stageCache('agentic'))}</span><span className="text-right text-text-primary">{fmt(agentic.output)}</span></>}
-          {usage?.narrativeState?.total > 0 && <><span className="text-text-secondary">Narrative state</span><span className="text-right text-text-primary">{fmt(usage.narrativeState.input)}</span><span className="text-right text-text-muted">{fmt(stageCache('narrativeState'))}</span><span className="text-right text-text-primary">{fmt(usage.narrativeState.output)}</span></>}
+          <span className="text-text-subtle">{t("Stage")}</span><span className="text-right text-text-subtle">{t("Input")}</span><span className="text-right text-text-subtle">{t("From cache")}</span><span className="text-right text-text-subtle">{t("Output")}</span>
+          <span className="text-text-secondary">{t("Main generation")}</span><span className="text-right text-text-primary">{fmt(main.input)}</span><span className="text-right text-text-muted">{fmt(stageCache('main'))}</span><span className="text-right text-text-primary">{fmt(main.output)}</span>
+          {(agentic.input || agentic.output) > 0 && <><span className="text-text-secondary">{t("Agentic retrieval")}</span><span className="text-right text-text-primary">{fmt(agentic.input)}</span><span className="text-right text-text-muted">{fmt(stageCache('agentic'))}</span><span className="text-right text-text-primary">{fmt(agentic.output)}</span></>}
+          {usage?.narrativeState?.total > 0 && <><span className="text-text-secondary">{t("Narrative state")}</span><span className="text-right text-text-primary">{fmt(usage.narrativeState.input)}</span><span className="text-right text-text-muted">{fmt(stageCache('narrativeState'))}</span><span className="text-right text-text-primary">{fmt(usage.narrativeState.output)}</span></>}
         </div>
       </div>
 
       {cache?.active && (
         <div className="rounded-lg border border-border-subtle bg-surface-canvas/50 px-3 py-2.5">
           <div className="flex items-center justify-between gap-2">
-            <SectionTitle>Prompt cache</SectionTitle>
-            <span className="text-[0.6875rem] text-text-subtle">Reported by the provider</span>
+            <SectionTitle>{t("Prompt cache")}</SectionTitle>
+            <span className="text-[0.6875rem] text-text-subtle">{t("Reported by the provider")}</span>
           </div>
           <div className="space-y-1 text-xs text-text-muted tabular-nums">
             {CACHE_STAGES.filter(([key]) => (Number(cacheStages[key]?.read) || 0) + (Number(cacheStages[key]?.write) || 0) > 0).map(([key, label]) => (
               <div key={key} className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
                 <span className="min-w-[8.5rem] text-text-secondary">{label}</span>
-                <span>Read <b className="font-semibold text-text-primary">{fmt(cacheStages[key].read)}</b></span>
-                <span>Written <b className="font-semibold text-text-primary">{fmt(cacheStages[key].write)}</b></span>
+                <span>{t("Read")}{' '}<b className="font-semibold text-text-primary">{fmt(cacheStages[key].read)}</b></span>
+                <span>{t("Written")}{' '}<b className="font-semibold text-text-primary">{fmt(cacheStages[key].write)}</b></span>
                 {cacheStages[key].mode && <span className="text-text-subtle">{CACHE_MODES[cacheStages[key].mode] || ''}</span>}
               </div>
             ))}
           </div>
           <p className={`mt-1.5 text-xs ${cacheNet >= 0 ? 'text-status-success' : 'text-status-warning'}`}>
             {cacheNet >= 0 ? `Saved ≈ ${fmt(cacheNet)} input tokens` : `Cost ≈ ${fmt(-cacheNet)} extra input tokens this turn`}
-            {cache.savingsKnown === false && <span className="text-text-muted"> · reads from an automatic cache are billed at the model's cached-input rate</span>}
+            {cache.savingsKnown === false && <span className="text-text-muted">{' '}{t("· reads from an automatic cache are billed at the model's cached-input rate")}</span>}
           </p>
         </div>
       )}
@@ -233,36 +236,36 @@ const STOP_REASONS = {
 };
 
 function AgenticView({ debug, copy }) {
+  const { t } = useI18n();
   const agentic = debug.agentic;
   const trajectory = debug.agenticTrajectory;
-  if (!agentic && !trajectory) return <Disclosure title="Report">{copy}</Disclosure>;
+  if (!agentic && !trajectory) return <Disclosure title={t("Report")}>{copy}</Disclosure>;
   const planner = trajectory?.plannerWindow;
   const pack = trajectory?.packing;
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-1.5">
-        {agentic && <Chip tone={agentic.stopReason === 'finished' ? 'bg-status-success/12 text-status-success' : 'bg-status-warning/12 text-status-warning'}>{STOP_REASONS[agentic.stopReason] || agentic.stopReason || 'Unknown stop'}</Chip>}
-        {agentic?.degraded && <Chip tone="bg-status-danger/12 text-status-danger">Degraded</Chip>}
-        {trajectory?.gate && <Chip>Path: {trajectory.gate.path}</Chip>}
-        {trajectory?.protocol && <Chip>Protocol: {trajectory.finalProtocol || trajectory.protocol}</Chip>}
+        {agentic && <Chip tone={agentic.stopReason === 'finished' ? 'bg-status-success/12 text-status-success' : 'bg-status-warning/12 text-status-warning'}>{STOP_REASONS[agentic.stopReason] || agentic.stopReason || t("Unknown stop")}</Chip>}
+        {agentic?.degraded && <Chip tone="bg-status-danger/12 text-status-danger">{t("Degraded")}</Chip>}
+        {trajectory?.gate && <Chip>{t("Path:")}{' '}{trajectory.gate.path}</Chip>}
+        {trajectory?.protocol && <Chip>{t("Protocol:")}{' '}{trajectory.finalProtocol || trajectory.protocol}</Chip>}
       </div>
 
       {planner && (
         <div>
-          <SectionTitle>Planner window</SectionTitle>
+          <SectionTitle>{t("Planner window")}</SectionTitle>
           <div className="h-2 w-full overflow-hidden rounded-full bg-tint/[0.06]">
             <span className="block h-full bg-status-info" style={{ width: `${Math.min(100, (planner.limit / (planner.configured || planner.limit)) * 100)}%` }} />
           </div>
           <p className="mt-1.5 text-xs text-text-muted tabular-nums">
-            {fmt(planner.limit)} of {fmt(planner.configured || planner.limit)} tokens ({planner.source}) · {fmt(planner.outputTokens)} reserved for its reply
-            {Number(planner.tokenRatio) > 1 && ` · corrected ×${Number(planner.tokenRatio).toFixed(2)}`}
+            {fmt(planner.limit)}{' '}{t("of")}{' '}{fmt(planner.configured || planner.limit)}{' '}{t("tokens (")}{planner.source}) · {fmt(planner.outputTokens)}{t("reserved for its reply")}{Number(planner.tokenRatio) > 1 && ` · corrected ×${Number(planner.tokenRatio).toFixed(2)}`}
           </p>
         </div>
       )}
 
       {trajectory?.seed && (
         <div>
-          <SectionTitle>Pre-search · {trajectory.seed.items} passages</SectionTitle>
+          <SectionTitle>{t("Pre-search ·")}{' '}{trajectory.seed.items}{' '}{t("passages")}</SectionTitle>
           <div className="flex flex-wrap gap-1.5">
             {(trajectory.seed.calls || []).map(call => <Chip key={call.tool}>{call.tool}<span className="text-text-subtle">→</span><b className="font-semibold text-text-primary">{call.hits}</b></Chip>)}
           </div>
@@ -271,15 +274,14 @@ function AgenticView({ debug, copy }) {
 
       {trajectory?.turns?.length > 0 && (
         <div>
-          <SectionTitle>Turns</SectionTitle>
+          <SectionTitle>{t("Turns")}</SectionTitle>
           <ol className="space-y-1.5">
             {trajectory.turns.map(turn => (
               <li key={turn.turn} className="rounded-lg border border-border-subtle bg-surface-canvas/50 px-3 py-2">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                  <span className="font-semibold text-text-primary">Turn {turn.turn}</span>
+                  <span className="font-semibold text-text-primary">{t("Turn")}{' '}{turn.turn}</span>
                   <span className="text-text-muted tabular-nums">
-                    +{turn.newItems} new · {fmt(turn.inputTokens)} in / {fmt(turn.outputTokens)} out
-                    {turn.tokenRatio ? ` · ×${Number(turn.tokenRatio).toFixed(2)}` : ''}
+                    +{turn.newItems}{' '}{t("new ·")}{' '}{fmt(turn.inputTokens)}{' '}{t("in /")}{' '}{fmt(turn.outputTokens)}{t("out")}{turn.tokenRatio ? ` · ×${Number(turn.tokenRatio).toFixed(2)}` : ''}
                   </span>
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -292,7 +294,7 @@ function AgenticView({ debug, copy }) {
                         <b className="font-semibold">{call.hits}</b>
                       </Chip>
                     ))
-                    : <Chip>{turn.finished ? 'Finished' : 'No call'}</Chip>}
+                    : <Chip>{turn.finished ? t("Finished") : t("No call")}</Chip>}
                 </div>
               </li>
             ))}
@@ -302,17 +304,17 @@ function AgenticView({ debug, copy }) {
 
       {pack && (
         <div className="grid grid-cols-3 gap-2">
-          <Stat label="Items packed" value={`${pack.kept}/${pack.total}`} />
-          <Stat label="Context budget" value={fmt(pack.budget)} sub="tokens" />
-          <Stat label="Dropped · cut" value={`${pack.dropped} · ${pack.truncated}`} tone={pack.dropped || pack.truncated ? 'text-status-warning' : 'text-text-primary'} />
+          <Stat label={t("Items packed")} value={`${pack.kept}/${pack.total}`} />
+          <Stat label={t("Context budget")} value={fmt(pack.budget)} sub="tokens" />
+          <Stat label={t("Dropped · cut")} value={`${pack.dropped} · ${pack.truncated}`} tone={pack.dropped || pack.truncated ? 'text-status-warning' : 'text-text-primary'} />
         </div>
       )}
 
       <div className="space-y-1.5">
-        {agentic?.finish && <Disclosure title="Planner's final answer">{agentic.finish}</Disclosure>}
-        {agentic?.contextText && <Disclosure title="Final context">{agentic.contextText}</Disclosure>}
-        {agentic?.turns && <Disclosure title="Raw tool trace">{diagnosticText(agentic.turns)}</Disclosure>}
-        {!agentic && debug.agenticRagResponse && <Disclosure title="Response">{debug.agenticRagResponse}</Disclosure>}
+        {agentic?.finish && <Disclosure title={t("Planner's final answer")}>{agentic.finish}</Disclosure>}
+        {agentic?.contextText && <Disclosure title={t("Final context")}>{agentic.contextText}</Disclosure>}
+        {agentic?.turns && <Disclosure title={t("Raw tool trace")}>{diagnosticText(agentic.turns)}</Disclosure>}
+        {!agentic && debug.agenticRagResponse && <Disclosure title={t("Response")}>{debug.agenticRagResponse}</Disclosure>}
       </div>
     </div>
   );
@@ -335,9 +337,10 @@ function groupSources(list = []) {
 const SOURCE_LIMIT = 8;
 
 function SourceList({ items, excluded = false }) {
+  const { t } = useI18n();
   const [showAll, setShowAll] = useState(false);
   const visible = showAll ? items : items.slice(0, SOURCE_LIMIT);
-  if (!items.length) return <p className="text-xs text-text-subtle">None.</p>;
+  if (!items.length) return <p className="text-xs text-text-subtle">{t("None.")}</p>;
   return (
     <div>
       <ul className="divide-y divide-border-subtle rounded-lg border border-border-subtle">
@@ -352,7 +355,7 @@ function SourceList({ items, excluded = false }) {
       </ul>
       {items.length > SOURCE_LIMIT && (
         <button type="button" onClick={() => setShowAll(value => !value)} className="mt-1.5 rounded px-1 text-xs font-semibold text-text-muted hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-          {showAll ? 'Show fewer' : `Show all ${items.length}`}
+          {showAll ? t("Show fewer") : `Show all ${items.length}`}
         </button>
       )}
     </div>
@@ -360,38 +363,38 @@ function SourceList({ items, excluded = false }) {
 }
 
 function RetrievalView({ debug, copy }) {
+  const { t } = useI18n();
   const retrieval = debug.retrieval;
-  if (!retrieval) return <Disclosure title="Report">{copy}</Disclosure>;
+  if (!retrieval) return <Disclosure title={t("Report")}>{copy}</Disclosure>;
   const selection = retrieval.selection;
   const breakdown = value => Object.entries(value || {}).map(([key, count]) => `${kindLabel(key)} ${count}`).join(' · ');
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-1.5">
-        <Chip>Mode: {retrieval.mode || 'standard'}</Chip>
-        {selection?.intent && <Chip>Intent: {selection.intent}</Chip>}
-        {debug.generation?.profileName && <Chip>Target: {debug.generation.profileName}</Chip>}
+        <Chip>{t("Mode:")}{' '}{retrieval.mode || t("standard")}</Chip>
+        {selection?.intent && <Chip>{t("Intent:")}{' '}{selection.intent}</Chip>}
+        {debug.generation?.profileName && <Chip>{t("Target:")}{' '}{debug.generation.profileName}</Chip>}
       </div>
 
       {selection && (
         <>
           <div className="grid grid-cols-3 gap-2">
-            <Stat label="Discovered" value={fmt(selection.discovered)} sub={breakdown(selection.discoveredByKind)} />
-            <Stat label="Selected" value={fmt(selection.selected)} sub={breakdown(selection.selectedByKind)} tone="text-status-success" />
-            <Stat label="Excluded" value={fmt(selection.excluded)} sub={breakdown(selection.excludedByReason) || 'None'} tone={selection.excluded ? 'text-status-warning' : 'text-text-primary'} />
+            <Stat label={t("Discovered")} value={fmt(selection.discovered)} sub={breakdown(selection.discoveredByKind)} />
+            <Stat label={t("Selected")} value={fmt(selection.selected)} sub={breakdown(selection.selectedByKind)} tone="text-status-success" />
+            <Stat label={t("Excluded")} value={fmt(selection.excluded)} sub={breakdown(selection.excludedByReason) || 'None'} tone={selection.excluded ? 'text-status-warning' : 'text-text-primary'} />
           </div>
           {selection.evidence && (
-            <p className="text-xs text-text-muted">
-              Evidence: <span className="text-text-secondary">{selection.evidence.status || 'inconclusive'}</span> ({selection.evidence.reason || 'unspecified'})
-              {selection.evidence.source && <> · latest from {selection.evidence.source}</>}
+            <p className="text-xs text-text-muted">{t("Evidence:")}<span className="text-text-secondary">{selection.evidence.status || t("inconclusive")}</span> ({selection.evidence.reason || t("unspecified")})
+              {selection.evidence.source && <>{' '}{t("· latest from")}{' '}{selection.evidence.source}</>}
             </p>
           )}
           <div>
-            <SectionTitle>Selected sources</SectionTitle>
+            <SectionTitle>{t("Selected sources")}</SectionTitle>
             <SourceList items={groupSources(selection.selectedSources)} />
           </div>
           {selection.excludedSources?.length > 0 && (
             <div>
-              <SectionTitle>Excluded sources</SectionTitle>
+              <SectionTitle>{t("Excluded sources")}</SectionTitle>
               <SourceList items={groupSources(selection.excludedSources)} excluded />
             </div>
           )}
@@ -399,10 +402,10 @@ function RetrievalView({ debug, copy }) {
       )}
 
       <div className="space-y-1.5">
-        {retrieval.bundle?.scopes?.length > 0 && <Disclosure title="Planner decisions">{formatPlannerDecisions(retrieval.bundle)}</Disclosure>}
-        <Disclosure title="Exact final narrative context">{retrieval.finalContextText || 'No additional narrative context was sent.'}</Disclosure>
+        {retrieval.bundle?.scopes?.length > 0 && <Disclosure title={t("Planner decisions")}>{formatPlannerDecisions(retrieval.bundle)}</Disclosure>}
+        <Disclosure title={t("Exact final narrative context")}>{retrieval.finalContextText || t("No additional narrative context was sent.")}</Disclosure>
       </div>
-      {debug.generation?.policyId && <p className="font-mono text-[0.6875rem] text-text-subtle">Policy {debug.generation.policyId}</p>}
+      {debug.generation?.policyId && <p className="font-mono text-[0.6875rem] text-text-subtle">{t("Policy")}{' '}{debug.generation.policyId}</p>}
     </div>
   );
 }
@@ -477,17 +480,18 @@ function parsePlanLine(line) {
 }
 
 function ScenePlanView({ plan }) {
+  const { t } = useI18n();
   const lines = String(plan || '').split(/\r?\n/).map(line => line.replace(/^[-*•]\s*/, '').trim()).filter(Boolean);
   const parsed = lines.map(parsePlanLine);
   if (!lines.length || /^none\.?$/i.test(lines.join(' '))) {
-    return <p className="text-xs text-text-muted">No non-player character acted this turn.</p>;
+    return <p className="text-xs text-text-muted">{t("No non-player character acted this turn.")}</p>;
   }
   if (parsed.some(entry => !entry)) {
     return <div className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-text-muted select-text">{plan}</div>;
   }
   return (
     <div className="space-y-3">
-      <p className="text-xs text-text-muted">What each character could rely on before the narration was written. Hidden from the reply.</p>
+      <p className="text-xs text-text-muted">{t("What each character could rely on before the narration was written. Hidden from the reply.")}</p>
       <ul className="divide-y divide-border-subtle rounded-lg border border-border-subtle">
         {parsed.map((entry, index) => (
           <li key={index} className="px-3 py-2.5 select-text">
@@ -508,17 +512,18 @@ function ScenePlanView({ plan }) {
 }
 
 function SceneMemoryList({ updates, names }) {
+  const { t } = useI18n();
   return (
     <ul className="divide-y divide-border-subtle rounded-lg border border-border-subtle">
       {updates.map(update => (
         <li key={update.entityId} className="px-3 py-2 text-xs select-text">
-          <p className="font-semibold text-text-primary">{names?.get(update.entityId) || 'Unknown character'}</p>
+          <p className="font-semibold text-text-primary">{names?.get(update.entityId) || t("Unknown character")}</p>
           <ul className="mt-1 space-y-0.5 text-text-secondary">
-            {(update.perceived || []).map((text, index) => <li key={`p${index}`}><span className="text-text-subtle">perceived</span> {text}</li>)}
+            {(update.perceived || []).map((text, index) => <li key={`p${index}`}><span className="text-text-subtle">{t("perceived")}</span> {text}</li>)}
             {(update.heard || []).map((line, index) => (
-              <li key={`h${index}`}><span className="text-text-subtle">heard{line.fromId && names?.get(line.fromId) ? ` from ${names.get(line.fromId)}` : ''}</span> {line.text}</li>
+              <li key={`h${index}`}><span className="text-text-subtle">{t("heard")}{line.fromId && names?.get(line.fromId) ? ` from ${names.get(line.fromId)}` : ''}</span> {line.text}</li>
             ))}
-            {update.stance && <li><span className="text-text-subtle">stance</span> {update.stance}</li>}
+            {update.stance && <li><span className="text-text-subtle">{t("stance")}</span> {update.stance}</li>}
           </ul>
         </li>
       ))}
@@ -536,6 +541,7 @@ const RELATIONSHIP_REFUSALS = {
 
 // What the analysis asked for, and where the limits left it.
 function RelationshipChanges({ changes, names }) {
+  const { t } = useI18n();
   const name = id => names?.get(id) || 'Unknown';
   return (
     <ul className="divide-y divide-border-subtle rounded-lg border border-border-subtle">
@@ -544,8 +550,8 @@ function RelationshipChanges({ changes, names }) {
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <span className="font-semibold text-text-primary">{name(change.sourceEntityId)} → {name(change.targetEntityId)}</span>
             <span className={`tabular-nums ${change.applied === null ? 'text-status-warning' : 'text-text-secondary'}`}>
-              {change.from ?? 'new'} → {change.applied ?? change.from ?? 'unchanged'}
-              {change.applied !== change.requested && <span className="text-text-subtle"> · asked {change.requested}</span>}
+              {change.from ?? t("new")} → {change.applied ?? change.from ?? t("unchanged")}
+              {change.applied !== change.requested && <span className="text-text-subtle">{' '}{t("· asked")}{' '}{change.requested}</span>}
             </span>
           </div>
           <p className="mt-0.5 text-text-muted">
@@ -559,8 +565,9 @@ function RelationshipChanges({ changes, names }) {
 }
 
 function NarrativeView({ debug, names, copy }) {
+  const { t } = useI18n();
   const state = debug.narrativeState;
-  if (!state || typeof state !== 'object') return <Disclosure title="Report">{copy}</Disclosure>;
+  if (!state || typeof state !== 'object') return <Disclosure title={t("Report")}>{copy}</Disclosure>;
   const status = NARRATIVE_STATUS[state.status] || { label: humanize(state.status || 'unknown'), tone: 'bg-tint/[0.06] text-text-secondary' };
   const triage = state.triage || {};
   const routing = state.routing || {};
@@ -599,18 +606,18 @@ function NarrativeView({ debug, names, copy }) {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-1.5">
         <Chip tone={status.tone}>{status.label}</Chip>
-        {routing.mode && routing.mode !== 'none' && <Chip>Analysis: {humanize(routing.mode)}</Chip>}
-        {state.forceDeepAnalysis && <Chip tone="bg-status-warning/12 text-status-warning">Forced deep pass</Chip>}
+        {routing.mode && routing.mode !== 'none' && <Chip>{t("Analysis:")}{' '}{humanize(routing.mode)}</Chip>}
+        {state.forceDeepAnalysis && <Chip tone="bg-status-warning/12 text-status-warning">{t("Forced deep pass")}</Chip>}
         {seconds(state.elapsedMs) && <Chip>{seconds(state.elapsedMs)}</Chip>}
-        {state.manifest?.sequence != null && <Chip>Manifest #{state.manifest.sequence}</Chip>}
+        {state.manifest?.sequence != null && <Chip>{t("Manifest #")}{state.manifest.sequence}</Chip>}
       </div>
 
       {state.error && <p className="rounded-lg border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-xs text-status-danger">{state.error}</p>}
 
       <div className="grid grid-cols-2 gap-2">
         <div className="rounded-lg border border-border-subtle bg-surface-canvas/50 px-3 py-2.5">
-          <SectionTitle>Triage</SectionTitle>
-          <p className="text-xs text-text-secondary">{triage.consequential ? 'Consequential turn' : 'Nothing lasting happened'}</p>
+          <SectionTitle>{t("Triage")}</SectionTitle>
+          <p className="text-xs text-text-secondary">{triage.consequential ? t("Consequential turn") : t("Nothing lasting happened")}</p>
           {(triage.types || []).length > 0 && (
             <div className="mt-2 flex flex-wrap gap-1">
               {triage.types.map(type => <Chip key={type} tone={domainTone(type)}>{humanize(type)}</Chip>)}
@@ -618,31 +625,31 @@ function NarrativeView({ debug, names, copy }) {
           )}
         </div>
         <div className="rounded-lg border border-border-subtle bg-surface-canvas/50 px-3 py-2.5">
-          <SectionTitle>Analyzed</SectionTitle>
+          <SectionTitle>{t("Analyzed")}</SectionTitle>
           {(routing.selectedDomains || []).length
             ? <div className="flex flex-wrap gap-1">{routing.selectedDomains.map(domain => <Chip key={domain} tone={domainTone(domain)}>{humanize(domain)}</Chip>)}</div>
-            : <p className="text-xs text-text-muted">Triage only</p>}
+            : <p className="text-xs text-text-muted">{t("Triage only")}</p>}
           {(routing.forceReasons || []).length > 0 && <p className="mt-1.5 text-[0.6875rem] text-status-warning">{routing.forceReasons.map(humanize).join(' · ')}</p>}
         </div>
       </div>
 
       {sceneLocation && (
         <div>
-          <SectionTitle>Location</SectionTitle>
+          <SectionTitle>{t("Location")}</SectionTitle>
           <p className={`text-xs select-text ${sceneRejected ? 'text-status-warning' : 'text-text-secondary'}`}>{sceneLocation}</p>
         </div>
       )}
 
       {Array.isArray(triage.sceneMemory) && triage.sceneMemory.length > 0 && (
         <div>
-          <SectionTitle>Scene memory · {triage.sceneMemory.length}</SectionTitle>
+          <SectionTitle>{t("Scene memory ·")}{' '}{triage.sceneMemory.length}</SectionTitle>
           <SceneMemoryList updates={triage.sceneMemory} names={names} />
         </div>
       )}
 
       {entityIds.length > 0 && (
         <div>
-          <SectionTitle>Involved · {entityIds.length}</SectionTitle>
+          <SectionTitle>{t("Involved ·")}{' '}{entityIds.length}</SectionTitle>
           <div className="flex flex-wrap gap-1">
             {named.map(name => <Chip key={name}>{name}</Chip>)}
             {unnamed > 0 && <Chip tone="bg-tint/[0.04] text-text-subtle">{named.length ? `+${unnamed} more` : `${unnamed} ${unnamed === 1 ? 'entity' : 'entities'}`}</Chip>}
@@ -652,7 +659,7 @@ function NarrativeView({ debug, names, copy }) {
 
       {frame?.end && (
         <div>
-          <SectionTitle>Time and place</SectionTitle>
+          <SectionTitle>{t("Time and place")}</SectionTitle>
           <p className="text-xs text-text-secondary tabular-nums">
             {formatFrameTime(frame.start)} → <b className="font-semibold text-text-primary">{formatFrameTime(frame.end)}</b>
             {frame.end.locationName && <> · {frame.start?.locationName && frame.start.locationName !== frame.end.locationName ? `${frame.start.locationName} → ` : ''}{frame.end.locationName}</>}
@@ -669,7 +676,7 @@ function NarrativeView({ debug, names, copy }) {
 
       {warnings.length > 0 && (
         <div>
-          <SectionTitle>Warnings</SectionTitle>
+          <SectionTitle>{t("Warnings")}</SectionTitle>
           <ul className="space-y-1">
             {warnings.map((warning, index) => <li key={index} className="flex gap-2 text-xs text-status-warning"><span aria-hidden="true">•</span><span>{warning}</span></li>)}
           </ul>
@@ -678,7 +685,7 @@ function NarrativeView({ debug, names, copy }) {
 
       {(state.proposals || []).length > 0 && (
         <div>
-          <SectionTitle>Proposals · {state.proposals.length}</SectionTitle>
+          <SectionTitle>{t("Proposals ·")}{' '}{state.proposals.length}</SectionTitle>
           <ul className="divide-y divide-border-subtle rounded-lg border border-border-subtle">
             {state.proposals.map((proposal, index) => (
               <li key={index} className="flex items-center gap-2 px-3 py-1.5 text-xs">
@@ -693,58 +700,59 @@ function NarrativeView({ debug, names, copy }) {
 
       {(state.relationshipChanges || []).length > 0 && (
         <div>
-          <SectionTitle>Relationships · {state.relationshipChanges.length}</SectionTitle>
+          <SectionTitle>{t("Relationships ·")}{' '}{state.relationshipChanges.length}</SectionTitle>
           <RelationshipChanges changes={state.relationshipChanges} names={names} />
         </div>
       )}
 
       {usageRows.length > 0 && (
         <div>
-          <SectionTitle>Tokens</SectionTitle>
+          <SectionTitle>{t("Tokens")}</SectionTitle>
           <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-6 gap-y-1.5 text-xs tabular-nums">
-            <span className="text-text-subtle">Pass</span><span className="text-right text-text-subtle">Input</span><span className="text-right text-text-subtle">Output</span>
+            <span className="text-text-subtle">{t("Pass")}</span><span className="text-right text-text-subtle">{t("Input")}</span><span className="text-right text-text-subtle">{t("Output")}</span>
             {usageRows.map(([label, input, output]) => (
               <span key={label} className="contents"><span className="text-text-secondary">{label}</span><span className="text-right text-text-primary">{fmt(input)}</span><span className="text-right text-text-primary">{fmt(output)}</span></span>
             ))}
           </div>
           {state.repairs && (state.repairs.triage || state.repairs.deep || state.repairs.structuredFallbacks) > 0 && (
-            <p className="mt-1.5 text-xs text-text-muted">Repairs: triage {state.repairs.triage || 0} · analysis {state.repairs.deep || 0} · structured fallbacks {state.repairs.structuredFallbacks || 0}</p>
+            <p className="mt-1.5 text-xs text-text-muted">{t("Repairs: triage")}{' '}{state.repairs.triage || 0}{' '}{t("· analysis")}{' '}{state.repairs.deep || 0}{' '}{t("· structured fallbacks")}{' '}{state.repairs.structuredFallbacks || 0}</p>
           )}
           {(state.repairs?.structuredFallbackReasons || []).map((fallback, index) => (
-            <p key={index} className="mt-1 text-xs text-status-warning select-text">{fallback.stage}: schema refused · {fallback.reason}</p>
+            <p key={index} className="mt-1 text-xs text-status-warning select-text">{fallback.stage}{t(": schema refused ·")}{' '}{fallback.reason}</p>
           ))}
         </div>
       )}
 
       {contextUsage && (
         <div>
-          <SectionTitle>Analysis input · {fmt(contextUsage.total)} tokens</SectionTitle>
+          <SectionTitle>{t("Analysis input ·")}{' '}{fmt(contextUsage.total)}{' '}{t("tokens")}</SectionTitle>
           <ContextSections usage={contextUsage} />
         </div>
       )}
 
-      <Disclosure title="Raw record">{copy}</Disclosure>
+      <Disclosure title={t("Raw record")}>{copy}</Disclosure>
     </div>
   );
 }
 
 function RequestView({ requests }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-3">
-      <p className="text-xs text-text-muted">What the model received for this reply, as sent: variables filled in, the retrieved context in place, and the full reply with its hidden scene plan.</p>
+      <p className="text-xs text-text-muted">{t("What the model received for this reply, as sent: variables filled in, the retrieved context in place, and the full reply with its hidden scene plan.")}</p>
       <ol className="space-y-2">
         {requests.map(request => (
           <li key={request.step} className="space-y-1.5 rounded-lg border border-border-subtle bg-surface-canvas/50 p-2.5">
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-xs font-semibold text-text-primary">{requests.length > 1 ? `Step ${request.step} · ` : ''}{request.profileName}</span>
               {seconds(request.elapsedMs) && <Chip>{seconds(request.elapsedMs)}</Chip>}
-              {request.inputTokens > 0 && <Chip>{fmt(request.inputTokens)} in{request.outputTokens > 0 ? ` · ${fmt(request.outputTokens)} out` : ''}</Chip>}
-              {request.attachedImages > 0 && <Chip>{request.attachedImages} {request.attachedImages === 1 ? 'image' : 'images'}</Chip>}
+              {request.inputTokens > 0 && <Chip>{fmt(request.inputTokens)}{' '}{t("in")}{request.outputTokens > 0 ? ` · ${fmt(request.outputTokens)} out` : ''}</Chip>}
+              {request.attachedImages > 0 && <Chip>{request.attachedImages} {request.attachedImages === 1 ? t("image") : t("images")}</Chip>}
             </div>
-            <Disclosure title="System prompt">{request.systemPrompt || 'None.'}</Disclosure>
-            <Disclosure title={`History · ${(request.history || []).length}`}>{formatHistory(request.history) || 'No history was sent.'}</Disclosure>
-            <Disclosure title="Message">{request.newPrompt}</Disclosure>
-            <Disclosure title="Response">{request.response || 'Empty response.'}</Disclosure>
+            <Disclosure title={t("System prompt")}>{request.systemPrompt || t("None.")}</Disclosure>
+            <Disclosure title={`History · ${(request.history || []).length}`}>{formatHistory(request.history) || t("No history was sent.")}</Disclosure>
+            <Disclosure title={t("Message")}>{request.newPrompt}</Disclosure>
+            <Disclosure title={t("Response")}>{request.response || t("Empty response.")}</Disclosure>
           </li>
         ))}
       </ol>
@@ -760,9 +768,10 @@ const CALL_MODES = {
 };
 
 function ModelCallsView({ calls }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-3">
-      <p className="text-xs text-text-muted">What Narrative State sent to the model this turn and what came back, in order. Entities travel as short labels, listed under Labels.</p>
+      <p className="text-xs text-text-muted">{t("What Narrative State sent to the model this turn and what came back, in order. Entities travel as short labels, listed under Labels.")}</p>
       <ol className="space-y-2">
         {calls.map((call, index) => (
           <li key={index} className="space-y-1.5 rounded-lg border border-border-subtle bg-surface-canvas/50 p-2.5">
@@ -770,16 +779,16 @@ function ModelCallsView({ calls }) {
               <span className="text-xs font-semibold text-text-primary">{index + 1}. {call.stage}</span>
               {CALL_MODES[call.mode] && <Chip>{CALL_MODES[call.mode]}</Chip>}
               {seconds(call.elapsedMs) && <Chip>{seconds(call.elapsedMs)}</Chip>}
-              {call.inputTokens > 0 && <Chip>{fmt(call.inputTokens)} in · {fmt(call.outputTokens)} out</Chip>}
-              {call.error && <Chip tone="bg-status-danger/12 text-status-danger">Failed</Chip>}
+              {call.inputTokens > 0 && <Chip>{fmt(call.inputTokens)}{' '}{t("in ·")}{' '}{fmt(call.outputTokens)}{' '}{t("out")}</Chip>}
+              {call.error && <Chip tone="bg-status-danger/12 text-status-danger">{t("Failed")}</Chip>}
             </div>
-            {call.fallbackReason && <p className="text-xs text-status-warning select-text">Schema not used: {call.fallbackReason}</p>}
-            <Disclosure title="System prompt">{call.systemPrompt}</Disclosure>
+            {call.fallbackReason && <p className="text-xs text-status-warning select-text">{t("Schema not used:")}{' '}{call.fallbackReason}</p>}
+            <Disclosure title={t("System prompt")}>{call.systemPrompt}</Disclosure>
             {call.legend?.length > 0 && <Disclosure title={`Labels · ${call.legend.length}`}>{formatLabelLegend(call.legend)}</Disclosure>}
-            <Disclosure title="Input">{prettyJsonText(call.input)}</Disclosure>
+            <Disclosure title={t("Input")}>{prettyJsonText(call.input)}</Disclosure>
             {call.error
               ? <p className="rounded-lg border border-status-danger/30 bg-status-danger/10 px-3 py-2 text-xs text-status-danger select-text">{call.error}</p>
-              : <Disclosure title="Response">{prettyJsonText(call.response) || 'Empty response.'}</Disclosure>}
+              : <Disclosure title={t("Response")}>{prettyJsonText(call.response) || t("Empty response.")}</Disclosure>}
           </li>
         ))}
       </ol>
@@ -788,6 +797,7 @@ function ModelCallsView({ calls }) {
 }
 
 function DiagnosticsPanel({ debug, items, names, onCopy, copiedKey }) {
+  const { t } = useI18n();
   const [activeKey, setActiveKey] = useState(items[0]?.key);
   const active = items.find(item => item.key === activeKey) || items[0];
   if (!active) return null;
@@ -796,7 +806,7 @@ function DiagnosticsPanel({ debug, items, names, onCopy, copiedKey }) {
     <div className="w-[min(42rem,calc(100vw-2rem))] rounded-card rounded-tr-none border border-border-default bg-surface-panel p-3.5 shadow-overlay select-none">
       <div className="mb-3.5 flex items-center gap-2">
         {items.length > 1 && (
-          <div role="tablist" aria-label="Diagnostics" className="flex min-w-0 flex-1 flex-wrap gap-0.5 rounded-control bg-shade/25 p-0.5">
+          <div role="tablist" aria-label={t("Diagnostics")} className="flex min-w-0 flex-1 flex-wrap gap-0.5 rounded-control bg-shade/25 p-0.5">
             {items.map(item => (
               <button
                 key={item.key}
@@ -818,7 +828,7 @@ function DiagnosticsPanel({ debug, items, names, onCopy, copiedKey }) {
             className="ml-auto inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-border-default px-2.5 text-xs font-semibold text-text-secondary transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
             <Copy aria-hidden="true" className="h-3.5 w-3.5" />
-            {copiedKey === active.key ? 'Copied' : 'Copy report'}
+            {copiedKey === active.key ? t("Copied") : t("Copy report")}
           </button>
         )}
       </div>

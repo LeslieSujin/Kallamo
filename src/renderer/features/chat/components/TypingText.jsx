@@ -1,7 +1,9 @@
+import { useI18n } from '../../../i18n';
 import { useEffect, useState } from 'react';
 import { parseMarkdown } from '../../../utils/markdown';
 
 export default function TypingText({ text, onComplete, onClick }) {
+  const { t } = useI18n();
   const [displayedText, setDisplayedText] = useState('');
 
   useEffect(() => {
@@ -30,7 +32,7 @@ export default function TypingText({ text, onComplete, onClick }) {
   }, [text]);
 
   return (
-    <div onClick={onClick} className="cursor-pointer select-text" data-tooltip="Click to skip the typing effect">
+    <div onClick={onClick} className="cursor-pointer select-text" data-tooltip={t("Click to skip the typing effect")}>
       <div className="leading-relaxed markdown-content" dangerouslySetInnerHTML={{ __html: parseMarkdown(displayedText, false, { dialogue: true }) }} />
     </div>
   );

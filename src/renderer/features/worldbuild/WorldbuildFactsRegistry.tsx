@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useMemo, useState } from 'react';
 import { useRef } from 'react';
 import { BookCheck, Lock, MoreHorizontal, Package, Pencil, Plus, Search, Trash2, X } from 'lucide-react';
@@ -38,6 +39,7 @@ export default function WorldbuildFactsRegistry({
   showToast: Toast;
   onCountChanged?(count: number): void;
 }) {
+  const { t } = useI18n();
   const [facts, setFacts] = useState<WorldbuildFact[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -154,21 +156,21 @@ export default function WorldbuildFactsRegistry({
     <div className="mx-auto max-w-4xl space-y-4 p-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-bold text-text-primary">Facts <span className="text-base font-medium tabular-nums text-text-subtle">{facts.length || ''}</span></h1>
-          <p className="caption mt-1 max-w-xl">What is objectively true in this world. Characters may not know it, or believe otherwise.</p>
+          <h1 className="text-2xl font-bold text-text-primary">{t("Facts")}{' '}<span className="text-base font-medium tabular-nums text-text-subtle">{facts.length || ''}</span></h1>
+          <p className="caption mt-1 max-w-xl">{t("What is objectively true in this world. Characters may not know it, or believe otherwise.")}</p>
         </div>
-        <Button icon={Plus} onClick={startAdd} className="self-start sm:self-auto">Add fact</Button>
+        <Button icon={Plus} onClick={startAdd} className="self-start sm:self-auto">{t("Add fact")}</Button>
       </header>
       <section className="ws-card overflow-hidden rounded-card border border-border-default bg-surface-panel-muted/60 backdrop-blur-md">
         <div className="flex flex-col gap-2.5 border-b border-border-subtle px-4 py-3 sm:flex-row sm:items-center">
           <div className="relative min-w-0 flex-1 sm:max-w-xs">
             <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-subtle" />
-            <input value={query} onChange={event => setQuery(event.target.value)} aria-label="Search facts" placeholder="Search facts" className={`${INPUT} pl-9 ${query ? 'pr-9' : ''}`} />
+            <input value={query} onChange={event => setQuery(event.target.value)} aria-label={t("Search facts")} placeholder={t("Search facts")} className={`${INPUT} pl-9 ${query ? 'pr-9' : ''}`} />
             {query && (
-              <button type="button" onClick={() => setQuery('')} aria-label="Clear search" className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-text-subtle transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><X aria-hidden="true" className="h-3.5 w-3.5" /></button>
+              <button type="button" onClick={() => setQuery('')} aria-label={t("Clear search")} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-text-subtle transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><X aria-hidden="true" className="h-3.5 w-3.5" /></button>
             )}
           </div>
-          <div role="group" aria-label="Filter facts by source" className="inline-flex shrink-0 flex-wrap gap-1 rounded-control border border-border-default bg-surface-input p-1">
+          <div role="group" aria-label={t("Filter facts by source")} className="inline-flex shrink-0 flex-wrap gap-1 rounded-control border border-border-default bg-surface-input p-1">
             {SOURCE_FILTERS.map(option => (
               <button
                 key={option.id}
@@ -189,12 +191,12 @@ export default function WorldbuildFactsRegistry({
           {!loading && !facts.length && (
             <button type="button" onClick={startAdd} className="my-4 flex w-full flex-col items-center justify-center rounded-card border border-dashed border-border-subtle px-6 py-12 text-center transition-colors duration-200 ease-standard hover:border-border-strong hover:bg-surface-hover/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
               <Plus aria-hidden="true" className="mb-2 h-5 w-5 text-text-disabled" />
-              <span className="text-sm font-semibold text-text-secondary">Add the first fact</span>
-              <span className="caption mt-1 max-w-md">Facts are workspace-wide truths. They are not memories, beliefs, or knowledge owned by a character.</span>
+              <span className="text-sm font-semibold text-text-secondary">{t("Add the first fact")}</span>
+              <span className="caption mt-1 max-w-md">{t("Facts are workspace-wide truths. They are not memories, beliefs, or knowledge owned by a character.")}</span>
             </button>
           )}
           {!loading && facts.length > 0 && !visible.length && (
-            <p className="py-10 text-center text-sm text-text-subtle">No facts match this search.</p>
+            <p className="py-10 text-center text-sm text-text-subtle">{t("No facts match this search.")}</p>
           )}
           {visible.map(fact => (
             <FactCard
@@ -212,26 +214,26 @@ export default function WorldbuildFactsRegistry({
       {editor && (
         <Modal onClose={() => setEditor(null)} size="lg" title={`${editor.existing ? 'Edit' : 'Add'} fact`} icon={BookCheck} iconClassName="text-text-muted" closeOnOverlay={!saving} closeOnEsc={!saving}>
           <div className="max-h-[72vh] space-y-5 overflow-y-auto p-5 custom-scrollbar">
-            <p className="caption text-sm">Only what is objectively true. What a character believes belongs on their Knowledge tab.</p>
-            <Field label="Title" hint="A short label that names this truth.">
-              <input autoFocus className={INPUT} value={editor.title} onChange={event => setEditor({ ...editor, title: event.target.value })} placeholder="e.g. The northern gate is sealed" />
+            <p className="caption text-sm">{t("Only what is objectively true. What a character believes belongs on their Knowledge tab.")}</p>
+            <Field label={t("Title")} hint={t("A short label that names this truth.")}>
+              <input autoFocus className={INPUT} value={editor.title} onChange={event => setEditor({ ...editor, title: event.target.value })} placeholder={t("e.g. The northern gate is sealed")} />
             </Field>
-            <Field label="Statement">
-              <textarea className={`${INPUT} min-h-32 resize-y`} value={editor.statement} onChange={event => setEditor({ ...editor, statement: event.target.value })} placeholder="State what is true." />
+            <Field label={t("Statement")}>
+              <textarea className={`${INPUT} min-h-32 resize-y`} value={editor.statement} onChange={event => setEditor({ ...editor, statement: event.target.value })} placeholder={t("State what is true.")} />
             </Field>
-            <Field label="About" hint="For finding it later. The fact stays global.">
+            <Field label={t("About")} hint={t("For finding it later. The fact stays global.")}>
               <SearchableSelect
                 multiple
                 values={editor.relatedEntityIds}
                 onChange={(relatedEntityIds: string[]) => setEditor({ ...editor, relatedEntityIds })}
                 options={entityOptions}
-                placeholder="Search entities"
+                placeholder={t("Search entities")}
               />
             </Field>
           </div>
           <footer className="flex justify-end gap-2 border-t border-border-subtle px-5 py-4">
-            <Button variant="ghost" onClick={() => setEditor(null)} disabled={saving}>Cancel</Button>
-            <Button onClick={save} loading={saving} disabled={!editor.title.trim() || !editor.statement.trim()}>{editor.existing ? 'Save changes' : 'Add fact'}</Button>
+            <Button variant="ghost" onClick={() => setEditor(null)} disabled={saving}>{t("Cancel")}</Button>
+            <Button onClick={save} loading={saving} disabled={!editor.title.trim() || !editor.statement.trim()}>{editor.existing ? t("Save changes") : t("Add fact")}</Button>
           </footer>
         </Modal>
       )}
@@ -239,11 +241,11 @@ export default function WorldbuildFactsRegistry({
       {deleting && (
         <ConfirmDialog
           tone="danger"
-          title="Retract fact"
-          message={<>Retract <strong className="text-text-primary">“{deleting.title}”</strong> from the current canon? Its prior record remains in narrative history.</>}
+          title={t("Retract fact")}
+          message={<>{t("Retract")}{' '}<strong className="text-text-primary">“{deleting.title}”</strong>{' '}{t("from the current canon? Its prior record remains in narrative history.")}</>}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDeleting(null) },
-            { label: 'Retract', variant: 'danger', loading: saving, autoFocus: true, onClick: remove },
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleting(null) },
+            { label: t("Retract"), variant: 'danger', loading: saving, autoFocus: true, onClick: remove },
           ]}
           onClose={() => setDeleting(null)}
         />
@@ -259,13 +261,14 @@ function FactCard({ fact, names, types, onEdit, onDelete }: {
   onEdit(): void;
   onDelete(): void;
 }) {
+  const { t } = useI18n();
   const origin = fact.managed
-    ? { label: 'From an event', icon: Lock, tone: 'text-entity-event' }
+    ? { label: t("From an event"), icon: Lock, tone: 'text-entity-event' }
     : fact.source === 'narrative'
-      ? { label: 'From the story', icon: AiGlyph, tone: 'text-entity-event' }
+      ? { label: t("From the story"), icon: AiGlyph, tone: 'text-entity-event' }
       : fact.by === 'kallamo'
         ? { label: SEEDED_BY.label, icon: Package, tone: 'text-text-subtle' }
-        : { label: 'Written by you', icon: Pencil, tone: 'text-text-subtle' };
+        : { label: t("Written by you"), icon: Pencil, tone: 'text-text-subtle' };
   const OriginIcon = origin.icon;
   return (
     <article className="py-4">
@@ -289,7 +292,7 @@ function FactCard({ fact, names, types, onEdit, onDelete }: {
           {fact.relatedEntityIds.map(id => (
             <span key={id} className="inline-flex min-h-6 items-center gap-1.5 rounded-full border border-border-subtle bg-surface-hover/35 px-2.5 py-0.5 text-xs font-medium text-text-secondary">
               <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${meta(types.get(id) || '').dot || 'bg-text-subtle'}`} />
-              {names.get(id) || 'Unknown entity'}
+              {names.get(id) || t("Unknown entity")}
             </span>
           ))}
         </div>
@@ -299,14 +302,15 @@ function FactCard({ fact, names, types, onEdit, onDelete }: {
 }
 
 function FactActions({ title, onEdit, onDelete }: { title: string; onEdit(): void; onDelete(): void }) {
+  const { t } = useI18n();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   return <>
     <IconButton ref={anchorRef} icon={MoreHorizontal} size="sm" label={`Actions for ${title}`} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(value => !value)} className="-mt-1" />
-    <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label="Fact actions" className="w-44">
-      <MenuItem icon={Pencil} label="Edit" onSelect={() => { setOpen(false); onEdit(); }} />
+    <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={t("Fact actions")} className="w-44">
+      <MenuItem icon={Pencil} label={t("Edit")} onSelect={() => { setOpen(false); onEdit(); }} />
       <MenuSeparator />
-      <MenuItem icon={Trash2} label="Retract" danger onSelect={() => { setOpen(false); onDelete(); }} />
+      <MenuItem icon={Trash2} label={t("Retract")} danger onSelect={() => { setOpen(false); onDelete(); }} />
     </Menu>
   </>;
 }

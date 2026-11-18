@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useRef, useState } from 'react';
 import { AlertTriangle, Check, ChevronDown, Users } from 'lucide-react';
 import Popover from './Popover';
@@ -7,6 +8,7 @@ import Popover from './Popover';
  * profiles' colours, so a limit reads from across a list.
  */
 export default function ProfileScopeButton({ profiles = [], selectedIds = [], onToggle, disabled = false, fullWidth = false }) {
+  const { t } = useI18n();
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
   const selected = profiles.filter(profile => selectedIds.includes(profile.id));
@@ -44,17 +46,17 @@ export default function ProfileScopeButton({ profiles = [], selectedIds = [], on
         {restricted && <ChevronDown className="h-3 w-3 shrink-0 text-text-muted" aria-hidden="true" />}
       </button>
       <Popover anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} matchAnchorWidth={false} align="right" scroll={false} className="w-60 !p-1.5">
-        <div role="dialog" aria-label="Available to" onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>
-          <span className="block px-2.5 pb-1 pt-1.5 text-xs font-semibold text-text-muted">Available to</span>
+        <div role="dialog" aria-label={t("Available to")} onMouseDown={(event) => event.stopPropagation()} onClick={(event) => event.stopPropagation()}>
+          <span className="block px-2.5 pb-1 pt-1.5 text-xs font-semibold text-text-muted">{t("Available to")}</span>
           {profiles.length === 0 ? (
-            <p className="px-2.5 py-2 text-xs text-text-subtle">No active AI profiles in this chat.</p>
+            <p className="px-2.5 py-2 text-xs text-text-subtle">{t("No active AI profiles in this chat.")}</p>
           ) : (
             <div className="max-h-48 overflow-y-auto custom-scrollbar">
               {profiles.map(profile => {
                 const isSelected = selectedIds.includes(profile.id);
                 if (profile.needsSetup) {
                   return (
-                    <div key={profile.id} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 opacity-60" title="This AI profile needs an API connection and a model before it can be used.">
+                    <div key={profile.id} className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 opacity-60" title={t("This AI profile needs an API connection and a model before it can be used.")}>
                       <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: profile.color }} />
                       <span className="flex-1 truncate text-sm text-text-muted">{profile.name}</span>
                       <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-status-warning" aria-hidden="true" />
@@ -75,7 +77,7 @@ export default function ProfileScopeButton({ profiles = [], selectedIds = [], on
             </div>
           )}
           <div className="mx-1 my-1.5 h-px bg-border-subtle" />
-          <p className="px-2.5 pb-1.5 text-xs leading-snug text-text-subtle">With none checked, every profile can use it.</p>
+          <p className="px-2.5 pb-1.5 text-xs leading-snug text-text-subtle">{t("With none checked, every profile can use it.")}</p>
         </div>
       </Popover>
     </>

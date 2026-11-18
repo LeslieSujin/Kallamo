@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { ImageUp, Palette, Send } from 'lucide-react';
 import Button from '../../components/ui/Button';
@@ -6,6 +7,7 @@ import { ConfigSection, FieldLabel } from './ConfigParts';
 const fileUrl = path => `url("app-file:///${String(path).replace(/\\/g, '/')}")`;
 
 export default function AppearanceSection({ sectionRef, activeChat, handleSaveChat, electronAPI, showToast }) {
+  const { t } = useI18n();
   const inputRef = useRef(null);
   const background = activeChat.backgroundImage || '';
   // Saved once the hand rests: a save per step re-renders the whole app.
@@ -53,19 +55,19 @@ export default function AppearanceSection({ sectionRef, activeChat, handleSaveCh
       id="appearance"
       sectionRef={sectionRef}
       icon={Palette}
-      title="Appearance"
-      description="Background art and message transparency in this workspace's chat."
+      title={t("Appearance")}
+      description={t("Background art and message transparency in this workspace's chat.")}
     >
       <div className="grid gap-7 md:grid-cols-2">
         <div className="flex flex-col gap-5">
           <div>
-            <FieldLabel className="mb-2">Background image</FieldLabel>
+            <FieldLabel className="mb-2">{t("Background image")}</FieldLabel>
             {background ? (
               <>
-                <div className="h-32 w-full rounded-card border border-border-subtle bg-cover bg-center" style={{ backgroundImage: fileUrl(background) }} role="img" aria-label="Current background" />
+                <div className="h-32 w-full rounded-card border border-border-subtle bg-cover bg-center" style={{ backgroundImage: fileUrl(background) }} role="img" aria-label={t("Current background")} />
                 <div className="mt-2 flex gap-2">
-                  <Button variant="ghost" size="sm" icon={ImageUp} onClick={() => inputRef.current?.click()}>Replace</Button>
-                  <Button variant="subtle" size="sm" onClick={() => change('backgroundImage', '')}>Remove</Button>
+                  <Button variant="ghost" size="sm" icon={ImageUp} onClick={() => inputRef.current?.click()}>{t("Replace")}</Button>
+                  <Button variant="subtle" size="sm" onClick={() => change('backgroundImage', '')}>{t("Remove")}</Button>
                 </div>
               </>
             ) : (
@@ -75,18 +77,18 @@ export default function AppearanceSection({ sectionRef, activeChat, handleSaveCh
                 className="flex h-32 w-full flex-col items-center justify-center gap-1.5 rounded-card border-2 border-dashed border-border-default text-text-muted transition-colors hover:border-border-strong hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
               >
                 <ImageUp aria-hidden="true" className="h-5 w-5" />
-                <span className="text-xs font-semibold">Choose an image</span>
+                <span className="text-xs font-semibold">{t("Choose an image")}</span>
               </button>
             )}
             <input ref={inputRef} type="file" accept="image/*" onChange={upload} className="hidden" />
           </div>
-          <RangeField label="Background dimming" value={dimming} onChange={value => slide('backdropOpacity', value)} onRelease={flush} />
-          <RangeField label="Your messages" value={userOpacity} onChange={value => slide('userBubbleOpacity', value)} onRelease={flush} />
-          <RangeField label="AI messages" value={aiOpacity} onChange={value => slide('aiBubbleOpacity', value)} onRelease={flush} />
+          <RangeField label={t("Background dimming")} value={dimming} onChange={value => slide('backdropOpacity', value)} onRelease={flush} />
+          <RangeField label={t("Your messages")} value={userOpacity} onChange={value => slide('userBubbleOpacity', value)} onRelease={flush} />
+          <RangeField label={t("AI messages")} value={aiOpacity} onChange={value => slide('aiBubbleOpacity', value)} onRelease={flush} />
         </div>
 
         <div className="flex flex-col">
-          <FieldLabel className="mb-2">Preview</FieldLabel>
+          <FieldLabel className="mb-2">{t("Preview")}</FieldLabel>
           <div
             className="relative min-h-[20rem] flex-1 overflow-hidden rounded-card border border-border-subtle bg-cover bg-center"
             style={background ? { backgroundImage: fileUrl(background) } : { backgroundColor: 'var(--theme-surface-canvas)' }}
@@ -96,17 +98,13 @@ export default function AppearanceSection({ sectionRef, activeChat, handleSaveCh
               <div
                 className="max-w-[75%] self-end rounded-surface border px-3 py-2 text-[0.8125rem] leading-snug text-text-secondary backdrop-blur-md"
                 style={{ backgroundColor: `color-mix(in srgb, var(--theme-bubble-user) ${userOpacity}%, transparent)`, borderColor: 'color-mix(in srgb, var(--app-accent) 15%, transparent)' }}
-              >
-                How does the northern keep look at dawn?
-              </div>
+              >{t("How does the northern keep look at dawn?")}</div>
               <div
                 className="max-w-[85%] rounded-surface border px-3 py-2 text-[0.8125rem] leading-snug text-text-secondary backdrop-blur-md"
                 style={{ backgroundColor: `color-mix(in srgb, var(--theme-surface-panel) ${aiOpacity}%, transparent)`, borderColor: 'var(--theme-highlight)' }}
-              >
-                Mist clings to the ramparts as first light spills over the valley, gilding the old stone.
-              </div>
+              >{t("Mist clings to the ramparts as first light spills over the valley, gilding the old stone.")}</div>
               <div className="flex h-10 items-center rounded-card border border-border-subtle bg-surface-editor/90 pl-3 pr-1.5">
-                <span className="flex-1 select-none text-[0.8125rem] text-text-disabled">Write a message</span>
+                <span className="flex-1 select-none text-[0.8125rem] text-text-disabled">{t("Write a message")}</span>
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent"><Send aria-hidden="true" className="h-3.5 w-3.5 text-on-accent" /></span>
               </div>
             </div>

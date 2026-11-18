@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState, useEffect, useRef } from 'react';
 import { Database, Image as ImageIcon, Search, Workflow as WorkflowIcon } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -46,6 +47,7 @@ export function workspaceRecord(chat, { id, title, description = '', activeProfi
 
 // `draft` carries what was already filled in elsewhere (the empty home's quick form).
 export default function ChatModal({ chat, draft, onClose }) {
+  const { t } = useI18n();
   const { handleCreateChat, handleSaveChat, writingProfiles, workflows, electronAPI } = useApp();
   const isEditing = !!chat;
 
@@ -115,8 +117,8 @@ export default function ChatModal({ chat, draft, onClose }) {
       <Modal
         onClose={onClose}
         size="wide"
-        title={isEditing ? 'Workspace settings' : 'New workspace'}
-        subtitle="A story with its own chat, world, memory and writing."
+        title={isEditing ? t("Workspace settings") : t("New workspace")}
+        subtitle={t("A story with its own chat, world, memory and writing.")}
         className="max-h-[calc(100vh-2rem)]"
       >
         <div className="flex-1 overflow-y-auto custom-scrollbar px-7 py-6 flex flex-col gap-6">
@@ -132,28 +134,28 @@ export default function ChatModal({ chat, draft, onClose }) {
               </div>
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" icon={ImageIcon} fullWidth onClick={() => bgInputRef.current?.click()}>
-                  {cover ? 'Change cover' : 'Add cover image'}
+                  {cover ? t("Change cover") : t("Add cover image")}
                 </Button>
-                {cover && <Button variant="subtle" size="sm" onClick={() => setBgImage('')}>Remove</Button>}
+                {cover && <Button variant="subtle" size="sm" onClick={() => setBgImage('')}>{t("Remove")}</Button>}
               </div>
-              <span className="caption">Without an image the card gets a map drawn from its name. The image also sits behind the chat.</span>
+              <span className="caption">{t("Without an image the card gets a map drawn from its name. The image also sits behind the chat.")}</span>
               <input type="file" ref={bgInputRef} accept="image/*" onChange={handleBgImageUpload} className="hidden" />
             </div>
 
             <div className="flex flex-1 flex-col gap-4">
               <TextInput
-                label="Name"
+                label={t("Name")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Novel project, Campaign, Sandbox"
+                placeholder={t("e.g. Novel project, Campaign, Sandbox")}
                 error={isEditing && !title.trim() ? 'A workspace needs a name.' : null}
                 autoFocus={!isEditing}
               />
               <Textarea
-                label="Description (optional)"
+                label={t("Description (optional)")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="What this story is about, for you. The AI doesn't read it."
+                placeholder={t("What this story is about, for you. The AI doesn't read it.")}
                 className="min-h-[5.75rem]"
               />
             </div>
@@ -161,29 +163,28 @@ export default function ChatModal({ chat, draft, onClose }) {
 
           <section className="flex flex-col gap-2.5">
             <div className="flex flex-wrap items-baseline gap-2.5">
-              <h3 className="text-sm font-bold text-text-primary">Starts with</h3>
-              <span className="caption">Profiles and workflows switched on when it opens. You can change them later in Configuration.</span>
+              <h3 className="text-sm font-bold text-text-primary">{t("Starts with")}</h3>
+              <span className="caption">{t("Profiles and workflows switched on when it opens. You can change them later in Configuration.")}</span>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="overflow-hidden rounded-[0.875rem] border border-border-subtle bg-tint/[0.02]">
                 <div className="flex items-center gap-2 px-3 py-2.5">
-                  <span className="flex-1 text-xs font-semibold text-text-primary">
-                    AI profiles <span className="caption tabular-nums">{activeProfiles.length} on</span>
+                  <span className="flex-1 text-xs font-semibold text-text-primary">{t("AI profiles")}<span className="caption tabular-nums">{activeProfiles.length}{' '}{t("on")}</span>
                   </span>
                   <div className="relative w-40">
                     <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3 w-3 -translate-y-1/2 text-text-subtle" aria-hidden="true" />
                     <input
                       value={searchProfiles}
                       onChange={(e) => setSearchProfiles(e.target.value)}
-                      placeholder="Search"
-                      aria-label="Search profiles"
+                      placeholder={t("Search")}
+                      aria-label={t("Search profiles")}
                       className="h-[1.875rem] w-full rounded-lg border border-border-default bg-surface-input pl-7 pr-2 text-xs text-text-secondary placeholder:text-text-subtle focus:border-accent focus:outline-none"
                     />
                   </div>
                 </div>
                 <div className="max-h-64 overflow-y-auto overflow-x-hidden custom-scrollbar">
                   {filteredProfiles.length === 0 ? (
-                    <p className="caption border-t border-border-subtle px-3 py-3">No profiles found.</p>
+                    <p className="caption border-t border-border-subtle px-3 py-3">{t("No profiles found.")}</p>
                   ) : filteredProfiles.map(p => (
                     p.needsSetup ? (
                       <div key={p.id} className="flex items-center gap-2.5 border-t border-tint/5 px-3 py-2">
@@ -191,11 +192,9 @@ export default function ChatModal({ chat, draft, onClose }) {
                         <span className="h-2 w-2 shrink-0 rounded-full opacity-50" style={{ backgroundColor: p.color }} />
                         <span className="min-w-0 flex-1">
                           <span className="block truncate text-sm text-text-subtle">{p.name}</span>
-                          <span className="block text-xs text-status-warning">No model linked</span>
+                          <span className="block text-xs text-status-warning">{t("No model linked")}</span>
                         </span>
-                        <button type="button" onClick={() => setProfileToSetUp(p)} className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-status-setup transition-colors hover:bg-tint/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                          Set up
-                        </button>
+                        <button type="button" onClick={() => setProfileToSetUp(p)} className="rounded-lg px-2.5 py-1.5 text-xs font-semibold text-status-setup transition-colors hover:bg-tint/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{t("Set up")}</button>
                       </div>
                     ) : (
                       <div key={p.id} className="border-t border-tint/5 px-3 py-2 transition-colors hover:bg-tint/[0.03]">
@@ -220,12 +219,11 @@ export default function ChatModal({ chat, draft, onClose }) {
               </div>
 
               <div className="self-start overflow-hidden rounded-[0.875rem] border border-border-subtle bg-tint/[0.02]">
-                <div className="px-3 py-2.5 text-xs font-semibold text-text-primary">
-                  Workflows <span className="caption tabular-nums">{activeWorkflows.length} on</span>
+                <div className="px-3 py-2.5 text-xs font-semibold text-text-primary">{t("Workflows")}<span className="caption tabular-nums">{activeWorkflows.length}{' '}{t("on")}</span>
                 </div>
                 <div className="max-h-64 overflow-y-auto overflow-x-hidden custom-scrollbar">
                   {workflows.length === 0 ? (
-                    <p className="caption border-t border-border-subtle px-3 py-3">No workflows yet. Build one in the Library.</p>
+                    <p className="caption border-t border-border-subtle px-3 py-3">{t("No workflows yet. Build one in the Library.")}</p>
                   ) : workflows.map(w => (
                     <div key={w.id} className="border-t border-tint/5 px-3 py-2 transition-colors hover:bg-tint/[0.03]">
                       <Checkbox
@@ -237,7 +235,7 @@ export default function ChatModal({ chat, draft, onClose }) {
                             <WorkflowIcon className="h-3.5 w-3.5 shrink-0 text-text-muted" aria-hidden="true" />
                             <span className="min-w-0">
                               <span className="block truncate text-text-primary">{w.name}</span>
-                              <span className="block truncate text-xs text-text-subtle">{stepsOf(w).map(step => profileName(step.profileId)).join(', then ') || 'No steps'}</span>
+                              <span className="block truncate text-xs text-text-subtle">{stepsOf(w).map(step => profileName(step.profileId)).join(', then ') || t("No steps")}</span>
                             </span>
                           </span>
                         )}
@@ -252,9 +250,9 @@ export default function ChatModal({ chat, draft, onClose }) {
 
         <footer className="flex shrink-0 items-center gap-2.5 border-t border-border-subtle bg-tint/[0.015] px-7 py-4">
           <Database className="h-4 w-4 shrink-0 text-text-subtle" aria-hidden="true" />
-          <span className="caption flex-1">Facts, files and lore go in the Memory tab once the workspace is open.</span>
-          <Button variant="subtle" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave} disabled={!title.trim()}>{isEditing ? 'Save changes' : 'Create workspace'}</Button>
+          <span className="caption flex-1">{t("Facts, files and lore go in the Memory tab once the workspace is open.")}</span>
+          <Button variant="subtle" onClick={onClose}>{t("Cancel")}</Button>
+          <Button onClick={handleSave} disabled={!title.trim()}>{isEditing ? t("Save changes") : t("Create workspace")}</Button>
         </footer>
       </Modal>
 

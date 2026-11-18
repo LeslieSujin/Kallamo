@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState } from 'react';
 import Modal from './ui/Modal';
 import Button from './ui/Button';
@@ -69,10 +70,11 @@ const Section = ({ title, children }) => (
 
 // Page setup for the current chapter. Each chapter keeps its own page settings.
 export default function WritingPageModal({ config, chapterTitle, onChange, onClose }) {
+  const { t } = useI18n();
   const orientation = config.orientation || 'portrait';
   const [showColorPicker, setShowColorPicker] = useState(false);
   const sheet = (config.sheetColor || '#ffffff').toLowerCase();
-  const isPreset = PAPER_THEMES.some(t => t.color.toLowerCase() === sheet);
+  const isPreset = PAPER_THEMES.some(localValue => localValue.color.toLowerCase() === sheet);
 
   const setOrientation = (o) => {
     if (o === orientation) return;
@@ -89,47 +91,47 @@ export default function WritingPageModal({ config, chapterTitle, onChange, onClo
   const row = 'flex items-center justify-between gap-4';
 
   return (
-    <Modal onClose={onClose} size="wide" title="Page setup" subtitle={chapterTitle || null} icon={FileCog}>
+    <Modal onClose={onClose} size="wide" title={t("Page setup")} subtitle={chapterTitle || null} icon={FileCog}>
       <div className="flex min-h-0">
         <div className="hidden w-64 shrink-0 items-center justify-center bg-shade/25 p-6 sm:flex">
           <PagePreview config={config} />
         </div>
         <div className="custom-scrollbar flex max-h-[70vh] min-w-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-5">
-          <Section title="Paper">
+          <Section title={t("Paper")}>
             <div className="flex flex-col gap-3">
               <div className={row}>
-                <span className="text-sm text-text-secondary">Size</span>
-                <SegmentedControl label="Paper size" value={config.pageSize || 'A4'} onChange={setSize} options={['A4', 'Letter', 'Custom'].map(v => ({ value: v, label: v }))} />
+                <span className="text-sm text-text-secondary">{t("Size")}</span>
+                <SegmentedControl label={t("Paper size")} value={config.pageSize || 'A4'} onChange={setSize} options={['A4', 'Letter', 'Custom'].map(v => ({ value: v, label: v }))} />
               </div>
               {config.pageSize === 'Custom' && (
                 <div className="grid grid-cols-2 gap-3">
-                  <NumberField label="Width" unit="px" min={200} value={config.pageWidth || 794} onChange={(v) => onChange({ pageWidth: v })} />
-                  <NumberField label="Height" unit="px" min={200} value={config.pageHeight || 1123} onChange={(v) => onChange({ pageHeight: v })} />
+                  <NumberField label={t("Width")} unit="px" min={200} value={config.pageWidth || 794} onChange={(v) => onChange({ pageWidth: v })} />
+                  <NumberField label={t("Height")} unit="px" min={200} value={config.pageHeight || 1123} onChange={(v) => onChange({ pageHeight: v })} />
                 </div>
               )}
               <div className={row}>
-                <span className="text-sm text-text-secondary">Orientation</span>
-                <SegmentedControl label="Orientation" value={orientation} onChange={setOrientation} options={[{ value: 'portrait', label: 'Portrait' }, { value: 'landscape', label: 'Landscape' }]} />
+                <span className="text-sm text-text-secondary">{t("Orientation")}</span>
+                <SegmentedControl label={t("Orientation")} value={orientation} onChange={setOrientation} options={[{ value: 'portrait', label: t("Portrait") }, { value: 'landscape', label: t("Landscape") }]} />
               </div>
               <div className={row}>
-                <span className="text-sm text-text-secondary">Colour</span>
+                <span className="text-sm text-text-secondary">{t("Colour")}</span>
                 <div className="flex items-center gap-2">
-                  {PAPER_THEMES.map(t => (
-                    <Tooltip key={t.label} content={t.label}>
+                  {PAPER_THEMES.map(localValue => (
+                    <Tooltip key={localValue.label} content={t(localValue.label)}>
                       <button
                         type="button"
-                        aria-label={`${t.label} paper`}
-                        aria-pressed={sheet === t.color.toLowerCase()}
-                        onClick={() => onChange({ sheetColor: t.color })}
-                        className={`h-7 w-7 rounded-full border border-tint/20 transition-transform hover:scale-105 ${sheet === t.color.toLowerCase() ? 'ring-2 ring-text-primary ring-offset-2 ring-offset-surface-canvas' : ''}`}
-                        style={{ backgroundColor: t.color }}
+                        aria-label={t('{name} paper', { name: t(localValue.label) })}
+                        aria-pressed={sheet === localValue.color.toLowerCase()}
+                        onClick={() => onChange({ sheetColor: localValue.color })}
+                        className={`h-7 w-7 rounded-full border border-tint/20 transition-transform hover:scale-105 ${sheet === localValue.color.toLowerCase() ? 'ring-2 ring-text-primary ring-offset-2 ring-offset-surface-canvas' : ''}`}
+                        style={{ backgroundColor: localValue.color }}
                       />
                     </Tooltip>
                   ))}
                   <Tooltip content="Custom colour">
                     <button
                       type="button"
-                      aria-label="Custom paper colour"
+                      aria-label={t("Custom paper colour")}
                       aria-expanded={showColorPicker}
                       onClick={() => setShowColorPicker(s => !s)}
                       className={`h-7 w-7 rounded-full border border-tint/20 transition-transform hover:scale-105 ${!isPreset || showColorPicker ? 'ring-2 ring-text-primary ring-offset-2 ring-offset-surface-canvas' : ''}`}
@@ -146,27 +148,27 @@ export default function WritingPageModal({ config, chapterTitle, onChange, onClo
             </div>
           </Section>
 
-          <Section title="Margins">
+          <Section title={t("Margins")}>
             <div className="grid grid-cols-4 gap-3">
-              <NumberField label="Top" unit="px" value={config.marginTop ?? 96} onChange={(v) => onChange({ marginTop: v })} />
-              <NumberField label="Bottom" unit="px" value={config.marginBottom ?? 96} onChange={(v) => onChange({ marginBottom: v })} />
-              <NumberField label="Left" unit="px" value={config.marginLeft ?? 96} onChange={(v) => onChange({ marginLeft: v })} />
-              <NumberField label="Right" unit="px" value={config.marginRight ?? 96} onChange={(v) => onChange({ marginRight: v })} />
+              <NumberField label={t("Top")} unit="px" value={config.marginTop ?? 96} onChange={(v) => onChange({ marginTop: v })} />
+              <NumberField label={t("Bottom")} unit="px" value={config.marginBottom ?? 96} onChange={(v) => onChange({ marginBottom: v })} />
+              <NumberField label={t("Left")} unit="px" value={config.marginLeft ?? 96} onChange={(v) => onChange({ marginLeft: v })} />
+              <NumberField label={t("Right")} unit="px" value={config.marginRight ?? 96} onChange={(v) => onChange({ marginRight: v })} />
             </div>
           </Section>
 
-          <Section title="Paragraph">
+          <Section title={t("Paragraph")}>
             <div className="grid grid-cols-2 gap-3">
-              <NumberField label="First-line indent" unit="pt" value={pxToPt(config.firstLineIndent ?? 0)} onChange={(v) => onChange({ firstLineIndent: ptToPx(v) })} />
+              <NumberField label={t("First-line indent")} unit="pt" value={pxToPt(config.firstLineIndent ?? 0)} onChange={(v) => onChange({ firstLineIndent: ptToPx(v) })} />
             </div>
           </Section>
         </div>
       </div>
 
       <div className="flex shrink-0 items-center gap-2 border-t border-border-subtle px-5 py-3.5">
-        <span className="text-xs text-text-subtle">Changes apply to this chapter as you make them.</span>
+        <span className="text-xs text-text-subtle">{t("Changes apply to this chapter as you make them.")}</span>
         <span className="flex-1" />
-        <Button variant="primary" onClick={onClose}>Done</Button>
+        <Button variant="primary" onClick={onClose}>{t("Done")}</Button>
       </div>
     </Modal>
   );

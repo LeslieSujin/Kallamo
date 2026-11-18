@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { X, Search, Database, FileText, Trash2, Save, Plus, Download, FileSearch, Loader2, Pencil, Upload } from 'lucide-react';
@@ -16,6 +17,7 @@ import { Menu, MenuItem, MenuSeparator } from '../ui/Menu';
 import { ProfileAvatar } from './ProfileModal';
 
 export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) {
+  const { t } = useI18n();
   const { electronAPI, settings, showToast, openSettings } = useApp();
   const [blocks, setBlocks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -663,10 +665,10 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
     let searchable = 0;
     groupedBlocks.forEach(b => {
       if (b.enabled === false) return;
-      const t = b.tokenCount || tokenMap[b.id] || 0;
+      const localValue = b.tokenCount || tokenMap[b.id] || 0;
       const isAlwaysOn = b.type === 'constant'
         || (b.type === 'manual' && (b.strategy === 'constant' || b.rawItem?.strategy === 'constant'));
-      if (isAlwaysOn) alwaysOn += t; else searchable += t;
+      if (isAlwaysOn) alwaysOn += localValue; else searchable += localValue;
     });
     return { alwaysOn, searchable };
   }, [groupedBlocks, tokenMap]);
@@ -693,9 +695,9 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
   const isAlwaysOn = (b) => b.type === 'constant'
     || (b.type === 'manual' && (b.strategy === 'constant' || b.rawItem?.strategy === 'constant'));
   const kindOf = (b) => {
-    if (b.type === 'rag_file') return { label: 'Searchable file', Icon: FileSearch };
-    if (b.type === 'constant') return { label: 'Always-on file', Icon: FileText };
-    return { label: 'Custom memory', Icon: Pencil };
+    if (b.type === 'rag_file') return { label: t("Searchable file"), Icon: FileSearch };
+    if (b.type === 'constant') return { label: t("Always-on file"), Icon: FileText };
+    return { label: t("Custom memory"), Icon: Pencil };
   };
   const counts = {
     all: groupedBlocks.length,
@@ -704,21 +706,21 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
     rag: groupedBlocks.filter(b => b.type === 'rag_file').length,
   };
   const FILTERS = [
-    { id: 'all', label: 'All' },
-    { id: 'manual', label: 'Custom memory' },
-    { id: 'constant', label: 'Always-on files' },
-    { id: 'rag', label: 'Searchable files' },
+    { id: 'all', label: t("All") },
+    { id: 'manual', label: t("Custom memory") },
+    { id: 'constant', label: t("Always-on files") },
+    { id: 'rag', label: t("Searchable files") },
   ];
   const ADD_OPTIONS = [
-    { id: 'memory', Icon: Pencil, title: 'Custom memory', text: 'Write a fact or rule by hand. Tags decide when it comes up.', mode: 'var(--theme-mode-always)', onClick: () => openEditor(null) },
-    { id: 'constant', Icon: FileText, title: 'Always-on file', text: 'Sent with every reply. Best for short, essential canon.', mode: 'var(--theme-mode-always)', onClick: () => constantInputRef.current?.click() },
-    { id: 'searchable', Icon: FileSearch, title: 'Searchable file', text: 'Split into chunks; only the relevant parts are sent.', mode: 'var(--theme-mode-searchable)', onClick: () => searchableInputRef.current?.click() },
+    { id: 'memory', Icon: Pencil, title: t("Custom memory"), text: t("Write a fact or rule by hand. Tags decide when it comes up."), mode: 'var(--theme-mode-always)', onClick: () => openEditor(null) },
+    { id: 'constant', Icon: FileText, title: t("Always-on file"), text: t("Sent with every reply. Best for short, essential canon."), mode: 'var(--theme-mode-always)', onClick: () => constantInputRef.current?.click() },
+    { id: 'searchable', Icon: FileSearch, title: t("Searchable file"), text: t("Split into chunks; only the relevant parts are sent."), mode: 'var(--theme-mode-searchable)', onClick: () => searchableInputRef.current?.click() },
   ];
   const profileColor = profile?.color || '#FBCB2D';
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center titlebar-nodrag select-none p-8 ${isBlurEnabled ? 'bg-surface-overlay backdrop-blur-sm' : 'bg-surface-canvas'}`}>
-      <div role="dialog" aria-modal="true" aria-label="Knowledge base" className="w-full max-w-6xl h-full max-h-[50rem] bg-surface-canvas rounded-[1.25rem] shadow-2xl border border-border-default flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div role="dialog" aria-modal="true" aria-label={t("Knowledge base")} className="w-full max-w-6xl h-full max-h-[50rem] bg-surface-canvas rounded-[1.25rem] shadow-2xl border border-border-default flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
 
         <header
           className="shrink-0 flex items-center gap-3.5 border-b border-border-subtle py-4 pl-6 pr-5"
@@ -726,24 +728,22 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
         >
           <ProfileAvatar color={profileColor} size={40} />
           <div className="min-w-0 flex-1">
-            <h2 className="text-lg font-bold text-text-primary">Knowledge base</h2>
-            <p className="caption truncate text-[0.8125rem]">{profile?.name} · goes with this profile into every workspace that uses it</p>
+            <h2 className="text-lg font-bold text-text-primary">{t("Knowledge base")}</h2>
+            <p className="caption truncate text-[0.8125rem]">{profile?.name}{' '}{t("· goes with this profile into every workspace that uses it")}</p>
           </div>
           <div ref={addMenuAnchorRef}>
-            <Button variant="ghost" size="sm" icon={Plus} disabled={isProcessing} onClick={() => setIsAddMenuOpen(open => !open)} aria-haspopup="menu" aria-expanded={isAddMenuOpen}>
-              Add
-            </Button>
+            <Button variant="ghost" size="sm" icon={Plus} disabled={isProcessing} onClick={() => setIsAddMenuOpen(open => !open)} aria-haspopup="menu" aria-expanded={isAddMenuOpen}>{t("Add")}</Button>
           </div>
-          <Menu anchorRef={addMenuAnchorRef} open={isAddMenuOpen} onClose={() => setIsAddMenuOpen(false)} label="Add to knowledge base" className="w-60">
+          <Menu anchorRef={addMenuAnchorRef} open={isAddMenuOpen} onClose={() => setIsAddMenuOpen(false)} label={t("Add to knowledge base")} className="w-60">
             {ADD_OPTIONS.map(option => (
               <MenuItem key={option.id} icon={option.Icon} label={option.title} onSelect={() => { setIsAddMenuOpen(false); option.onClick(); }} />
             ))}
             <MenuSeparator />
-            <MenuItem icon={Upload} label="Import knowledge base" onSelect={() => { setIsAddMenuOpen(false); handleImportKb(); }} />
+            <MenuItem icon={Upload} label={t("Import knowledge base")} onSelect={() => { setIsAddMenuOpen(false); handleImportKb(); }} />
           </Menu>
           <input type="file" ref={searchableInputRef} onChange={handleAddSearchableFile} accept=".txt,.pdf,.md,.docx" multiple className="hidden" />
           <input type="file" ref={constantInputRef} onChange={handleAddConstantFile} accept=".txt,.pdf,.md,.docx" multiple className="hidden" />
-          <IconButton icon={X} label="Close knowledge base" onClick={onClose} />
+          <IconButton icon={X} label={t("Close knowledge base")} onClick={onClose} />
         </header>
 
         {isProcessing && (
@@ -754,7 +754,7 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
             </div>
             {progressDetail && (
               <div className="flex w-72 shrink-0 items-center gap-3">
-                <span className="caption shrink-0 tabular-nums">{progressDetail.current} / {progressDetail.total} chunks</span>
+                <span className="caption shrink-0 tabular-nums">{progressDetail.current} / {progressDetail.total}{' '}{t("chunks")}</span>
                 <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-tint/10">
                   <div className="h-full rounded-full bg-accent transition-all duration-300" style={{ width: `${Math.round((progressDetail.current / progressDetail.total) * 100)}%` }} />
                 </div>
@@ -765,7 +765,7 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
 
         <div className="flex-1 flex overflow-hidden min-h-0 relative">
 
-          <nav aria-label="Filter knowledge" className="flex w-60 shrink-0 flex-col gap-0.5 border-r border-border-subtle px-3 py-4">
+          <nav aria-label={t("Filter knowledge")} className="flex w-60 shrink-0 flex-col gap-0.5 border-r border-border-subtle px-3 py-4">
             {FILTERS.map(item => {
               const active = activeFilter === item.id;
               return (
@@ -785,26 +785,22 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
             <div className="mb-2.5 flex flex-col gap-2.5 rounded-xl border border-border-subtle bg-tint/[0.025] p-3">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--theme-mode-always)]" />
-                <span className="caption flex-1">Sent every reply</span>
-                <span className="text-xs tabular-nums text-text-secondary">{tokenTotals.alwaysOn.toLocaleString()} tokens</span>
+                <span className="caption flex-1">{t("Sent every reply")}</span>
+                <span className="text-xs tabular-nums text-text-secondary">{tokenTotals.alwaysOn.toLocaleString()}{' '}{t("tokens")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--theme-mode-searchable)]" />
-                <span className="caption flex-1">Searchable</span>
-                <span className="text-xs tabular-nums text-text-secondary">{tokenTotals.searchable.toLocaleString()} tokens</span>
+                <span className="caption flex-1">{t("Searchable")}</span>
+                <span className="text-xs tabular-nums text-text-secondary">{tokenTotals.searchable.toLocaleString()}{' '}{t("tokens")}</span>
               </div>
-              <span className="caption">Switched-off items count for nothing.</span>
+              <span className="caption">{t("Switched-off items count for nothing.")}</span>
             </div>
             {onOpenSmartSearch && (
               <button type="button" onClick={onOpenSmartSearch} className="flex h-9 items-center gap-2.5 rounded-[0.5625rem] px-3 text-left text-sm text-text-muted transition-colors hover:bg-tint/[0.04] hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                <Search className="h-4 w-4" aria-hidden="true" />
-                Smart search settings
-              </button>
+                <Search className="h-4 w-4" aria-hidden="true" />{t("Smart search settings")}</button>
             )}
             <button type="button" onClick={handleExportKb} disabled={exportingKb || isProcessing} className="flex h-9 items-center gap-2.5 rounded-[0.5625rem] px-3 text-left text-sm text-text-muted transition-colors hover:bg-tint/[0.04] hover:text-text-secondary disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-              <Download className="h-4 w-4" aria-hidden="true" />
-              Export
-            </button>
+              <Download className="h-4 w-4" aria-hidden="true" />{t("Export")}</button>
           </nav>
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 px-6 py-5">
@@ -812,20 +808,20 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
               <h3 className="flex-1 text-[0.9375rem] font-bold text-text-primary">
                 {FILTERS.find(item => item.id === activeFilter)?.label} <span className="caption tabular-nums">{filteredBlocks.length}</span>
               </h3>
-              <TextInput placeholder="Search in content" aria-label="Search in content" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} icon={Search} containerClassName="w-64" />
+              <TextInput placeholder={t("Search in content")} aria-label={t("Search in content")} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} icon={Search} containerClassName="w-64" />
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar pr-1">
               {loading ? (
                 <div className="flex h-full flex-col items-center justify-center py-20 text-text-subtle">
                   <Loader2 className="mb-2 h-7 w-7 animate-spin" aria-hidden="true" />
-                  <span className="text-xs">Loading the knowledge base…</span>
+                  <span className="text-xs">{t("Loading the knowledge base…")}</span>
                 </div>
               ) : groupedBlocks.length === 0 ? (
                 <div className="flex min-h-full flex-col items-center justify-center gap-6 rounded-2xl border-[1.5px] border-dashed border-border-default p-8 text-center">
                   <div>
-                    <span className="block text-[1.0625rem] font-bold text-text-primary">Nothing here yet</span>
-                    <span className="caption text-[0.8125rem]">What this profile should always know, wherever it's used. For a single story, use that workspace's Memory tab.</span>
+                    <span className="block text-[1.0625rem] font-bold text-text-primary">{t("Nothing here yet")}</span>
+                    <span className="caption text-[0.8125rem]">{t("What this profile should always know, wherever it's used. For a single story, use that workspace's Memory tab.")}</span>
                   </div>
                   <div className="grid w-full max-w-3xl grid-cols-1 gap-3.5 text-left md:grid-cols-3">
                     {ADD_OPTIONS.map(option => (
@@ -845,15 +841,15 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
                   </div>
                 </div>
               ) : filteredBlocks.length === 0 ? (
-                <EmptyState icon={Database} title="Nothing matches" subtitle="Try another search or filter." />
+                <EmptyState icon={Database} title={t("Nothing matches")} subtitle={t("Try another search or filter.")} />
               ) : (
                 <div className="overflow-hidden rounded-2xl border border-border-subtle bg-tint/[0.015]">
                   <div className="flex items-center gap-3.5 px-4 py-2.5">
                     <span className="w-4" />
-                    <span className="caption flex-1 pl-[2.875rem]">Item</span>
-                    <span className="caption w-28">How it's used</span>
+                    <span className="caption flex-1 pl-[2.875rem]">{t("Item")}</span>
+                    <span className="caption w-28">{t("How it's used")}</span>
                     <span className="w-16" />
-                    <span className="caption w-9">On</span>
+                    <span className="caption w-9">{t("On")}</span>
                   </div>
                   {filteredBlocks.map((block) => {
                     const always = isAlwaysOn(block);
@@ -895,7 +891,7 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
                             </span>
                             <span className="inline-flex w-28 shrink-0 items-center gap-1.5 text-xs font-semibold" style={{ color: mode }}>
                               <span className="h-2 w-2 rounded-full" style={{ background: mode }} />
-                              {always ? 'Always sent' : 'Searched'}
+                              {always ? t("Always sent") : t("Searched")}
                             </span>
                           </button>
                           <span className="flex w-16 justify-end gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
@@ -928,8 +924,8 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
                               {block.text}
                             </p>
                             <div className="flex items-center gap-2">
-                              <span className="caption flex-1">{always ? 'Sent with every reply while it is on.' : 'Comes up when the turn is about it, or mentions one of its tags.'}</span>
-                              <Button variant="ghost" size="sm" icon={Pencil} onClick={() => openEditor(block)}>Edit</Button>
+                              <span className="caption flex-1">{always ? t("Sent with every reply while it is on.") : t("Comes up when the turn is about it, or mentions one of its tags.")}</span>
+                              <Button variant="ghost" size="sm" icon={Pencil} onClick={() => openEditor(block)}>{t("Edit")}</Button>
                             </div>
                           </div>
                         )}
@@ -949,27 +945,25 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
                   <FileSearch className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-bold text-text-primary">Searchable file</h3>
-                  <span className="block truncate font-mono text-xs text-text-subtle">{viewingFileBlock.source} · {viewingFileBlock.chunks.length} chunks</span>
+                  <h3 className="text-sm font-bold text-text-primary">{t("Searchable file")}</h3>
+                  <span className="block truncate font-mono text-xs text-text-subtle">{viewingFileBlock.source} · {viewingFileBlock.chunks.length}{' '}{t("chunks")}</span>
                 </div>
-                <IconButton icon={X} label="Close file" size="sm" onClick={() => setViewingFileBlock(null)} />
+                <IconButton icon={X} label={t("Close file")} size="sm" onClick={() => setViewingFileBlock(null)} />
               </div>
 
               <div className="flex-1 space-y-3 overflow-y-auto pr-1 custom-scrollbar">
                 {viewingFileBlock.chunks.map((chunk, idx) => (
                   <div key={chunk.id} className="group/chunk relative flex flex-col rounded-xl border border-border-subtle bg-surface-input p-3">
                     <div className="mb-2 flex items-center justify-between">
-                      <span className="caption flex items-center gap-1.5 tabular-nums">
-                        Chunk {idx + 1} · {(chunk.tokenCount || tokenMap[chunk.id] || 0).toLocaleString()} tokens
-                        {chunk.manuallyEdited && (
-                          <span data-tooltip="Edited by hand. Survives re-indexing." className="inline-flex h-5 items-center rounded-full border border-border-default px-2 text-xs font-medium text-text-secondary">Edited</span>
+                      <span className="caption flex items-center gap-1.5 tabular-nums">{t("Chunk")}{idx + 1} · {(chunk.tokenCount || tokenMap[chunk.id] || 0).toLocaleString()}{t("tokens")}{chunk.manuallyEdited && (
+                          <span data-tooltip={t("Edited by hand. Survives re-indexing.")} className="inline-flex h-5 items-center rounded-full border border-border-default px-2 text-xs font-medium text-text-secondary">{t("Edited")}</span>
                         )}
                       </span>
                       <div className="flex gap-0.5 opacity-0 transition-opacity group-hover/chunk:opacity-100 focus-within:opacity-100">
-                        <IconButton icon={Pencil} label="Edit chunk" size="sm" onClick={() => openEditor(chunk)} />
+                        <IconButton icon={Pencil} label={t("Edit chunk")} size="sm" onClick={() => openEditor(chunk)} />
                         <IconButton
                           icon={Trash2}
-                          label="Delete chunk"
+                          label={t("Delete chunk")}
                           tone="danger"
                           size="sm"
                           onClick={() => {
@@ -1008,27 +1002,27 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
           {editorOpen && (
             <div className="absolute left-1/2 top-1/2 z-40 flex max-h-[calc(100%-3rem)] w-[30rem] -translate-x-1/2 -translate-y-1/2 flex-col rounded-2xl border border-border-default bg-surface-panel p-5 shadow-[0_0_0_100vmax_color-mix(in_srgb,var(--theme-shade)_55%,transparent)] animate-in zoom-in-95 fade-in duration-200">
               <div className="mb-4 flex shrink-0 items-center justify-between border-b border-border-subtle pb-3">
-                <h3 className="text-sm font-bold text-text-primary">{editingBlock ? 'Edit memory' : 'New custom memory'}</h3>
-                <IconButton icon={X} label="Close editor" size="sm" onClick={() => setEditorOpen(false)} />
+                <h3 className="text-sm font-bold text-text-primary">{editingBlock ? t("Edit memory") : t("New custom memory")}</h3>
+                <IconButton icon={X} label={t("Close editor")} size="sm" onClick={() => setEditorOpen(false)} />
               </div>
 
               <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto custom-scrollbar">
                 <TextInput
-                  label="Title"
+                  label={t("Title")}
                   value={editorTitle}
                   onChange={(e) => setEditorTitle(e.target.value)}
                   readOnly={editingBlock && editingBlock.type !== 'manual'}
-                  placeholder="e.g. Dice and checks"
-                  hint={editingBlock && editingBlock.type !== 'manual' ? 'A file keeps its own name.' : null}
+                  placeholder={t("e.g. Dice and checks")}
+                  hint={editingBlock && editingBlock.type !== 'manual' ? t("A file keeps its own name.") : null}
                 />
 
                 {(!editingBlock || editingBlock.type === 'manual') && (
                   <div>
-                    <span className="mb-1.5 block text-sm font-medium text-text-secondary">How it's used</span>
+                    <span className="mb-1.5 block text-sm font-medium text-text-secondary">{t("How it's used")}</span>
                     <div className="grid grid-cols-2 gap-2">
                       {[
-                        { id: 'rag_search', label: 'Searched', text: 'Sent only when the turn is about it', mode: 'var(--theme-mode-searchable)' },
-                        { id: 'constant', label: 'Always sent', text: 'Part of every reply', mode: 'var(--theme-mode-always)' },
+                        { id: 'rag_search', label: t("Searched"), text: t("Sent only when the turn is about it"), mode: 'var(--theme-mode-searchable)' },
+                        { id: 'constant', label: t("Always sent"), text: t("Part of every reply"), mode: 'var(--theme-mode-always)' },
                       ].map(option => {
                         const active = editorStrategy === option.id;
                         return (
@@ -1054,16 +1048,16 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
 
                 <Textarea
                   ref={editorTextareaRef}
-                  label="Text"
+                  label={t("Text")}
                   value={editorText}
                   onChange={(e) => setEditorText(e.target.value)}
-                  placeholder="What the AI should know"
+                  placeholder={t("What the AI should know")}
                   className="min-h-[9.5rem] flex-1"
                 />
 
                 {(!editingBlock || editingBlock.type === 'manual') && (
                   <div className="flex shrink-0 flex-col gap-2">
-                    <span className="block text-sm font-medium text-text-secondary">Tags <span className="caption">(it comes up when the turn mentions one)</span></span>
+                    <span className="block text-sm font-medium text-text-secondary">{t("Tags")}{' '}<span className="caption">{t("(it comes up when the turn mentions one)")}</span></span>
                     {editorKeywords.length > 0 && (
                       <div className="flex flex-wrap gap-1.5">
                         {editorKeywords.map((tag, idx) => (
@@ -1089,15 +1083,15 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
                           onChange={(e) => { setTagInput(e.target.value); setTagSuggestionsOpen(true); }}
                           onFocus={() => setTagSuggestionsOpen(true)}
                           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddTag(); } }}
-                          placeholder="Add a tag"
-                          aria-label="Add a tag"
+                          placeholder={t("Add a tag")}
+                          aria-label={t("Add a tag")}
                           disabled={savingEditor}
                         />
                         {(() => {
                           const allTags = Array.from(new Set(
                             blocks.filter(b => b.type === 'manual').flatMap(b => b.keywords || b.rawItem?.keywords || [])
-                          )).filter(t => t && !editorKeywords.includes(t));
-                          const suggestions = allTags.filter(t => t.toLowerCase().includes(tagInput.toLowerCase()));
+                          )).filter(localValue => localValue && !editorKeywords.includes(localValue));
+                          const suggestions = allTags.filter(localValue => localValue.toLowerCase().includes(tagInput.toLowerCase()));
                           return (
                             <Popover anchorRef={editorTagAnchorRef} open={tagSuggestionsOpen && suggestions.length > 0} onClose={() => setTagSuggestionsOpen(false)} maxHeight={160}>
                               {suggestions.map((tag) => (
@@ -1114,7 +1108,7 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
                           );
                         })()}
                       </div>
-                      <Button variant="ghost" icon={Plus} onClick={handleAddTag} disabled={savingEditor || !tagInput.trim()} aria-label="Add tag" />
+                      <Button variant="ghost" icon={Plus} onClick={handleAddTag} disabled={savingEditor || !tagInput.trim()} aria-label={t("Add tag")} />
                     </div>
                   </div>
                 )}
@@ -1123,26 +1117,26 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
               </div>
 
               <div className="mt-4 flex shrink-0 justify-end gap-2.5 border-t border-border-subtle pt-4">
-                <Button variant="subtle" onClick={() => setEditorOpen(false)}>Cancel</Button>
-                <Button icon={Save} loading={savingEditor} onClick={handleSaveEditor}>{savingEditor ? 'Saving…' : 'Save memory'}</Button>
+                <Button variant="subtle" onClick={() => setEditorOpen(false)}>{t("Cancel")}</Button>
+                <Button icon={Save} loading={savingEditor} onClick={handleSaveEditor}>{savingEditor ? t("Saving…") : t("Save memory")}</Button>
               </div>
             </div>
           )}
 
           {selectedBlockIds.length > 0 && (
             <div className="absolute bottom-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 rounded-2xl border border-border-default bg-surface-panel/95 py-2 pl-4 pr-2 shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-4 duration-200">
-              <span className="text-sm font-semibold tabular-nums text-text-primary">{selectedBlockIds.length} selected</span>
+              <span className="text-sm font-semibold tabular-nums text-text-primary">{selectedBlockIds.length}{' '}{t("selected")}</span>
               <span className="h-4 w-px bg-border-default" />
-              <Button variant="subtle" size="sm" onClick={handleSelectAll}>Select all</Button>
-              <Button variant="subtle" size="sm" onClick={handleClearSelection}>Clear</Button>
-              <Button variant="danger" size="sm" icon={Trash2} onClick={() => setIsBulkDeleteConfirmOpen(true)}>Delete</Button>
+              <Button variant="subtle" size="sm" onClick={handleSelectAll}>{t("Select all")}</Button>
+              <Button variant="subtle" size="sm" onClick={handleClearSelection}>{t("Clear")}</Button>
+              <Button variant="danger" size="sm" icon={Trash2} onClick={() => setIsBulkDeleteConfirmOpen(true)}>{t("Delete")}</Button>
             </div>
           )}
 
           {deleteTargetBlock && (
             <ConfirmDialog
               tone="danger"
-              title="Confirm Deletion"
+              title={t("Confirm Deletion")}
               message={
                 deleteTargetBlock.type === 'constant'
                   ? `You are about to delete ${deleteTargetBlock.source}. This permanently removes the constant file from the AI context.`
@@ -1150,7 +1144,7 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
               }
               actions={[
                 {
-                  label: 'Cancel',
+                  label: t("Cancel"),
                   variant: 'ghost',
                   onClick: () => setDeleteTargetBlock(null),
                 },
@@ -1167,16 +1161,16 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
           {isBulkDeleteConfirmOpen && (
             <ConfirmDialog
               tone="danger"
-              title="Confirm Bulk Deletion"
+              title={t("Confirm Bulk Deletion")}
               message={`Are you sure you want to delete ${selectedBlockIds.length} selected memory blocks? This action is permanent and cannot be undone.`}
               actions={[
                 {
-                  label: 'Cancel',
+                  label: t("Cancel"),
                   variant: 'ghost',
                   onClick: () => setIsBulkDeleteConfirmOpen(false),
                 },
                 {
-                  label: 'Delete All',
+                  label: t("Delete All"),
                   variant: 'danger',
                   onClick: handleBulkDelete,
                 },
@@ -1193,7 +1187,7 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
         <ImportProgressModal
           progress={kbProgress}
           statusText={kbProgressStatus}
-          title={kbOpType === 'export' ? 'Exporting the knowledge base' : 'Importing a knowledge base'}
+          title={kbOpType === 'export' ? t("Exporting the knowledge base") : t("Importing a knowledge base")}
           stages={kbOpType === 'export' ? PROGRESS_STAGES.export : PROGRESS_STAGES.kbImport}
         />
       )}
@@ -1201,11 +1195,11 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
       {confirmDialog && (
         <ConfirmDialog
           tone="danger"
-          title="Confirm Deletion"
+          title={t("Confirm Deletion")}
           message={confirmDialog.message}
           actions={[
             {
-              label: 'Cancel',
+              label: t("Cancel"),
               variant: 'ghost',
               onClick: () => setConfirmDialog(null),
             },
@@ -1226,18 +1220,18 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
       {vectorizeError && (
         <ConfirmDialog
           tone="warning"
-          title={vectorizeError.kind === 'config' ? 'Embedding Not Configured' : 'Vectorization Failed'}
+          title={vectorizeError.kind === 'config' ? t("Embedding Not Configured") : t("Vectorization Failed")}
           message={vectorizeError.message}
           actions={
             vectorizeError.kind === 'config'
               ? [
                 {
-                  label: 'Cancel',
+                  label: t("Cancel"),
                   variant: 'ghost',
                   onClick: () => setVectorizeError(null),
                 },
                 {
-                  label: 'Open Embedding Settings',
+                  label: t("Open Embedding Settings"),
                   variant: 'primary',
                   onClick: () => {
                     setVectorizeError(null);
@@ -1248,7 +1242,7 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
               ]
               : [
                 {
-                  label: 'Close',
+                  label: t("Close"),
                   variant: 'ghost',
                   onClick: () => setVectorizeError(null),
                 },
@@ -1261,23 +1255,23 @@ export default function KbManagerModal({ profile, onClose, onOpenSmartSearch }) 
       {pendingUpload && (
         <ConfirmDialog
           tone="warning"
-          title="Duplicate File Detected"
+          title={t("Duplicate File Detected")}
           message={`The following file(s) already exist in your Knowledge Base:\n\n${pendingUpload.conflicts.map(f => `• ${f.name}`).join('\n')}\n\nChoose how you want to resolve these conflicts. Cancel will skip duplicate files.`}
           actions={[
             {
-              label: 'Cancel',
+              label: t("Cancel"),
               variant: 'ghost',
               loading: uploadingAction === 'skip',
               onClick: () => handleResolveConflicts('skip'),
             },
             {
-              label: 'Rename',
+              label: t("Rename"),
               variant: 'primary',
               loading: uploadingAction === 'rename',
               onClick: () => handleResolveConflicts('rename'),
             },
             {
-              label: 'Replace',
+              label: t("Replace"),
               variant: 'danger',
               loading: uploadingAction === 'replace',
               onClick: () => handleResolveConflicts('replace'),

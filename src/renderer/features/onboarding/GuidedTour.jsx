@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Lightbulb, X } from 'lucide-react';
@@ -61,6 +62,7 @@ export function TourProvider({ children }) {
 }
 
 function TourOverlay({ tour, setTour }) {
+  const { t } = useI18n();
   const app = useApp();
   const definition = TOURS[tour.id];
   const [rect, setRect] = useState(null);
@@ -180,8 +182,8 @@ function TourOverlay({ tour, setTour }) {
           )}
           <div className="flex items-center gap-2">
             <Lightbulb className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
-            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-muted">{step.where || definition.where} · {index + 1} of {steps.length}</span>
-            <button type="button" onClick={() => finish(false)} aria-label="Close the guide"
+            <span className="min-w-0 flex-1 truncate text-sm font-semibold text-text-muted">{step.where || definition.where} · {index + 1}{' '}{t("of")}{' '}{steps.length}</span>
+            <button type="button" onClick={() => finish(false)} aria-label={t("Close the guide")}
               className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
@@ -200,15 +202,13 @@ function TourOverlay({ tour, setTour }) {
             {(step.skip !== false && !last) || step.skipLabel ? (
               <button type="button" onClick={() => (step.onSkip ? step.onSkip(helpers) : finish(false))}
                 className="inline-flex min-h-9 items-center whitespace-nowrap rounded-md px-1 text-sm font-medium text-text-subtle transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                {step.skipLabel || definition.skipLabel || 'Skip the guide'}
+                {step.skipLabel || definition.skipLabel || t("Skip the guide")}
               </button>
             ) : null}
             <span className="flex-1" />
             {index > 0 && step.back !== false && (
               <button type="button" onClick={() => go(index - 1, true)}
-                className="inline-flex min-h-9 items-center whitespace-nowrap rounded-md px-2 text-sm font-semibold text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-                Back
-              </button>
+                className="inline-flex min-h-9 items-center whitespace-nowrap rounded-md px-2 text-sm font-semibold text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">{t("Back")}</button>
             )}
             <button type="button" onClick={next} disabled={!ready}
               className="inline-flex min-h-9 items-center whitespace-nowrap rounded-control bg-accent/90 px-3.5 text-sm font-semibold tracking-wide text-on-accent transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:pointer-events-none disabled:opacity-50">

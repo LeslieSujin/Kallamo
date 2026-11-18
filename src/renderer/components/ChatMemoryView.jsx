@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState, useRef, useEffect } from 'react';
 import { Database, Plus, Trash2, Search, Check, ChevronDown, FileText, Info, X as XIcon, Download, Upload, MapPin, CircleHelp, FileSearch, NotebookPen, Orbit, Pin, Tag, UserRound, UsersRound, Loader2, Pencil, History, ListChecks, RefreshCw, Sparkles, Lightbulb } from 'lucide-react';
 import { DragonIcon, MoneybagIcon, PennantIcon, StopwatchIcon } from './ui/glyphs';
@@ -7,7 +8,7 @@ const ENTITY_TYPE_ICON = {
   Characters: UserRound, Locations: MapPin, Items: MoneybagIcon, Races: UsersRound,
   Factions: PennantIcon, Creatures: DragonIcon, Events: StopwatchIcon, System: Orbit,
 };
-const entityTypeIcon = (t) => ENTITY_TYPE_ICON[t] || CircleHelp;
+const entityTypeIcon = (localValue) => ENTITY_TYPE_ICON[localValue] || CircleHelp;
 import { useApp } from '../context/AppContext';
 import ImportProgressModal, { PROGRESS_STAGES } from './modals/ImportProgressModal';
 import { parseMarkdown } from '../utils/markdown';
@@ -73,6 +74,7 @@ export default function ChatMemoryView({
   backgroundImage = null,
   hasBackdrop = false
 }) {
+  const { t } = useI18n();
   const { writingProfiles, settings, refreshChats, showToast, openSettings } = useApp();
   const { tour, startTour } = useTour();
   useFirstVisitTour('memory', 'memoryTourSeen');
@@ -125,9 +127,9 @@ export default function ChatMemoryView({
   const archiveIdxRef = useRef(null);
   const searchableIdxRef = useRef(null);
   const indexTiers = [
-    { key: 'custom', label: 'Custom memory', ref: customIdxRef },
-    { key: 'archive', label: 'Chat archive', ref: archiveIdxRef },
-    { key: 'searchable', label: 'Searchable files', ref: searchableIdxRef },
+    { key: 'custom', label: t("Custom memory"), ref: customIdxRef },
+    { key: 'archive', label: t("Chat archive"), ref: archiveIdxRef },
+    { key: 'searchable', label: t("Searchable files"), ref: searchableIdxRef },
   ];
 
   const loadMemoryTags = async () => {
@@ -358,7 +360,7 @@ export default function ChatMemoryView({
   };
 
   const addEntityTag = (candidate) => {
-    setEditorEntityTags(prev => prev.some(t => t.entity === candidate.id)
+    setEditorEntityTags(prev => prev.some(localValue => localValue.entity === candidate.id)
       ? prev
       : [...prev, { entity: candidate.id, name: candidate.canonicalName, type: candidate.type }]);
     setTagInput('');
@@ -1037,8 +1039,8 @@ export default function ChatMemoryView({
 
     setSavingSnippet(true);
     setEditorError('');
-    const origIds = new Set(editorEntityTagsOriginal.map(t => t.entity));
-    const curIds = new Set(editorEntityTags.map(t => t.entity));
+    const origIds = new Set(editorEntityTagsOriginal.map(localValue => localValue.entity));
+    const curIds = new Set(editorEntityTags.map(localValue => localValue.entity));
     const entityTagsAdded = [...curIds].filter(id => !origIds.has(id));
     const entityTagsRemoved = [...origIds].filter(id => !curIds.has(id));
     try {
@@ -1174,15 +1176,15 @@ export default function ChatMemoryView({
   };
 
   const MODES = {
-    always: { title: 'Always on', description: 'Sent with every prompt', icon: Pin, toneClass: 'text-mode-always', dot: 'bg-mode-always' },
-    searchable: { title: 'Searchable', description: 'Retrieved when relevant', icon: Search, toneClass: 'text-mode-searchable', dot: 'bg-mode-searchable' },
-    history: { title: 'History', description: 'Earlier conversation, archived and searchable', icon: History, toneClass: 'text-mode-history', dot: 'bg-mode-history' },
+    always: { title: t("Always on"), description: t("Sent with every prompt"), icon: Pin, toneClass: 'text-mode-always', dot: 'bg-mode-always' },
+    searchable: { title: t("Searchable"), description: t("Retrieved when relevant"), icon: Search, toneClass: 'text-mode-searchable', dot: 'bg-mode-searchable' },
+    history: { title: t("History"), description: t("Earlier conversation, archived and searchable"), icon: History, toneClass: 'text-mode-history', dot: 'bg-mode-history' },
   };
   const firstLine = (text) => String(text || '').replace(/[#*_>`]/g, '').replace(/\s+/g, ' ').trim().slice(0, 180);
   const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 
   const sectionTotal = (mode) => mode === 'always'
-    ? <>{formatTokens(tokenTotals.always)} tok <span className="text-text-subtle">of {formatTokens(chat?.maxContext || 128000)}</span></>
+    ? <>{formatTokens(tokenTotals.always)}{' '}{t("tok")}{' '}<span className="text-text-subtle">{t("of")}{' '}{formatTokens(chat?.maxContext || 128000)}</span></>
     : `${formatTokens(tokenTotals[mode])} tok`;
 
   const rowTags = (block) => {
@@ -1195,7 +1197,7 @@ export default function ChatMemoryView({
   const requestDeleteFile = (block) => {
     const chunks = block.type === 'rag_file' ? block.chunks.length : 0;
     setConfirmDialog({
-      title: 'Delete file?',
+      title: t("Delete file?"),
       message: chunks
         ? `"${block.source}" and its ${plural(chunks, 'searchable chunk', 'searchable chunks')} will be removed. This cannot be undone.`
         : `"${block.source}" will be removed from this chat's memory. This cannot be undone.`,
@@ -1263,10 +1265,10 @@ export default function ChatMemoryView({
     const target = mode === 'always' ? 'searchable' : 'always';
     const menuItems = [
       isNote
-        ? { icon: Pencil, label: 'Edit note', onSelect: () => openSnippetEditor(block) }
+        ? { icon: Pencil, label: t("Edit note"), onSelect: () => openSnippetEditor(block) }
         : isSearchFile
-          ? { icon: ListChecks, label: 'View chunks', onSelect: () => setViewingFileBlock(block) }
-          : { icon: FileText, label: 'View content', onSelect: () => setViewingTextBlock(block) },
+          ? { icon: ListChecks, label: t("View chunks"), onSelect: () => setViewingFileBlock(block) }
+          : { icon: FileText, label: t("View content"), onSelect: () => setViewingTextBlock(block) },
       {
         icon: target === 'always' ? Pin : Search,
         iconClassName: MODES[target].toneClass,
@@ -1276,7 +1278,7 @@ export default function ChatMemoryView({
       },
       // World Index only reads indexed chunks, so always-on items have nothing to tag.
       ...(mode === 'searchable'
-        ? [{ icon: Tag, label: 'Tag with World Index', onSelect: () => openTagSelection(isNote ? 'custom' : 'searchable', { id: isNote ? block.id : block.source, title: block.title }) }]
+        ? [{ icon: Tag, label: t("Tag with World Index"), onSelect: () => openTagSelection(isNote ? 'custom' : 'searchable', { id: isNote ? block.id : block.source, title: block.title }) }]
         : []),
       'separator',
       { icon: Trash2, label: isNote ? 'Delete note' : 'Delete file', danger: true, onSelect: () => (isNote ? setDeleteTarget(block) : requestDeleteFile(block)) },
@@ -1310,8 +1312,8 @@ export default function ChatMemoryView({
     if (status?.active) return { tone: 'running', text: `Tagging ${status.active.processed || 0}/${status.active.total || 0}`, className: 'text-text-secondary' };
     if (status?.failed) return { tone: 'error', text: `${status.failed} need${status.failed === 1 ? 's' : ''} another try`, className: 'text-status-danger' };
     if (status?.pending) return { tone: 'pending', text: `${status.pending} to tag`, className: 'text-text-secondary' };
-    if (status?.total) return { tone: 'ok', text: 'Up to date', className: 'text-text-subtle' };
-    return { tone: 'idle', text: 'Nothing to tag', className: 'text-text-subtle' };
+    if (status?.total) return { tone: 'ok', text: t("Up to date"), className: 'text-text-subtle' };
+    return { tone: 'idle', text: t("Nothing to tag"), className: 'text-text-subtle' };
   };
 
   const openChunkEditor = (chunk) => {
@@ -1392,30 +1394,29 @@ export default function ChatMemoryView({
         <div className="shrink-0 flex flex-col gap-5 px-6 pt-6">
           <div className="flex min-w-0 flex-wrap items-end justify-between gap-x-6 gap-y-3">
             <div className="min-w-[16rem] flex-1">
-              <h2 className="text-xl font-semibold tracking-tight text-text-primary">Memory &amp; Knowledge</h2>
-              <p className="mt-1 max-w-2xl text-sm text-text-muted">What the AI always carries, what it looks up when relevant, and what it remembers from earlier.</p>
+              <h2 className="text-xl font-semibold tracking-tight text-text-primary">{t("Memory & Knowledge")}</h2>
+              <p className="mt-1 max-w-2xl text-sm text-text-muted">{t("What the AI always carries, what it looks up when relevant, and what it remembers from earlier.")}</p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <TextInput
                 icon={Search}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search memory"
-                aria-label="Search memory"
+                placeholder={t("Search memory")}
+                aria-label={t("Search memory")}
                 containerClassName="w-60"
               />
-              <IconButton icon={Lightbulb} label="Take the tour" onClick={() => startTour('memory')} className="!h-10 !w-10 border border-border-default bg-surface-panel/70" />
-              <Button variant="ghost" icon={Download} onClick={handleExportChatKb} title="Export this chat's memory as a KB package">Export</Button>
+              <IconButton icon={Lightbulb} label={t("Take the tour")} onClick={() => startTour('memory')} className="!h-10 !w-10 border border-border-default bg-surface-panel/70" />
+              <Button variant="ghost" icon={Download} onClick={handleExportChatKb} title={t("Export this chat's memory as a KB package")}>{t("Export")}</Button>
               <div ref={addDropdownAnchorRef} data-tour="mem-add">
-                <Button icon={Plus} onClick={() => setAddDropdownOpen(!addDropdownOpen)} aria-expanded={addDropdownOpen} aria-haspopup="menu">
-                  Add <ChevronDown className={`h-3.5 w-3.5 transition-transform ${addDropdownOpen ? 'rotate-180' : ''}`} />
+                <Button icon={Plus} onClick={() => setAddDropdownOpen(!addDropdownOpen)} aria-expanded={addDropdownOpen} aria-haspopup="menu">{t("Add")}<ChevronDown className={`h-3.5 w-3.5 transition-transform ${addDropdownOpen ? 'rotate-180' : ''}`} />
                 </Button>
               </div>
-              <Menu anchorRef={addDropdownAnchorRef} open={addDropdownOpen} onClose={() => setAddDropdownOpen(false)} label="Add memory" className="w-80" tourId="mem-add-menu">
+              <Menu anchorRef={addDropdownAnchorRef} open={addDropdownOpen} onClose={() => setAddDropdownOpen(false)} label={t("Add memory")} className="w-80" tourId="mem-add-menu">
                 <MenuItem
                   icon={NotebookPen}
-                  label="Write a note"
-                  description="Custom memory. You choose always on or searchable."
+                  label={t("Write a note")}
+                  description={t("Custom memory. You choose always on or searchable.")}
                   onSelect={() => {
                     setAddDropdownOpen(false);
                     setEditingBlock(null);
@@ -1435,29 +1436,29 @@ export default function ChatMemoryView({
                 <MenuItem
                   icon={FileSearch}
                   iconClassName="text-mode-searchable"
-                  label="Upload searchable file"
-                  description="Retrieved when relevant. PDF, DOCX, TXT or MD."
+                  label={t("Upload searchable file")}
+                  description={t("Retrieved when relevant. PDF, DOCX, TXT or MD.")}
                   onSelect={() => { setAddDropdownOpen(false); setUploadStrategy('rag_search'); fileInputRef.current?.click(); }}
                 />
                 <MenuItem
                   icon={Pin}
                   iconClassName="text-mode-always"
-                  label="Upload always-on file"
-                  description="Sent with every prompt. Counts against context."
+                  label={t("Upload always-on file")}
+                  description={t("Sent with every prompt. Counts against context.")}
                   onSelect={() => { setAddDropdownOpen(false); setUploadStrategy('full_context'); fileInputRef.current?.click(); }}
                 />
                 <MenuSeparator />
                 <MenuItem
                   icon={Upload}
-                  label="Import KB package"
-                  description="Notes and files from an Export."
+                  label={t("Import KB package")}
+                  description={t("Notes and files from an Export.")}
                   onSelect={() => { setAddDropdownOpen(false); handleImportChatKb(); }}
                 />
               </Menu>
             </div>
           </div>
 
-          <div role="tablist" aria-label="Memory mode" className="flex items-center gap-0.5 border-b border-border-subtle pb-2.5">
+          <div role="tablist" aria-label={t("Memory mode")} className="flex items-center gap-0.5 border-b border-border-subtle pb-2.5">
             {[
               ['all', 'All', null, combinedBlocks.length],
               ['always', MODES.always.title, MODES.always.dot, modeCounts.always],
@@ -1490,8 +1491,8 @@ export default function ChatMemoryView({
             <div className="flex flex-col gap-2 rounded-card border border-border-subtle glass-panel px-3.5 py-2.5">
               <div className="flex items-center gap-2 text-sm text-text-secondary">
                 {isProcessing && <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-accent" aria-hidden="true" />}
-                <span className="min-w-0 flex-1 truncate">{progressMsg || 'Working…'}</span>
-                {progressDetail && <span className="shrink-0 text-xs text-text-muted tabular-nums">{progressDetail.current} / {progressDetail.total} chunks</span>}
+                <span className="min-w-0 flex-1 truncate">{progressMsg || t("Working…")}</span>
+                {progressDetail && <span className="shrink-0 text-xs text-text-muted tabular-nums">{progressDetail.current} / {progressDetail.total}{' '}{t("chunks")}</span>}
               </div>
               {progressDetail && (
                 <div className="h-1 overflow-hidden rounded-full bg-surface-hover">
@@ -1504,7 +1505,7 @@ export default function ChatMemoryView({
 
         <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pb-24 pt-4">
           {loading ? (
-            <div className="overflow-hidden rounded-card border border-border-subtle glass-panel" aria-label="Loading memory">
+            <div className="overflow-hidden rounded-card border border-border-subtle glass-panel" aria-label={t("Loading memory")}>
               {[70, 55, 62].map(width => (
                 <div key={width} className="flex items-center gap-3 border-t border-border-subtle px-4 py-3 first:border-t-0">
                   <span className="h-8 w-8 rounded-lg bg-surface-hover animate-pulse" />
@@ -1518,14 +1519,13 @@ export default function ChatMemoryView({
           ) : combinedBlocks.length === 0 ? (
             <div className="flex flex-col items-center gap-2.5 rounded-card border border-border-subtle glass-panel px-6 py-10 text-center">
               <span className="flex h-11 w-11 items-center justify-center rounded-control bg-tint/5"><Database className="h-5 w-5 text-text-muted" /></span>
-              <span className="text-[0.9375rem] font-semibold text-text-primary">No memory yet</span>
-              <span className="max-w-xs text-sm leading-relaxed text-text-muted">Write a note or upload a file. Summaries appear here as the chat grows.</span>
-              <Button icon={Plus} onClick={() => setAddDropdownOpen(true)} className="mt-1">Add</Button>
+              <span className="text-[0.9375rem] font-semibold text-text-primary">{t("No memory yet")}</span>
+              <span className="max-w-xs text-sm leading-relaxed text-text-muted">{t("Write a note or upload a file. Summaries appear here as the chat grows.")}</span>
+              <Button icon={Plus} onClick={() => setAddDropdownOpen(true)} className="mt-1">{t("Add")}</Button>
             </div>
           ) : filteredBlocks.length === 0 && searchQuery ? (
-            <div className="rounded-card border border-border-subtle glass-panel px-4 py-3.5 text-sm text-text-muted">
-              No memory matches "<span className="text-text-primary">{searchQuery}</span>".{' '}
-              <button type="button" onClick={() => setSearchQuery('')} className="font-semibold text-text-secondary hover:text-text-primary cursor-pointer">Clear search</button>
+            <div className="rounded-card border border-border-subtle glass-panel px-4 py-3.5 text-sm text-text-muted">{t("No memory matches \"")}<span className="text-text-primary">{searchQuery}</span>".{' '}
+              <button type="button" onClick={() => setSearchQuery('')} className="font-semibold text-text-secondary hover:text-text-primary cursor-pointer">{t("Clear search")}</button>
             </div>
           ) : (
             <div className="flex flex-col gap-3.5">
@@ -1547,7 +1547,7 @@ export default function ChatMemoryView({
                   >
                     {items.length > 0
                       ? items.map(renderRow)
-                      : <p className="border-t border-border-subtle px-4 py-3 text-sm text-text-subtle">{mode === 'history' ? 'Nothing archived yet.' : 'Nothing here yet.'}</p>}
+                      : <p className="border-t border-border-subtle px-4 py-3 text-sm text-text-subtle">{mode === 'history' ? t("Nothing archived yet.") : t("Nothing here yet.")}</p>}
                   </CollapsibleSection>
                   </div>
                 );
@@ -1566,52 +1566,52 @@ export default function ChatMemoryView({
 
       <aside className="glass-rail w-full md:w-80 shrink-0 border-l border-border-subtle flex flex-col gap-8 overflow-y-auto custom-scrollbar px-6 py-7">
         <section data-tour="mem-world-index" className="flex flex-col gap-2.5">
-          <span className={`self-start ${sectionLabel}`}>World index</span>
-          <p className="text-sm leading-relaxed text-text-muted">Tags memories by character, faction and item so the AI can recall them by name.</p>
+          <span className={`self-start ${sectionLabel}`}>{t("World index")}</span>
+          <p className="text-sm leading-relaxed text-text-muted">{t("Tags memories by character, faction and item so the AI can recall them by name.")}</p>
           <div className="mt-1 flex flex-col border-b border-border-subtle">
-            {indexTiers.map(t => {
-              const status = worldIndexStatuses[t.key];
+            {indexTiers.map(localValue => {
+              const status = worldIndexStatuses[localValue.key];
               const state = tierState(status);
-              const canChoose = t.key === 'custom' || t.key === 'searchable';
+              const canChoose = localValue.key === 'custom' || localValue.key === 'searchable';
               return (
-                <div key={t.key} ref={t.ref}>
+                <div key={localValue.key} ref={localValue.ref}>
                   <button
                     type="button"
-                    onClick={() => setIndexMenu(indexMenu === t.key ? null : t.key)}
+                    onClick={() => setIndexMenu(indexMenu === localValue.key ? null : localValue.key)}
                     disabled={Boolean(status?.active)}
                     aria-haspopup="menu"
-                    aria-expanded={indexMenu === t.key}
-                    title="World Index reads chunks that are already searchable and adds retrieval tags. It does not vectorize or change the text."
-                    className={`-mx-2 flex w-[calc(100%+1rem)] items-center gap-2.5 rounded-lg border-t border-border-subtle px-2 py-2.5 text-left text-sm text-text-primary transition-colors cursor-pointer hover:bg-surface-hover/60 disabled:cursor-default disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${indexMenu === t.key ? 'bg-surface-hover' : ''}`}
+                    aria-expanded={indexMenu === localValue.key}
+                    title={t("World Index reads chunks that are already searchable and adds retrieval tags. It does not vectorize or change the text.")}
+                    className={`-mx-2 flex w-[calc(100%+1rem)] items-center gap-2.5 rounded-lg border-t border-border-subtle px-2 py-2.5 text-left text-sm text-text-primary transition-colors cursor-pointer hover:bg-surface-hover/60 disabled:cursor-default disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${indexMenu === localValue.key ? 'bg-surface-hover' : ''}`}
                   >
                     <StatusDot tone={state.tone} />
-                    <span className="flex-1 truncate">{t.label}</span>
+                    <span className="flex-1 truncate">{localValue.label}</span>
                     <span className={`shrink-0 text-xs ${state.className}`}>{state.text}</span>
-                    <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-text-subtle transition-transform ${indexMenu === t.key ? 'rotate-180' : ''}`} aria-hidden="true" />
+                    <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-text-subtle transition-transform ${indexMenu === localValue.key ? 'rotate-180' : ''}`} aria-hidden="true" />
                   </button>
-                  <Menu anchorRef={t.ref} open={indexMenu === t.key} onClose={() => setIndexMenu(null)} label={`${t.label} tagging`} align="right" className="w-72">
+                  <Menu anchorRef={localValue.ref} open={indexMenu === localValue.key} onClose={() => setIndexMenu(null)} label={`${localValue.label} tagging`} align="right" className="w-72">
                     <MenuItem
                       icon={Tag}
-                      label={status?.pending ? `Tag new chunks · ${status.pending}` : 'Tag new chunks'}
-                      description="Only chunks the index hasn't read yet."
-                      onSelect={() => handleIndexMemories(t.key, false)}
+                      label={status?.pending ? `Tag new chunks · ${status.pending}` : t("Tag new chunks")}
+                      description={t("Only chunks the index hasn't read yet.")}
+                      onSelect={() => handleIndexMemories(localValue.key, false)}
                     />
                     <MenuItem
                       icon={RefreshCw}
-                      label="Re-tag all chunks"
-                      description="Rebuilds automatic tags. Manual tags and suppressions stay."
-                      onSelect={() => handleIndexMemories(t.key, true)}
+                      label={t("Re-tag all chunks")}
+                      description={t("Rebuilds automatic tags. Manual tags and suppressions stay.")}
+                      onSelect={() => handleIndexMemories(localValue.key, true)}
                     />
                     {canChoose && (
                       <MenuItem
                         icon={ListChecks}
-                        label={t.key === 'custom' ? 'Choose notes to tag…' : 'Choose files to tag…'}
-                        description={`Every chunk inside each chosen ${t.key === 'custom' ? 'note' : 'file'} is tagged.`}
-                        onSelect={() => { setIndexMenu(null); openTagSelection(t.key); }}
+                        label={localValue.key === 'custom' ? t("Choose notes to tag…") : t("Choose files to tag…")}
+                        description={`Every chunk inside each chosen ${localValue.key === 'custom' ? 'note' : 'file'} is tagged.`}
+                        onSelect={() => { setIndexMenu(null); openTagSelection(localValue.key); }}
                       />
                     )}
                     <MenuSeparator />
-                    <MenuNote>Tagging reads text that is already searchable. It never changes or re-vectorizes it.</MenuNote>
+                    <MenuNote>{t("Tagging reads text that is already searchable. It never changes or re-vectorizes it.")}</MenuNote>
                   </Menu>
                 </div>
               );
@@ -1626,69 +1626,63 @@ export default function ChatMemoryView({
             aria-expanded={simIsOpen}
             className="flex items-center justify-between rounded cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            <span className={sectionLabel}>Retrieval test</span>
+            <span className={sectionLabel}>{t("Retrieval test")}</span>
             <ChevronDown className={`h-4 w-4 text-text-subtle transition-transform ${simIsOpen ? '' : '-rotate-90'}`} aria-hidden="true" />
           </button>
           {simIsOpen && (
             <>
-              <p className="text-sm leading-relaxed text-text-muted">See which memories a prompt would pull in.</p>
-              <label className="flex flex-col gap-1.5 text-xs font-medium text-text-muted">
-                Profile
-                <select
+              <p className="text-sm leading-relaxed text-text-muted">{t("See which memories a prompt would pull in.")}</p>
+              <label className="flex flex-col gap-1.5 text-xs font-medium text-text-muted">{t("Profile")}<select
                   value={simProfileId}
                   onChange={(e) => setSimProfileId(e.target.value)}
                   className="field-input h-9 px-3 text-sm cursor-pointer"
                 >
-                  <option value="">No profile (standard retrieval)</option>
+                  <option value="">{t("No profile (standard retrieval)")}</option>
                   {chatProfiles.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}{p.isAgentic === 1 ? ' · Agentic' : ''}</option>
+                    <option key={p.id} value={p.id}>{p.name}{p.isAgentic === 1 ? t(" · Agentic") : ''}</option>
                   ))}
                 </select>
               </label>
               {simProfile?.isAgentic === 1 && (
                 <p className="flex gap-1.5 text-xs leading-snug text-text-muted">
-                  <Sparkles className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  This profile rewrites the prompt before searching. It costs a few tokens.
-                </p>
+                  <Sparkles className="mt-px h-3.5 w-3.5 shrink-0" aria-hidden="true" />{t("This profile rewrites the prompt before searching. It costs a few tokens.")}</p>
               )}
-              <label className="flex flex-col gap-1.5 text-xs font-medium text-text-muted">
-                Prompt
-                <textarea
+              <label className="flex flex-col gap-1.5 text-xs font-medium text-text-muted">{t("Prompt")}<textarea
                   value={tourRetrieval ? TOUR_SIM_QUERY : simQuery}
                   readOnly={tourRetrieval}
                   onChange={(e) => setSimQuery(e.target.value)}
-                  placeholder="Who is the innkeeper?"
+                  placeholder={t("Who is the innkeeper?")}
                   className="field-input h-20 resize-none px-3 py-2.5 text-sm select-text"
                 />
               </label>
-              <Button variant="ghost" fullWidth loading={simLoading} disabled={!tourRetrieval && !simQuery.trim()} onClick={tourRetrieval ? undefined : handleTestSearch}>Run test</Button>
+              <Button variant="ghost" fullWidth loading={simLoading} disabled={!tourRetrieval && !simQuery.trim()} onClick={tourRetrieval ? undefined : handleTestSearch}>{t("Run test")}</Button>
 
               {shownSim && !simHasResults && (
                 <div className="flex flex-col gap-1 rounded-card border border-dashed border-border-default px-3.5 py-3">
-                  <span className="text-sm font-semibold text-text-primary">Nothing found</span>
-                  <span className="text-xs leading-relaxed text-text-muted">No memory scored above the threshold for this prompt. Try the names or places you expect it to find.</span>
+                  <span className="text-sm font-semibold text-text-primary">{t("Nothing found")}</span>
+                  <span className="text-xs leading-relaxed text-text-muted">{t("No memory scored above the threshold for this prompt. Try the names or places you expect it to find.")}</span>
                 </div>
               )}
               {simHasResults && (
                 <div className="flex flex-col gap-2.5 select-text">
                   {shownSim.isAgenticApplied && (
                     <div className="flex flex-col gap-0.5 rounded-control border border-border-subtle bg-tint/[0.03] px-3 py-2.5">
-                      <span className="text-xs text-text-subtle">Searched as</span>
+                      <span className="text-xs text-text-subtle">{t("Searched as")}</span>
                       <span className="text-sm text-text-primary">"{shownSim.searchQuery}"</span>
                     </div>
                   )}
-                  <span className="mt-1 text-xs font-semibold text-text-secondary">This chat · {shownSim.kbResults.length + shownSim.memoryResults.length}</span>
+                  <span className="mt-1 text-xs font-semibold text-text-secondary">{t("This chat ·")}{' '}{shownSim.kbResults.length + shownSim.memoryResults.length}</span>
                   {shownSim.kbResults.length + shownSim.memoryResults.length === 0
-                    ? <p className="text-xs text-text-subtle">No matching notes or files.</p>
+                    ? <p className="text-xs text-text-subtle">{t("No matching notes or files.")}</p>
                     : [
                       ...shownSim.kbResults.map((res, i) => resultCard(res, i, 'searchable', FileText)),
                       ...shownSim.memoryResults.map((res, i) => resultCard(res, i, 'history', History)),
                     ]}
                   {simProfileId && (
                     <>
-                      <span className="mt-1 text-xs font-semibold text-text-secondary">{simProfile?.name || 'Profile'} memory · {(shownSim.profileResults || []).length}</span>
+                      <span className="mt-1 text-xs font-semibold text-text-secondary">{simProfile?.name || t("Profile")}{' '}{t("memory ·")}{' '}{(shownSim.profileResults || []).length}</span>
                       {(shownSim.profileResults || []).length === 0
-                        ? <p className="text-xs text-text-subtle">Nothing above the threshold.</p>
+                        ? <p className="text-xs text-text-subtle">{t("Nothing above the threshold.")}</p>
                         : shownSim.profileResults.map((res, i) => resultCard(res, i, 'profile', UserRound))}
                     </>
                   )}
@@ -1704,37 +1698,37 @@ export default function ChatMemoryView({
           <div className="flex shrink-0 items-center gap-3 border-b border-border-subtle py-4 pl-6 pr-4">
             <ItemTile icon={noteEditor ? Pencil : FileText} tone={noteEditor ? (editorStrategy === 'constant' ? 'always' : 'searchable') : 'searchable'} size="lg" />
             <div className="min-w-0 flex-1">
-              <h2 className="truncate text-base font-semibold text-text-primary">{noteEditor ? (editingBlock ? 'Edit note' : 'New note') : 'Edit chunk'}</h2>
+              <h2 className="truncate text-base font-semibold text-text-primary">{noteEditor ? (editingBlock ? 'Edit note' : 'New note') : t("Edit chunk")}</h2>
               <p className="truncate text-xs text-text-muted">
                 {noteEditor
                   ? `Custom memory · ${editorStrategy === 'constant' ? 'Always on' : 'Searchable'}${editingBlock?.tokenCount ? ` · ${formatTokens(editingBlock.tokenCount)} tok` : ''}`
                   : editingBlock?.source}
               </p>
             </div>
-            <IconButton icon={XIcon} label="Close editor" size="sm" onClick={() => setEditorOpen(false)} disabled={savingSnippet} />
+            <IconButton icon={XIcon} label={t("Close editor")} size="sm" onClick={() => setEditorOpen(false)} disabled={savingSnippet} />
           </div>
 
           <div className="flex min-h-0 flex-1 overflow-hidden">
             <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-y-auto custom-scrollbar p-6">
               {noteEditor ? (
                 <TextInput
-                  label="Title"
+                  label={t("Title")}
                   value={editorTitle}
                   onChange={(e) => setEditorTitle(e.target.value)}
-                  placeholder="e.g. Character sheet"
+                  placeholder={t("e.g. Character sheet")}
                   disabled={savingSnippet}
                 />
               ) : (
                 <div className="flex items-start gap-2 rounded-control border border-border-subtle bg-tint/[0.03] px-3 py-2.5">
                   <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-subtle" aria-hidden="true" />
-                  <span className="text-xs leading-relaxed text-text-muted">This chunk comes from a file, so its title and mode follow the file. Your edit is marked as manual and survives re-indexing.</span>
+                  <span className="text-xs leading-relaxed text-text-muted">{t("This chunk comes from a file, so its title and mode follow the file. Your edit is marked as manual and survives re-indexing.")}</span>
                 </div>
               )}
               <Textarea
-                label="Content"
+                label={t("Content")}
                 value={editorText}
                 onChange={(e) => setEditorText(e.target.value)}
-                placeholder="Anything the AI should know: a character sheet, rules, a timeline…"
+                placeholder={t("Anything the AI should know: a character sheet, rules, a timeline…")}
                 disabled={savingSnippet}
                 monospace={noteEditor}
                 containerClassName="min-h-0 flex-1"
@@ -1742,14 +1736,14 @@ export default function ChatMemoryView({
                 hint={`${editorText.length.toLocaleString()} characters`}
               />
               {!noteEditor && (
-                <p className="text-xs text-text-subtle">Tags for this chunk are managed on its card in the file view.</p>
+                <p className="text-xs text-text-subtle">{t("Tags for this chunk are managed on its card in the file view.")}</p>
               )}
             </div>
 
             {noteEditor && (
               <div className="flex w-80 shrink-0 flex-col gap-6 overflow-y-auto custom-scrollbar border-l border-border-subtle bg-surface-panel-muted p-5">
-                <div role="radiogroup" aria-label="Mode" className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-text-secondary">Mode</span>
+                <div role="radiogroup" aria-label={t("Mode")} className="flex flex-col gap-2">
+                  <span className="text-sm font-medium text-text-secondary">{t("Mode")}</span>
                   {[['constant', 'always'], ['rag_search', 'searchable']].map(([strategy, mode]) => {
                     const selected = editorStrategy === strategy;
                     const ModeIcon = MODES[mode].icon;
@@ -1777,7 +1771,7 @@ export default function ChatMemoryView({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-text-secondary">Available to</span>
+                  <span className="text-sm font-medium text-text-secondary">{t("Available to")}</span>
                   <ProfileScopeButton
                     profiles={chatProfiles}
                     selectedIds={editorProfiles}
@@ -1787,14 +1781,14 @@ export default function ChatMemoryView({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-text-secondary">Tags</span>
+                  <span className="text-sm font-medium text-text-secondary">{t("Tags")}</span>
                   <div ref={tagAnchorRef} className="field-input flex min-h-10 flex-wrap items-center gap-1.5 px-2 py-1.5">
-                    {editorEntityTags.map((t, idx) => (
+                    {editorEntityTags.map((localValue, idx) => (
                       <TagChip
-                        key={`ent_${t.entity}`}
-                        label={t.name}
+                        key={`ent_${localValue.entity}`}
+                        label={localValue.name}
                         variant="entity"
-                        icon={t.type ? entityTypeIcon(t.type) : Tag}
+                        icon={localValue.type ? entityTypeIcon(localValue.type) : Tag}
                         onRemove={() => setEditorEntityTags(prev => prev.filter((_, i) => i !== idx))}
                         disabled={savingSnippet}
                       />
@@ -1823,23 +1817,23 @@ export default function ChatMemoryView({
                           handleAddTag();
                         }
                       }}
-                      placeholder="Add a tag…"
-                      aria-label="Add a tag"
+                      placeholder={t("Add a tag…")}
+                      aria-label={t("Add a tag")}
                       disabled={savingSnippet}
                       className="min-w-[6rem] flex-1 bg-transparent px-1 py-0.5 text-sm text-text-primary placeholder:text-text-subtle focus:outline-none"
                     />
                   </div>
-                  <span className="text-xs text-text-subtle">Pick a world entity, or type a keyword and press Enter.</span>
+                  <span className="text-xs text-text-subtle">{t("Pick a world entity, or type a keyword and press Enter.")}</span>
                   {(() => {
                     const allTags = Array.from(new Set(
                       combinedBlocks.filter(b => b.type === 'snippet').flatMap(b => b.keywords || [])
-                    )).filter(t => t && !editorKeywords.includes(t));
-                    const filteredSuggestions = allTags.filter(t => t.toLowerCase().includes(tagInput.toLowerCase()));
-                    const entityMatches = entityCandidates.filter(c => !editorEntityTags.some(t => t.entity === c.id));
+                    )).filter(localValue => localValue && !editorKeywords.includes(localValue));
+                    const filteredSuggestions = allTags.filter(localValue => localValue.toLowerCase().includes(tagInput.toLowerCase()));
+                    const entityMatches = entityCandidates.filter(c => !editorEntityTags.some(localValue => localValue.entity === c.id));
                     const hasContent = entityMatches.length > 0 || filteredSuggestions.length > 0;
                     return (
                       <Popover anchorRef={tagAnchorRef} open={tagSuggestionsOpen && hasContent} onClose={() => setTagSuggestionsOpen(false)} maxHeight={240}>
-                        {entityMatches.length > 0 && <div className="px-3 pb-1 pt-1.5 text-xs font-semibold text-text-subtle">World entities</div>}
+                        {entityMatches.length > 0 && <div className="px-3 pb-1 pt-1.5 text-xs font-semibold text-text-subtle">{t("World entities")}</div>}
                         {entityMatches.map((c) => {
                           const Icon = entityTypeIcon(c.type);
                           return (
@@ -1851,7 +1845,7 @@ export default function ChatMemoryView({
                             >
                               <Icon className="h-3.5 w-3.5 shrink-0 text-status-info" />
                               <span className="truncate">{c.canonicalName}</span>
-                              {c.matchedAlias && <span className="truncate text-xs text-text-subtle">alias: {c.matchedAlias}</span>}
+                              {c.matchedAlias && <span className="truncate text-xs text-text-subtle">{t("alias:")}{' '}{c.matchedAlias}</span>}
                               <span className="ml-auto shrink-0 text-xs text-text-subtle">{c.type}</span>
                             </button>
                           );
@@ -1873,13 +1867,13 @@ export default function ChatMemoryView({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-text-secondary">Found by World Index</span>
+                  <span className="text-sm font-medium text-text-secondary">{t("Found by World Index")}</span>
                   {editingBlock && (memoryTags[editingBlock.id] || []).length > 0 ? (
                     <div className="flex flex-wrap gap-1.5">
-                      {memoryTags[editingBlock.id].map((t, i) => <TagChip key={i} label={t.value} variant={t.entity ? 'entity' : 'keyword'} />)}
+                      {memoryTags[editingBlock.id].map((localValue, i) => <TagChip key={i} label={localValue.value} variant={localValue.entity ? 'entity' : 'keyword'} />)}
                     </div>
                   ) : (
-                    <span className="text-xs leading-relaxed text-text-subtle">Nothing yet. Tag custom memory from the World Index panel.</span>
+                    <span className="text-xs leading-relaxed text-text-subtle">{t("Nothing yet. Tag custom memory from the World Index panel.")}</span>
                   )}
                 </div>
               </div>
@@ -1903,13 +1897,13 @@ export default function ChatMemoryView({
                   }
                 }}
               >
-                {noteEditor ? 'Delete note' : 'Delete chunk'}
+                {noteEditor ? t("Delete note") : t("Delete chunk")}
               </Button>
             )}
             <span className="flex-1" />
             {editorError && <span className="mr-2 text-xs font-semibold text-status-danger">{editorError}</span>}
-            <Button variant="ghost" disabled={savingSnippet} onClick={() => setEditorOpen(false)}>Cancel</Button>
-            <Button loading={savingSnippet} onClick={handleSaveSnippet}>Save</Button>
+            <Button variant="ghost" disabled={savingSnippet} onClick={() => setEditorOpen(false)}>{t("Cancel")}</Button>
+            <Button loading={savingSnippet} onClick={handleSaveSnippet}>{t("Save")}</Button>
           </div>
         </Modal>
       )}
@@ -1917,18 +1911,18 @@ export default function ChatMemoryView({
       {deleteTarget && (
         <ConfirmDialog
           tone="danger"
-          title={deleteTarget.type === 'snippet' ? 'Delete note?' : deleteTarget.type === 'summarized' ? 'Delete summary?' : 'Delete block?'}
+          title={deleteTarget.type === 'snippet' ? t("Delete note?") : deleteTarget.type === 'summarized' ? t("Delete summary?") : t("Delete block?")}
           message={deleteTarget.type === 'rag' || deleteTarget.type === 'constant'
             ? `"${deleteTarget.title}" belongs to the file "${deleteTarget.source}". Delete only this block, or the whole file and all its chunks.`
             : `"${deleteTarget.title}" and its search data will be removed. This cannot be undone.`}
           actions={deleteTarget.type === 'rag' || deleteTarget.type === 'constant'
             ? [
-              { label: 'Cancel', variant: 'ghost', onClick: () => setDeleteTarget(null) },
-              { label: 'Delete whole file', variant: 'ghost', onClick: () => handleDeleteEntireFile(deleteTarget.source) },
-              { label: 'Delete only this block', variant: 'danger', autoFocus: true, onClick: handleDeleteTarget },
+              { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleteTarget(null) },
+              { label: t("Delete whole file"), variant: 'ghost', onClick: () => handleDeleteEntireFile(deleteTarget.source) },
+              { label: t("Delete only this block"), variant: 'danger', autoFocus: true, onClick: handleDeleteTarget },
             ]
             : [
-              { label: 'Cancel', variant: 'ghost', onClick: () => setDeleteTarget(null) },
+              { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleteTarget(null) },
               { label: deleteTarget.type === 'snippet' ? 'Delete note' : 'Delete', variant: 'danger', autoFocus: true, onClick: handleDeleteTarget },
             ]}
           onClose={() => setDeleteTarget(null)}
@@ -1944,7 +1938,7 @@ export default function ChatMemoryView({
             title={`Delete ${plural(names.length, 'item', 'items')}?`}
             message={`${shown}${names.length > 3 ? ` and ${names.length - 3} more` : ''}, with all their chunks. This cannot be undone.`}
             actions={[
-              { label: 'Cancel', variant: 'ghost', onClick: () => setIsBulkDeleteConfirmOpen(false) },
+              { label: t("Cancel"), variant: 'ghost', onClick: () => setIsBulkDeleteConfirmOpen(false) },
               { label: `Delete ${plural(names.length, 'item', 'items')}`, variant: 'danger', autoFocus: true, onClick: handleBulkDelete },
             ]}
             onClose={() => setIsBulkDeleteConfirmOpen(false)}
@@ -1970,7 +1964,7 @@ export default function ChatMemoryView({
               <h2 className="truncate text-base font-semibold text-text-primary">{viewingTextBlock.title}</h2>
               <p className="text-xs text-text-muted">{blockKindLabel(viewingTextBlock)} · {MODES[blockMode(viewingTextBlock)].title}</p>
             </div>
-            <IconButton icon={XIcon} label="Close" size="sm" onClick={() => setViewingTextBlock(null)} />
+            <IconButton icon={XIcon} label={t("Close")} size="sm" onClick={() => setViewingTextBlock(null)} />
           </div>
           <div className="overflow-y-auto custom-scrollbar p-6">
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-secondary select-text">{viewingTextBlock.summary}</p>
@@ -1984,23 +1978,23 @@ export default function ChatMemoryView({
             <ItemTile icon={FileText} tone="searchable" size="lg" />
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-base font-semibold text-text-primary" title={viewingFile.source}>{viewingFile.source}</h2>
-              <p className="text-xs text-text-muted">Searchable · {chunkCount(viewingFile.chunks.length)} · {formatTokens(viewingFile.tokenCount || 0)} tok</p>
+              <p className="text-xs text-text-muted">{t("Searchable ·")}{' '}{chunkCount(viewingFile.chunks.length)} · {formatTokens(viewingFile.tokenCount || 0)}{' '}{t("tok")}</p>
             </div>
             <ProfileScopeButton profiles={chatProfiles} selectedIds={viewingFile.profiles || []} onToggle={(profileId) => handleToggleProfileScope(viewingFile, profileId)} />
-            <IconButton icon={XIcon} label="Close file" size="sm" onClick={() => setViewingFileBlock(null)} />
+            <IconButton icon={XIcon} label={t("Close file")} size="sm" onClick={() => setViewingFileBlock(null)} />
           </div>
 
           <div className="flex shrink-0 flex-col gap-2.5 border-b border-border-subtle bg-surface-panel-muted px-6 py-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-text-secondary">Tags on this file</span>
-              <span className="text-xs text-text-subtle">Applies to every chunk at once.</span>
-              <span data-tooltip="Removing an automatic entity tag creates a persistent suppression, so World Index will not add it back during a future re-tag." className="inline-flex text-text-subtle hover:text-text-primary cursor-help">
+              <span className="text-sm font-medium text-text-secondary">{t("Tags on this file")}</span>
+              <span className="text-xs text-text-subtle">{t("Applies to every chunk at once.")}</span>
+              <span data-tooltip={t("Removing an automatic entity tag creates a persistent suppression, so World Index will not add it back during a future re-tag.")} className="inline-flex text-text-subtle hover:text-text-primary cursor-help">
                 <Info className="h-3.5 w-3.5" />
               </span>
             </div>
             <div className="flex max-h-20 flex-wrap gap-1.5 overflow-y-auto custom-scrollbar pr-1">
               {fileTagSummary.tags.length === 0
-                ? <span className="text-sm text-text-subtle">No tags in this file yet.</span>
+                ? <span className="text-sm text-text-subtle">{t("No tags in this file yet.")}</span>
                 : fileTagSummary.tags.map((tag) => (
                   <TagChip
                     key={`${tag.tag}_${tag.entity || 'keyword'}_${tag.manual}`}
@@ -2018,19 +2012,17 @@ export default function ChatMemoryView({
                 value={bulkTagInput}
                 name="fast-tag"
                 autoComplete="off"
-                aria-label="Tag to add to every chunk"
+                aria-label={t("Tag to add to every chunk")}
                 onChange={(e) => { setBulkTagInput(e.target.value); refreshBulkEntityCandidates(e.target.value); }}
                 onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); applyFileTag('add', 'keyword', bulkTagInput, `#${bulkTagInput.replace(/^#/, '')}`); } }}
-                placeholder="Add a keyword to every chunk, or pick an entity…"
+                placeholder={t("Add a keyword to every chunk, or pick an entity…")}
                 className="field-input h-9 flex-1 px-3 text-sm"
               />
-              <Button variant="ghost" size="sm" disabled={!bulkTagInput.trim() || bulkTagBusy} onClick={() => applyFileTag('add', 'keyword', bulkTagInput, `#${bulkTagInput.replace(/^#/, '')}`)}>Add to all</Button>
+              <Button variant="ghost" size="sm" disabled={!bulkTagInput.trim() || bulkTagBusy} onClick={() => applyFileTag('add', 'keyword', bulkTagInput, `#${bulkTagInput.replace(/^#/, '')}`)}>{t("Add to all")}</Button>
               <Popover anchorRef={bulkTagAnchorRef} open={bulkEntityCandidates.length > 0} onClose={() => setBulkEntityCandidates([])} maxHeight={160}>
-                <div className="px-3 pb-1 pt-2 text-xs font-semibold text-text-subtle">World entities</div>
+                <div className="px-3 pb-1 pt-2 text-xs font-semibold text-text-subtle">{t("World entities")}</div>
                 {bulkEntityCandidates.map((entity) => (
-                  <button key={entity.id} type="button" onMouseDown={(e) => { e.preventDefault(); applyFileTag('add', 'entity', entity.id, entity.canonicalName); }} className="w-full rounded-lg px-3 py-2 text-left text-sm text-text-primary hover:bg-surface-hover cursor-pointer">
-                    Add {entity.canonicalName} to every chunk
-                  </button>
+                  <button key={entity.id} type="button" onMouseDown={(e) => { e.preventDefault(); applyFileTag('add', 'entity', entity.id, entity.canonicalName); }} className="w-full rounded-lg px-3 py-2 text-left text-sm text-text-primary hover:bg-surface-hover cursor-pointer">{t("Add")}{entity.canonicalName}{t("to every chunk")}</button>
                 ))}
               </Popover>
             </div>
@@ -2043,23 +2035,22 @@ export default function ChatMemoryView({
               return (
                 <div key={chunk.id} className="group/chunk flex flex-col gap-2.5 rounded-card border border-border-subtle bg-surface-panel-muted px-4 py-3.5 hover:border-border-default">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-text-primary">Chunk {idx + 1}</span>
-                    <span className="text-xs text-text-subtle tabular-nums">{chunk.text.length.toLocaleString()} chars</span>
+                    <span className="text-sm font-semibold text-text-primary">{t("Chunk")}{' '}{idx + 1}</span>
+                    <span className="text-xs text-text-subtle tabular-nums">{chunk.text.length.toLocaleString()}{' '}{t("chars")}</span>
                     {chunk.manuallyEdited && (
-                      <span className="inline-flex h-5 items-center gap-1 rounded-full border border-status-warning/30 bg-status-warning/10 px-2 text-[0.6875rem] font-semibold text-status-warning" title="Manually edited. Survives Knowledge Base re-indexing.">
-                        <Pencil className="h-3 w-3" aria-hidden="true" />Edited · kept on re-index
-                      </span>
+                      <span className="inline-flex h-5 items-center gap-1 rounded-full border border-status-warning/30 bg-status-warning/10 px-2 text-[0.6875rem] font-semibold text-status-warning" title={t("Manually edited. Survives Knowledge Base re-indexing.")}>
+                        <Pencil className="h-3 w-3" aria-hidden="true" />{t("Edited · kept on re-index")}</span>
                     )}
                     <span className="flex-1" />
                     <span className="hover-reveal flex gap-0.5 group-hover/chunk:opacity-100">
-                      <IconButton icon={Pencil} label="Edit chunk" size="sm" onClick={() => openChunkEditor(chunk)} />
-                      <IconButton icon={Trash2} label="Delete chunk" tone="danger" size="sm" onClick={() => requestDeleteChunk(chunk, idx)} />
+                      <IconButton icon={Pencil} label={t("Edit chunk")} size="sm" onClick={() => openChunkEditor(chunk)} />
+                      <IconButton icon={Trash2} label={t("Delete chunk")} tone="danger" size="sm" onClick={() => requestDeleteChunk(chunk, idx)} />
                     </span>
                   </div>
                   <p className="max-h-44 overflow-y-auto custom-scrollbar whitespace-pre-wrap text-sm leading-relaxed text-text-primary select-text">{chunk.text}</p>
                   <div className="flex flex-wrap items-center gap-1.5">
-                    {cTags.entities.map((t) => (
-                      <TagChip key={`e_${t.entity}`} label={t.value} variant="entity" size="sm" onRemove={() => removeChunkEntity(chunk.id, t.entity)} />
+                    {cTags.entities.map((localValue) => (
+                      <TagChip key={`e_${localValue.entity}`} label={localValue.value} variant="entity" size="sm" onRemove={() => removeChunkEntity(chunk.id, localValue.entity)} />
                     ))}
                     {cTags.keywords.map((kw) => (
                       <TagChip key={`k_${kw}`} label={kw} size="sm" onRemove={() => removeChunkKeyword(chunk.id, kw)} />
@@ -2076,14 +2067,14 @@ export default function ChatMemoryView({
                             if (e.key === 'Escape') { setActiveTagChunk(null); setChunkTagInput(''); setChunkEntityCandidates([]); }
                           }}
                           onBlur={() => setTimeout(() => { setActiveTagChunk(null); setChunkTagInput(''); setChunkEntityCandidates([]); }, 150)}
-                          placeholder="Type a tag, pick an entity…"
+                          placeholder={t("Type a tag, pick an entity…")}
                           className="field-input h-6 w-52 px-2 text-xs"
                         />
                         {(() => {
-                          const entityMatches = chunkEntityCandidates.filter(c => !cTags.entities.some(t => t.entity === c.id));
+                          const entityMatches = chunkEntityCandidates.filter(c => !cTags.entities.some(localValue => localValue.entity === c.id));
                           return (
                             <Popover anchorRef={chunkTagAnchorRef} open={entityMatches.length > 0} onClose={() => setChunkEntityCandidates([])} maxHeight={200}>
-                              <div className="px-3 pb-1 pt-1.5 text-xs font-semibold text-text-subtle">World entities</div>
+                              <div className="px-3 pb-1 pt-1.5 text-xs font-semibold text-text-subtle">{t("World entities")}</div>
                               {entityMatches.map((c) => {
                                 const Icon = entityTypeIcon(c.type);
                                 return (
@@ -2091,7 +2082,7 @@ export default function ChatMemoryView({
                                     className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-sm text-text-primary hover:bg-surface-hover cursor-pointer">
                                     <Icon className="h-3.5 w-3.5 shrink-0 text-status-info" />
                                     <span className="truncate">{c.canonicalName}</span>
-                                    {c.matchedAlias && <span className="truncate text-xs text-text-subtle">alias: {c.matchedAlias}</span>}
+                                    {c.matchedAlias && <span className="truncate text-xs text-text-subtle">{t("alias:")}{' '}{c.matchedAlias}</span>}
                                     <span className="ml-auto shrink-0 text-xs text-text-subtle">{c.type}</span>
                                   </button>
                                 );
@@ -2106,8 +2097,7 @@ export default function ChatMemoryView({
                         onClick={() => { setActiveTagChunk(chunk.id); setChunkTagInput(''); setChunkEntityCandidates([]); }}
                         className="inline-flex h-5 items-center gap-1 rounded-md border border-dashed border-border-strong px-2 text-[0.6875rem] text-text-muted hover:border-accent/50 hover:text-text-primary cursor-pointer"
                       >
-                        <Plus className="h-3 w-3" />Tag
-                      </button>
+                        <Plus className="h-3 w-3" />{t("Tag")}</button>
                     )}
                   </div>
                 </div>
@@ -2122,10 +2112,10 @@ export default function ChatMemoryView({
           <div className="flex shrink-0 items-start gap-3 border-b border-border-subtle py-4 pl-6 pr-4">
             <ItemTile icon={Tag} size="lg" />
             <div className="min-w-0 flex-1">
-              <h2 className="text-base font-semibold text-text-primary">{tagSelection === 'custom' ? 'Tag notes' : 'Tag searchable files'}</h2>
-              <p className="mt-0.5 text-xs leading-relaxed text-text-muted">World Index tags every chunk inside the {tagSelectionNoun[1]} you pick. The text is not changed or re-vectorized.</p>
+              <h2 className="text-base font-semibold text-text-primary">{tagSelection === 'custom' ? t("Tag notes") : t("Tag searchable files")}</h2>
+              <p className="mt-0.5 text-xs leading-relaxed text-text-muted">{t("World Index tags every chunk inside the")}{' '}{tagSelectionNoun[1]}{' '}{t("you pick. The text is not changed or re-vectorized.")}</p>
             </div>
-            <IconButton icon={XIcon} label="Close" size="sm" onClick={() => setTagSelection(null)} />
+            <IconButton icon={XIcon} label={t("Close")} size="sm" onClick={() => setTagSelection(null)} />
           </div>
           <div className="flex shrink-0 items-center gap-2 border-b border-border-subtle px-6 py-3">
             <TextInput
@@ -2138,8 +2128,8 @@ export default function ChatMemoryView({
               placeholder={`Filter ${tagSelectionNoun[1]}`}
               containerClassName="flex-1"
             />
-            <Button variant="ghost" size="sm" onClick={() => setTagSelectionIds(tagSelectionBlocks.map(block => block.id))}>Select all</Button>
-            <Button variant="ghost" size="sm" onClick={() => setTagSelectionIds([])}>Clear</Button>
+            <Button variant="ghost" size="sm" onClick={() => setTagSelectionIds(tagSelectionBlocks.map(block => block.id))}>{t("Select all")}</Button>
+            <Button variant="ghost" size="sm" onClick={() => setTagSelectionIds([])}>{t("Clear")}</Button>
           </div>
           <div className="flex-1 overflow-y-auto overscroll-contain custom-scrollbar space-y-2 px-6 py-4">
             {tagSelectionLoading ? <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-accent" /></div> : tagSelectionBlocks.filter(block => `${block.title} ${block.excerpt}`.toLowerCase().includes(tagSelectionSearch.toLowerCase())).map((block) => {
@@ -2158,7 +2148,7 @@ export default function ChatMemoryView({
                     <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                       <span className="text-sm font-semibold text-text-primary">{block.title}</span>
                       <span className={`inline-flex items-center gap-1.5 text-xs ${block.complete ? 'text-text-muted' : 'text-status-warning'}`}>
-                        <StatusDot tone={block.complete ? 'ok' : 'pending'} />{block.complete ? 'Already tagged' : 'Needs tagging'}
+                        <StatusDot tone={block.complete ? 'ok' : 'pending'} />{block.complete ? t("Already tagged") : t("Needs tagging")}
                       </span>
                       {tagSelection === 'searchable' && <span className="text-xs text-text-subtle">· {chunkCount(block.chunkIds.length)}</span>}
                     </span>
@@ -2167,16 +2157,15 @@ export default function ChatMemoryView({
                 </button>
               );
             })}
-            {!tagSelectionLoading && tagSelectionBlocks.length > 0 && tagSelectionBlocks.filter(block => `${block.title} ${block.excerpt}`.toLowerCase().includes(tagSelectionSearch.toLowerCase())).length === 0 && <p className="py-8 text-center text-sm text-text-subtle">Nothing matches this filter.</p>}
+            {!tagSelectionLoading && tagSelectionBlocks.length > 0 && tagSelectionBlocks.filter(block => `${block.title} ${block.excerpt}`.toLowerCase().includes(tagSelectionSearch.toLowerCase())).length === 0 && <p className="py-8 text-center text-sm text-text-subtle">{t("Nothing matches this filter.")}</p>}
           </div>
           <div className="flex shrink-0 items-center justify-between gap-4 border-t border-border-subtle py-3.5 pl-6 pr-4">
             <span className="text-sm text-text-muted tabular-nums">
-              {plural(tagSelectionIds.length, tagSelectionNoun[0], tagSelectionNoun[1])}{tagSelection === 'searchable' && tagSelectionIds.length > 0 ? ` · ${chunkCount(selectedTagChunks)}` : ''} selected
-            </span>
+              {plural(tagSelectionIds.length, tagSelectionNoun[0], tagSelectionNoun[1])}{tagSelection === 'searchable' && tagSelectionIds.length > 0 ? ` · ${chunkCount(selectedTagChunks)}` : ''}{t("selected")}</span>
             <div className="flex gap-2">
-              <Button variant="ghost" onClick={() => setTagSelection(null)}>Cancel</Button>
+              <Button variant="ghost" onClick={() => setTagSelection(null)}>{t("Cancel")}</Button>
               <Button disabled={!tagSelectionIds.length || tagSelectionLoading} onClick={startSelectedTagging}>
-                {tagSelectionIds.length ? `Tag ${plural(tagSelectionIds.length, tagSelectionNoun[0], tagSelectionNoun[1])}` : 'Tag'}
+                {tagSelectionIds.length ? `Tag ${plural(tagSelectionIds.length, tagSelectionNoun[0], tagSelectionNoun[1])}` : t("Tag")}
               </Button>
             </div>
           </div>
@@ -2186,7 +2175,7 @@ export default function ChatMemoryView({
         <ImportProgressModal
           progress={kbProgress}
           statusText={kbProgressStatus}
-          title={kbOpType === 'export' ? 'Exporting the workspace memory' : 'Importing workspace memory'}
+          title={kbOpType === 'export' ? t("Exporting the workspace memory") : t("Importing workspace memory")}
           stages={kbOpType === 'export' ? PROGRESS_STAGES.export : PROGRESS_STAGES.kbImport}
         />
       )}
@@ -2194,11 +2183,11 @@ export default function ChatMemoryView({
       {confirmDialog && (
         <ConfirmDialog
           tone="danger"
-          title={confirmDialog.title || 'Confirm'}
+          title={confirmDialog.title || t("Confirm")}
           message={confirmDialog.message}
           actions={[
             {
-              label: 'Cancel',
+              label: t("Cancel"),
               variant: 'ghost',
               onClick: () => setConfirmDialog(null)
             },
@@ -2220,23 +2209,23 @@ export default function ChatMemoryView({
       {pendingUpload && (
         <ConfirmDialog
           tone="warning"
-          title="Duplicate File Detected"
+          title={t("Duplicate File Detected")}
           message={`The following file(s) already exist in this workspace memory:\n\n${pendingUpload.conflicts.map(f => `• ${f.name}`).join('\n')}\n\nChoose how you want to resolve these conflicts. Cancel will skip duplicate files.`}
           actions={[
             {
-              label: 'Cancel',
+              label: t("Cancel"),
               variant: 'ghost',
               loading: uploadingAction === 'skip',
               onClick: () => handleResolveConflicts('skip'),
             },
             {
-              label: 'Rename',
+              label: t("Rename"),
               variant: 'primary',
               loading: uploadingAction === 'rename',
               onClick: () => handleResolveConflicts('rename'),
             },
             {
-              label: 'Replace',
+              label: t("Replace"),
               variant: 'danger',
               loading: uploadingAction === 'replace',
               onClick: () => handleResolveConflicts('replace'),

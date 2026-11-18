@@ -1,12 +1,14 @@
+import { useI18n } from '../../i18n';
 import React, { useRef, useState } from 'react';
 import { BookOpen, Clock, MapPin, MoreHorizontal, Pencil, Pin, PinOff, Plus, Trash2 } from 'lucide-react';
 import { Menu, MenuItem, MenuSeparator } from '../../components/ui/Menu';
 import ContourCover from './ContourCover';
 import ProfileAvatars from './ProfileAvatars';
 import RoleplayChip from './RoleplayChip';
-import { leadImage, plural, timeAgo } from './workspaceFormat';
+import { leadImage, timeAgo } from './workspaceFormat';
 
 export default function WorkspaceCard({ chat, profiles, onOpen, onTogglePin, onEdit, onNewStory, onDelete }) {
+  const { t, locale } = useI18n();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuAnchorRef = useRef(null);
   // A picture that fails to load steps down: the scene's place, then the cover, then none.
@@ -14,7 +16,9 @@ export default function WorkspaceCard({ chat, profiles, onOpen, onTogglePin, onE
   const sceneImage = chat.experienceMode === 'roleplay' && Boolean(chat.roleplayScene?.background?.path);
   const image = failed >= 2 ? null : leadImage(chat, { skipScene: failed >= 1 });
   const stepDown = () => setFailed(level => (level === 0 && !sceneImage ? 2 : level + 1));
-  const messages = chat.messageCount ? plural(chat.messageCount, 'message') : 'No messages yet';
+  const messages = chat.messageCount
+    ? t(chat.messageCount === 1 ? '{count} message' : '{count} messages', { count: chat.messageCount })
+    : t('No messages yet');
   const pinned = chat.isPinned === 1;
   const roleplay = chat.experienceMode === 'roleplay';
   const scene = roleplay ? chat.roleplayScene : null;
@@ -39,7 +43,7 @@ export default function WorkspaceCard({ chat, profiles, onOpen, onTogglePin, onE
         {(pinned || roleplay) && (
           <span className="absolute inset-x-3 top-3 flex flex-col items-start gap-2">
             <span className="flex gap-1.5">
-              {pinned && <CardChip icon={Pin}>Pinned</CardChip>}
+              {pinned && <CardChip icon={Pin}>{t("Pinned")}</CardChip>}
               {roleplay && <RoleplayChip />}
             </span>
             {hasScene && (
@@ -63,7 +67,7 @@ export default function WorkspaceCard({ chat, profiles, onOpen, onTogglePin, onE
         <span className="absolute inset-x-4 bottom-3.5 flex flex-col gap-2">
           <span className="truncate text-[1.0625rem] font-bold leading-tight text-text-primary">{chat.title}</span>
           <span className="flex items-center gap-2">
-            <span className="flex-1 truncate text-xs font-semibold tabular-nums text-accent">{messages} · {timeAgo(chat.updatedAt)}</span>
+            <span className="flex-1 truncate text-xs font-semibold tabular-nums text-accent">{messages} · {timeAgo(chat.updatedAt, undefined, locale)}</span>
             <ProfileAvatars profiles={profiles} />
           </span>
         </span>
@@ -72,7 +76,7 @@ export default function WorkspaceCard({ chat, profiles, onOpen, onTogglePin, onE
       <button
         ref={menuAnchorRef}
         type="button"
-        aria-label={`Options for ${chat.title}`}
+        aria-label={t('Options for {title}', { title: chat.title })}
         aria-haspopup="menu"
         aria-expanded={menuOpen}
         onClick={() => setMenuOpen(open => !open)}
@@ -81,12 +85,12 @@ export default function WorkspaceCard({ chat, profiles, onOpen, onTogglePin, onE
       >
         <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
       </button>
-      <Menu anchorRef={menuAnchorRef} open={menuOpen} onClose={() => setMenuOpen(false)} label={`${chat.title} options`} className="w-60">
-        <MenuItem icon={pinned ? PinOff : Pin} label={pinned ? 'Unpin' : 'Pin to top'} onSelect={() => { setMenuOpen(false); onTogglePin(chat); }} />
-        <MenuItem icon={Pencil} label="Edit workspace" onSelect={() => { setMenuOpen(false); onEdit(chat); }} />
-        <MenuItem icon={BookOpen} label="New story in this world" description="Same world, played again from the start." onSelect={() => { setMenuOpen(false); onNewStory(chat); }} />
+      <Menu anchorRef={menuAnchorRef} open={menuOpen} onClose={() => setMenuOpen(false)} label={t('Options for {title}', { title: chat.title })} className="w-60">
+        <MenuItem icon={pinned ? PinOff : Pin} label={pinned ? t("Unpin") : t("Pin to top")} onSelect={() => { setMenuOpen(false); onTogglePin(chat); }} />
+        <MenuItem icon={Pencil} label={t("Edit workspace")} onSelect={() => { setMenuOpen(false); onEdit(chat); }} />
+        <MenuItem icon={BookOpen} label={t("New story in this world")} description={t("Same world, played again from the start.")} onSelect={() => { setMenuOpen(false); onNewStory(chat); }} />
         <MenuSeparator />
-        <MenuItem icon={Trash2} label="Delete" danger onSelect={() => { setMenuOpen(false); onDelete(chat); }} />
+        <MenuItem icon={Trash2} label={t("Delete")} danger onSelect={() => { setMenuOpen(false); onDelete(chat); }} />
       </Menu>
     </div>
   );
@@ -102,6 +106,7 @@ function CardChip({ icon: Icon, children }) {
 }
 
 export function NewWorkspaceTile({ onClick }) {
+  const { t } = useI18n();
   return (
     <button
       type="button"
@@ -111,8 +116,8 @@ export function NewWorkspaceTile({ onClick }) {
       <span className="inline-flex h-11 w-11 items-center justify-center rounded-[0.875rem] bg-accent/90 text-on-accent shadow-[0_0.375rem_1.125rem_-0.5rem] shadow-accent/50 transition-colors group-hover:bg-accent">
         <Plus className="h-5 w-5" aria-hidden="true" />
       </span>
-      <span className="text-sm font-semibold text-accent">New workspace</span>
-      <span className="caption max-w-[12.5rem]">A story with its own chat, world, memory and writing.</span>
+      <span className="text-sm font-semibold text-accent">{t("New workspace")}</span>
+      <span className="caption max-w-[12.5rem]">{t("A story with its own chat, world, memory and writing.")}</span>
     </button>
   );
 }

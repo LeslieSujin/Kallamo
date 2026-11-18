@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState } from 'react';
 import { BookOpenCheck, CalendarDays, Check, Eye, Info, Link, Plus, Scale, Upload, Image as ImageIcon } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
@@ -34,12 +35,13 @@ const CHIP = {
 const KIND_LABEL = { yours: 'kept', theirs: 'from the package', new: 'new', gone: 'removed' };
 
 function Outcome({ chips, note }) {
+  const { t } = useI18n();
   return (
     <span className="ml-7 mt-2.5 flex flex-wrap items-center gap-1.5 border-t border-border-subtle pt-2.5">
-      <span className="mr-1 text-xs font-semibold text-text-muted">You get</span>
+      <span className="mr-1 text-xs font-semibold text-text-muted">{t("You get")}</span>
       {chips.length ? chips.map(chip => (
         <span key={`${chip.kind}-${chip.name}`} data-tooltip={KIND_LABEL[chip.kind]} className="inline-flex h-6 items-center rounded-full border px-2 text-xs font-medium" style={CHIP[chip.kind]}>{chip.name}</span>
-      )) : <span className="text-xs text-text-subtle">No resources</span>}
+      )) : <span className="text-xs text-text-subtle">{t("No resources")}</span>}
       {note && <span className="text-xs text-text-subtle">· {note}</span>}
     </span>
   );
@@ -72,6 +74,7 @@ function outcomes(rules) {
 }
 
 function RulesCompare({ rules }) {
+  const { t } = useI18n();
   const describe = (resources, mode, attributes) => ({
     resources: resources.length ? resources.join(', ') : 'None',
     progression: mode === 'levels' ? `${PROGRESSION.levels}, ${plural(attributes || 0, 'attribute', 'attributes')}` : PROGRESSION.off,
@@ -93,8 +96,8 @@ function RulesCompare({ rules }) {
         <thead>
           <tr>
             <th className="w-[6.5rem]" />
-            <th className="pb-1.5 pt-2.5 text-left text-xs font-semibold text-text-primary">This world</th>
-            <th className="pb-1.5 pt-2.5 text-left text-xs font-semibold text-text-primary">The package</th>
+            <th className="pb-1.5 pt-2.5 text-left text-xs font-semibold text-text-primary">{t("This world")}</th>
+            <th className="pb-1.5 pt-2.5 text-left text-xs font-semibold text-text-primary">{t("The package")}</th>
           </tr>
         </thead>
         <tbody>
@@ -113,6 +116,7 @@ function RulesCompare({ rules }) {
 
 /** Everything a .klwb brings, how it lands, and the two choices it needs, before anything is written. */
 export default function ImportWorldbuildModal({ inspected, workspaceName = null, currentDate = null, onCancel, onImport }) {
+  const { t } = useI18n();
   const { rules, calendar } = inspected;
   const hasRuleChoice = Boolean(rules?.localRules && rules?.differs);
   const datesToAdjust = calendar?.datesToAdjust || [];
@@ -141,12 +145,12 @@ export default function ImportWorldbuildModal({ inspected, workspaceName = null,
   const left = (
     <div className="min-w-0 flex-1 space-y-4">
       <div className="space-y-2.5">
-        <p className="text-xs font-semibold text-text-primary">In the package</p>
+        <p className="text-xs font-semibold text-text-primary">{t("In the package")}</p>
         <TypeStrip counts={inspected.typeCounts} />
         <div className="divide-y divide-border-subtle rounded-control border" style={{ background: 'var(--theme-surface-well)', borderColor: 'var(--theme-border-well)' }}>
           <div className="flex items-center gap-3 px-4 py-3">
             <Eye className="h-4 w-4 shrink-0 text-status-info" aria-hidden="true" />
-            <p className="text-[0.8125rem] leading-relaxed text-text-secondary"><b className="font-semibold text-text-primary">{plural(inspected.entities, 'new entity', 'new entities')}, for review.</b> Nothing changes your world until you accept or dismiss each one in the sidebar.</p>
+            <p className="text-[0.8125rem] leading-relaxed text-text-secondary"><b className="font-semibold text-text-primary">{plural(inspected.entities, 'new entity', 'new entities')}{t(", for review.")}</b>{' '}{t("Nothing changes your world until you accept or dismiss each one in the sidebar.")}</p>
           </div>
           {packageParts(inspected).length > 0 && (
             <ul className="space-y-1.5 px-4 py-3">
@@ -161,27 +165,27 @@ export default function ImportWorldbuildModal({ inspected, workspaceName = null,
       </div>
       {calendar && !calendar.same && (
         <div>
-          <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-text-primary"><CalendarDays className="h-3.5 w-3.5 text-entity-event" aria-hidden="true" />Calendar</p>
-          <div role="radiogroup" aria-label="Calendar" className="space-y-2">
+          <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-text-primary"><CalendarDays className="h-3.5 w-3.5 text-entity-event" aria-hidden="true" />{t("Calendar")}</p>
+          <div role="radiogroup" aria-label={t("Calendar")} className="space-y-2">
             <RadioCard
               name="import-calendar"
               selected={calendarMode === 'keep'}
               onSelect={() => setCalendarMode('keep')}
-              title="Keep this world's calendar"
-              description="Imported dates are read in it."
+              title={t("Keep this world's calendar")}
+              description={t("Imported dates are read in it.")}
               aside={<span className="shrink-0 text-right"><span className="block text-xs font-semibold text-text-secondary">{calendar.currentName}</span>{currentDate && <span className="block text-xs text-text-subtle">{currentDate}</span>}</span>}
             />
             <RadioCard
               name="import-calendar"
               selected={calendarMode === 'replace'}
               onSelect={() => setCalendarMode('replace')}
-              title="Use the package's calendar"
+              title={t("Use the package's calendar")}
               description={`It replaces yours, with its months and weekdays.${calendar.clockResets ? ' The roleplay clock starts over on its first day.' : ''}`}
               aside={<span className="shrink-0 text-right text-xs font-semibold text-text-secondary">{calendar.packageName}</span>}
             >
               {calendarMode === 'replace' && datesToAdjust.length > 0 && (
                 <span className="ml-7 mt-2.5 block space-y-1.5 border-t border-border-subtle pt-2.5">
-                  <span className="block text-xs font-semibold text-text-muted">{plural(datesToAdjust.length, 'date moves', 'dates move')} to the nearest day that fits</span>
+                  <span className="block text-xs font-semibold text-text-muted">{plural(datesToAdjust.length, 'date moves', 'dates move')}{' '}{t("to the nearest day that fits")}</span>
                   {datesToAdjust.map(item => {
                     const cleared = clearDates.has(item.key);
                     return (
@@ -193,7 +197,7 @@ export default function ImportWorldbuildModal({ inspected, workspaceName = null,
                           onClick={event => { event.preventDefault(); toggleClear(item.key); }}
                           className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium text-text-muted hover:bg-surface-hover hover:text-text-primary"
                         >
-                          {cleared ? 'Move' : 'Clear'}
+                          {cleared ? t("Move") : t("Clear")}
                         </button>
                       </span>
                     );
@@ -209,24 +213,24 @@ export default function ImportWorldbuildModal({ inspected, workspaceName = null,
 
   const right = rules && (
     <div className="min-w-0 flex-1 space-y-2.5">
-      <p className="flex items-center gap-2 text-xs font-semibold text-text-primary"><Scale className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />Roleplay rules</p>
+      <p className="flex items-center gap-2 text-xs font-semibold text-text-primary"><Scale className="h-3.5 w-3.5 text-text-muted" aria-hidden="true" />{t("Roleplay rules")}</p>
       <RulesCompare rules={rules} />
       {hasRuleChoice ? (
-        <div role="radiogroup" aria-label="Roleplay rules" className="space-y-2">
-          <RadioCard name="import-rules" selected={rulesMode === 'merge'} onSelect={() => setRulesMode('merge')} title="Keep mine, add what is missing" description="Your rules stay as they are. Rules only the package has are added.">
+        <div role="radiogroup" aria-label={t("Roleplay rules")} className="space-y-2">
+          <RadioCard name="import-rules" selected={rulesMode === 'merge'} onSelect={() => setRulesMode('merge')} title={t("Keep mine, add what is missing")} description={t("Your rules stay as they are. Rules only the package has are added.")}>
             <Outcome {...ends.merge} />
           </RadioCard>
-          <RadioCard name="import-rules" selected={rulesMode === 'replace'} onSelect={() => setRulesMode('replace')} title="Switch to the package's rules" description="Its rules replace yours. Characters keep their values where a resource still exists.">
+          <RadioCard name="import-rules" selected={rulesMode === 'replace'} onSelect={() => setRulesMode('replace')} title={t("Switch to the package's rules")} description={t("Its rules replace yours. Characters keep their values where a resource still exists.")}>
             <Outcome {...ends.replace} />
           </RadioCard>
-          <RadioCard name="import-rules" selected={rulesMode === 'skip'} onSelect={() => setRulesMode('skip')} title="Bring only the entities" description="Your rules stay exactly as they are. Nothing from the package's rules comes in.">
+          <RadioCard name="import-rules" selected={rulesMode === 'skip'} onSelect={() => setRulesMode('skip')} title={t("Bring only the entities")} description={t("Your rules stay exactly as they are. Nothing from the package's rules comes in.")}>
             <Outcome {...ends.skip} />
           </RadioCard>
         </div>
       ) : (
-        <p className="flex items-center gap-2.5 text-[0.8125rem] leading-relaxed text-text-muted"><Info className="h-4 w-4 shrink-0" aria-hidden="true" />{rules.localRules ? 'They match this world\'s, so nothing changes.' : 'This world has none yet, so they come in as they are.'}</p>
+        <p className="flex items-center gap-2.5 text-[0.8125rem] leading-relaxed text-text-muted"><Info className="h-4 w-4 shrink-0" aria-hidden="true" />{rules.localRules ? t("They match this world's, so nothing changes.") : t("This world has none yet, so they come in as they are.")}</p>
       )}
-      {inspected.currentValues && rulesMode !== 'skip' && <p className="caption">The package also carries its characters' current values. They go to the imported characters.</p>}
+      {inspected.currentValues && rulesMode !== 'skip' && <p className="caption">{t("The package also carries its characters' current values. They go to the imported characters.")}</p>}
     </div>
   );
 
@@ -234,7 +238,7 @@ export default function ImportWorldbuildModal({ inspected, workspaceName = null,
     <Modal
       onClose={() => { if (!busy) onCancel(); }}
       size="2xl"
-      title="Import Worldbuild"
+      title={t("Import Worldbuild")}
       subtitle={[inspected.fileName, inspected.fileBytes ? megabytes(inspected.fileBytes) : null, workspaceName ? `into ${workspaceName}` : null].filter(Boolean).join(' · ')}
       leading={<ToneTile icon={Upload} color="var(--theme-entity-location)" />}
       className={`${right ? '!max-w-[66rem]' : '!max-w-[36rem]'} max-h-[90vh]`}
@@ -244,8 +248,8 @@ export default function ImportWorldbuildModal({ inspected, workspaceName = null,
         {right}
       </div>
       <div className="flex items-center justify-end gap-2 border-t border-border-subtle px-5 py-3.5">
-        <Button variant="subtle" disabled={busy} onClick={onCancel}>Cancel</Button>
-        <Button icon={Upload} loading={busy} onClick={run}>Import {plural(inspected.entities, 'entity', 'entities')}</Button>
+        <Button variant="subtle" disabled={busy} onClick={onCancel}>{t("Cancel")}</Button>
+        <Button icon={Upload} loading={busy} onClick={run}>{t("Import")}{' '}{plural(inspected.entities, 'entity', 'entities')}</Button>
       </div>
     </Modal>
   );
@@ -253,6 +257,7 @@ export default function ImportWorldbuildModal({ inspected, workspaceName = null,
 
 /** What arrived, in the same terms as the import window; nothing is in the world until it is reviewed. */
 export function ImportWorldbuildDone({ inspected, result, rulesMode, onClose, onReview }) {
+  const { t } = useI18n();
   const name = String(inspected.fileName || 'The package').replace(/\.klwb$/i, '');
   const stat = (value, label, color, Icon) => (
     <div className="flex flex-1 items-center gap-3 rounded-control border px-3.5 py-3" style={{ background: 'var(--theme-surface-well)', borderColor: 'var(--theme-border-well)' }}>
@@ -293,8 +298,8 @@ export function ImportWorldbuildDone({ inspected, result, rulesMode, onClose, on
         <div className="flex items-center gap-4">
           <ToneTile icon={Check} color="var(--theme-status-success)" />
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-text-primary">{name} is waiting for review</h2>
-            <p className="mt-1 text-sm leading-relaxed text-text-muted">Nothing in your world changed yet. Open each one in the sidebar to accept or dismiss it.</p>
+            <h2 className="text-base font-semibold text-text-primary">{name}{' '}{t("is waiting for review")}</h2>
+            <p className="mt-1 text-sm leading-relaxed text-text-muted">{t("Nothing in your world changed yet. Open each one in the sidebar to accept or dismiss it.")}</p>
           </div>
         </div>
         <TypeStrip counts={inspected.typeCounts} />
@@ -315,8 +320,8 @@ export function ImportWorldbuildDone({ inspected, result, rulesMode, onClose, on
         )}
       </div>
       <div className="flex items-center justify-end gap-2 border-t border-border-subtle px-5 py-3.5">
-        <Button variant="subtle" onClick={onClose}>Later</Button>
-        <Button icon={Eye} onClick={onReview}>Review now</Button>
+        <Button variant="subtle" onClick={onClose}>{t("Later")}</Button>
+        <Button icon={Eye} onClick={onReview}>{t("Review now")}</Button>
       </div>
     </Modal>
   );

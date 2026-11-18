@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
@@ -20,6 +21,7 @@ export default function Drawer({
   bodyClassName = '',
   children,
 }) {
+  const { t } = useI18n();
   const fixed = position === 'fixed';
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function Drawer({
       <div
         role={fixed ? 'dialog' : 'region'}
         aria-modal={fixed && overlay ? true : undefined}
-        aria-label={title || 'Side panel'}
+        aria-label={title || t("Side panel")}
         className={`${fixed ? 'fixed' : 'absolute'} inset-y-0 ${edge} ${width} max-w-full z-40
           bg-surface-canvas border-border-default shadow-2xl flex flex-col p-6
           animate-in ${slide} duration-200 ${className}`}
@@ -72,7 +74,7 @@ export default function Drawer({
             </div>
             <button
               onClick={onClose}
-              aria-label="Close panel"
+              aria-label={t("Close panel")}
               className="inline-flex h-8 w-8 items-center justify-center rounded-control text-text-muted hover:bg-status-danger/10 hover:text-status-danger transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
               <X className="w-4 h-4" />

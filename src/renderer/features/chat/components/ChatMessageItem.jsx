@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { memo, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Brain, CalendarDays, ChevronLeft, ChevronRight, Clock3, Copy, Eye, EyeOff, History, MapPin, MoreHorizontal, Paperclip, Pencil, RotateCw, Trash2 } from 'lucide-react';
 import { Menu, MenuItem, MenuSeparator } from '../../../components/ui/Menu';
@@ -53,6 +54,7 @@ function CountingClock({ from, to }) {
 // The header stands from the moment the reply lands. While Narrative State reads it, it holds the
 // previous turn's place and time; when the analysis settles it, the change plays once.
 function RoleplayMessageFrame({ frame }) {
+  const { t } = useI18n();
   const analyzing = frame?.pending === 'analyzing';
   const wasAnalyzing = useRef(false);
   const [settled, setSettled] = useState(false);
@@ -76,26 +78,22 @@ function RoleplayMessageFrame({ frame }) {
         <MapPin aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-entity-location" />
         <span className={`min-w-0 truncate font-medium text-text-secondary transition-opacity duration-300 ${analyzing ? 'opacity-60' : ''}`}>
           {locationChanged
-            ? <>{frame.start?.locationName || 'Unknown location'}<span className={reveal}><span className="px-1.5 text-text-disabled">→</span>{frame.end.locationName || 'Unknown location'}</span></>
-            : frame.end.locationName || 'No current location'}
+            ? <>{frame.start?.locationName || t("Unknown location")}<span className={reveal}><span className="px-1.5 text-text-disabled">→</span>{frame.end.locationName || t("Unknown location")}</span></>
+            : frame.end.locationName || t("No current location")}
         </span>
         {analyzing && (
           <span
-            data-tooltip="Place and time settle once Narrative State has read this reply."
+            data-tooltip={t("Place and time settle once Narrative State has read this reply.")}
             className="inline-flex h-5 shrink-0 items-center gap-1.5 rounded-full bg-tint/[0.06] px-2 text-[0.6875rem] font-medium text-text-muted animate-in fade-in duration-300"
           >
-            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse motion-reduce:animate-none" />
-            Updating
-          </span>
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse motion-reduce:animate-none" />{t("Updating")}</span>
         )}
         {frame.pending === 'deferred' && (
           <span
-            data-tooltip="Place and time for this reply update when the story continues."
+            data-tooltip={t("Place and time for this reply update when the story continues.")}
             className="inline-flex h-5 shrink-0 items-center gap-1.5 rounded-full bg-tint/[0.06] px-2 text-[0.6875rem] font-medium text-text-muted"
           >
-            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-text-subtle" />
-            Pending
-          </span>
+            <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-text-subtle" />{t("Pending")}</span>
         )}
       </span>
       <span className={`flex shrink-0 items-center gap-3.5 transition-opacity duration-300 ${analyzing ? 'opacity-60' : ''}`}>
@@ -164,21 +162,22 @@ function ActionButton({ icon: Icon, label, onClick }) {
 }
 
 function AlternativeSwitcher({ alternatives, onSwitch }) {
+  const { t } = useI18n();
   return (
     <span className="chat-action mx-1 inline-flex h-7 items-center gap-0.5 rounded-lg border border-border-subtle px-0.5 text-xs tabular-nums text-text-secondary">
       <button
         type="button"
-        aria-label="Previous reply"
+        aria-label={t("Previous reply")}
         disabled={alternatives.index === 0}
         onClick={() => onSwitch(alternatives.index - 1)}
         className="inline-flex h-6 w-6 items-center justify-center rounded-md text-text-muted hover:text-text-primary disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
       >
         <ChevronLeft aria-hidden="true" className="h-3.5 w-3.5" />
       </button>
-      <span aria-live="polite">{alternatives.index + 1} of {alternatives.count}</span>
+      <span aria-live="polite">{alternatives.index + 1}{' '}{t("of")}{' '}{alternatives.count}</span>
       <button
         type="button"
-        aria-label="Next reply"
+        aria-label={t("Next reply")}
         disabled={alternatives.index === alternatives.count - 1}
         onClick={() => onSwitch(alternatives.index + 1)}
         className="inline-flex h-6 w-6 items-center justify-center rounded-md text-text-muted hover:text-text-primary disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
@@ -190,6 +189,7 @@ function AlternativeSwitcher({ alternatives, onSwitch }) {
 }
 
 function MessageMenu({ message, actions }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef(null);
   const excluded = message.excluded === 1;
@@ -202,7 +202,7 @@ function MessageMenu({ message, actions }) {
       <button
         ref={anchorRef}
         type="button"
-        aria-label="More actions"
+        aria-label={t("More actions")}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={(event) => {
@@ -213,16 +213,16 @@ function MessageMenu({ message, actions }) {
       >
         <MoreHorizontal aria-hidden="true" className="h-4 w-4" />
       </button>
-      <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label="Message actions" className="w-72">
+      <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={t("Message actions")} className="w-72">
         <MenuItem
           icon={excluded ? Eye : EyeOff}
-          label={excluded ? 'Restore to context' : 'Drop from context'}
-          description={excluded ? 'The AI reads it again.' : 'Stays in the chat. The AI stops reading it.'}
+          label={excluded ? t("Restore to context") : t("Drop from context")}
+          description={excluded ? t("The AI reads it again.") : t("Stays in the chat. The AI stops reading it.")}
           onSelect={choose(() => actions.toggleExcluded(message.id, !excluded))}
         />
         <MenuSeparator />
-        <MenuItem icon={History} label="Revert chat here" description="Deletes every message after this one." danger onSelect={choose(() => actions.requestRevert(message.id))} />
-        <MenuItem icon={Trash2} label="Delete message" description="Removes it for good." danger onSelect={choose(() => actions.requestDelete(message.id))} />
+        <MenuItem icon={History} label={t("Revert chat here")} description={t("Deletes every message after this one.")} danger onSelect={choose(() => actions.requestRevert(message.id))} />
+        <MenuItem icon={Trash2} label={t("Delete message")} description={t("Removes it for good.")} danger onSelect={choose(() => actions.requestDelete(message.id))} />
       </Menu>
     </>
   );
@@ -265,15 +265,15 @@ function contextCutNotice(context) {
 }
 
 function DroppedChip() {
+  const { t } = useI18n();
   return (
     <span className="inline-flex h-6 items-center gap-1.5 rounded-full bg-tint/[0.06] px-2.5 text-xs text-text-muted select-none">
-      <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />
-      Not in the AI&apos;s context
-    </span>
+      <EyeOff aria-hidden="true" className="h-3.5 w-3.5" />{t("Not in the AI's context")}</span>
   );
 }
 
 function UserMessage({ message, isEditing, isLastUser, playerName, view, actions }) {
+  const { t } = useI18n();
   const [copiedKey, markCopied] = useCopiedFeedback();
   const { sizeClass, isDocumentMode } = view;
   const isDropped = message.excluded === 1;
@@ -289,7 +289,7 @@ function UserMessage({ message, isEditing, isLastUser, playerName, view, actions
       {isDropped && !isEditing && <DroppedChip />}
       {playerName && !isDropped && (
         <div className="px-1 text-xs text-text-muted select-none">
-          {isEditing ? 'Editing your message as ' : 'You as '}<span className="font-semibold text-text-primary">{playerName}</span>
+          {isEditing ? t("Editing your message as ") : t("You as ")}<span className="font-semibold text-text-primary">{playerName}</span>
         </div>
       )}
 
@@ -302,7 +302,7 @@ function UserMessage({ message, isEditing, isLastUser, playerName, view, actions
           initialValue={message.content}
           sizeClass={sizeClass}
           saveLabel="Save and regenerate"
-          hint="The reply below it is replaced."
+          hint={t("The reply below it is replaced.")}
           requireChange
           onCancel={actions.cancelEdit}
           onSave={text => actions.saveUserEdit(message.id, text)}
@@ -324,13 +324,11 @@ function UserMessage({ message, isEditing, isLastUser, playerName, view, actions
               onClick={() => actions.toggleExcluded(message.id, false)}
               className="chat-action inline-flex h-7 items-center gap-1.5 rounded-lg border border-border-default px-2.5 text-xs font-semibold text-text-primary transition-colors hover:bg-tint/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
-              <Eye aria-hidden="true" className="h-3.5 w-3.5" />
-              Restore to context
-            </button>
+              <Eye aria-hidden="true" className="h-3.5 w-3.5" />{t("Restore to context")}</button>
           ) : (
             <>
-              <ActionButton icon={Copy} label={copiedKey === 'message' ? 'Copied' : 'Copy'} onClick={() => { actions.copyText(message.content); markCopied('message'); }} />
-              {isLastUser && <ActionButton icon={Pencil} label="Edit" onClick={() => actions.startEdit(message.id)} />}
+              <ActionButton icon={Copy} label={copiedKey === 'message' ? t("Copied") : t("Copy")} onClick={() => { actions.copyText(message.content); markCopied('message'); }} />
+              {isLastUser && <ActionButton icon={Pencil} label={t("Edit")} onClick={() => actions.startEdit(message.id)} />}
             </>
           )}
           <MessageMenu message={message} actions={actions} />
@@ -341,6 +339,7 @@ function UserMessage({ message, isEditing, isLastUser, playerName, view, actions
 }
 
 function AiMessage({ message, isEditing, isLastAi, isTyping, frame, view, actions }) {
+  const { t } = useI18n();
   const [copiedKey, markCopied] = useCopiedFeedback();
   const [thinkingOpen, setThinkingOpen] = useState(false);
   const { sizeClass, isDocumentMode, flags } = view;
@@ -354,7 +353,7 @@ function AiMessage({ message, isEditing, isLastAi, isTyping, frame, view, action
     <div className={`flex flex-col items-start gap-2 ${isDocumentMode || isEditing ? 'w-full' : 'max-w-[86%]'}`}>
       <div className="flex w-full min-w-0 items-center gap-3">
         <SpeakerLabel name={message.aiName} color={message.aiColor}>
-          {isEditing && <span className="font-normal text-text-muted">· Editing</span>}
+          {isEditing && <span className="font-normal text-text-muted">{t("· Editing")}</span>}
         </SpeakerLabel>
         {diagnostics.length > 0 && (
           <MessageDiagnostics
@@ -394,9 +393,7 @@ function AiMessage({ message, isEditing, isLastAi, isTyping, frame, view, action
                   onClick={() => setThinkingOpen(value => !value)}
                   className="flex w-full items-center gap-2 rounded-md text-left text-xs font-medium text-text-muted transition-colors hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
                 >
-                  <Brain aria-hidden="true" className="h-3.5 w-3.5" />
-                  Reasoning
-                  <ChevronRight aria-hidden="true" className={`ml-auto h-3.5 w-3.5 transition-transform ${thinkingOpen ? 'rotate-90' : ''}`} />
+                  <Brain aria-hidden="true" className="h-3.5 w-3.5" />{t("Reasoning")}<ChevronRight aria-hidden="true" className={`ml-auto h-3.5 w-3.5 transition-transform ${thinkingOpen ? 'rotate-90' : ''}`} />
                 </button>
                 {thinkingOpen && (
                   <div className="mt-2 rounded-xl border border-tint/5 bg-tint/5 p-3 font-mono text-xs italic text-text-muted whitespace-pre-wrap select-text animate-in fade-in duration-200">
@@ -414,8 +411,8 @@ function AiMessage({ message, isEditing, isLastAi, isTyping, frame, view, action
         )}
       </div>
 
-      {debugObj?.truncated && <Notice>The reply stopped at the output limit. Raise Max tokens on the AI profile for longer replies.</Notice>}
-      {debugObj?.context?.agenticDegraded && <Notice>Retrieval stopped early after an error. This reply used partial context.</Notice>}
+      {debugObj?.truncated && <Notice>{t("The reply stopped at the output limit. Raise Max tokens on the AI profile for longer replies.")}</Notice>}
+      {debugObj?.context?.agenticDegraded && <Notice>{t("Retrieval stopped early after an error. This reply used partial context.")}</Notice>}
       {contextCutNotice(debugObj?.context) && <Notice>{contextCutNotice(debugObj.context)}</Notice>}
 
       {!isEditing && (
@@ -426,14 +423,12 @@ function AiMessage({ message, isEditing, isLastAi, isTyping, frame, view, action
               onClick={() => actions.toggleExcluded(message.id, false)}
               className="chat-action inline-flex h-7 items-center gap-1.5 rounded-lg border border-border-default px-2.5 text-xs font-semibold text-text-primary transition-colors hover:bg-tint/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
             >
-              <Eye aria-hidden="true" className="h-3.5 w-3.5" />
-              Restore to context
-            </button>
+              <Eye aria-hidden="true" className="h-3.5 w-3.5" />{t("Restore to context")}</button>
           ) : (
             <>
-              <ActionButton icon={Copy} label={copiedKey === 'message' ? 'Copied' : 'Copy'} onClick={() => { actions.copyText(response); markCopied('message'); }} />
-              <ActionButton icon={Pencil} label="Edit" onClick={() => actions.startEdit(message.id)} />
-              {isLastAi && <ActionButton icon={RotateCw} label="Regenerate" onClick={() => actions.regenerate(message.id)} />}
+              <ActionButton icon={Copy} label={copiedKey === 'message' ? t("Copied") : t("Copy")} onClick={() => { actions.copyText(response); markCopied('message'); }} />
+              <ActionButton icon={Pencil} label={t("Edit")} onClick={() => actions.startEdit(message.id)} />
+              {isLastAi && <ActionButton icon={RotateCw} label={t("Regenerate")} onClick={() => actions.regenerate(message.id)} />}
             </>
           )}
           {alternatives && <AlternativeSwitcher alternatives={alternatives} onSwitch={index => actions.switchAlternative(message.id, index)} />}

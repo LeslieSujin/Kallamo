@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useRef, useState } from 'react';
 import { Pipette } from 'lucide-react';
 import ColorPicker from './ColorPicker';
@@ -6,6 +7,7 @@ import Popover from './Popover';
 const SWATCHES = ['#dc2626', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
 
 export default function ColorField({ value, onChange, ariaLabel = 'Choose color', className = '' }) {
+  const { t } = useI18n();
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
 
@@ -32,11 +34,10 @@ export default function ColorField({ value, onChange, ariaLabel = 'Choose color'
       </button>
       <Popover anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} matchAnchorWidth={false} scroll={false} className="w-64 border-border-default bg-surface-panel-muted p-3 shadow-black/60">
         <div className="mb-3 flex items-center justify-between">
-          <span className="text-xs font-semibold text-text-primary">Custom color</span>
+          <span className="text-xs font-semibold text-text-primary">{t("Custom color")}</span>
           {window.EyeDropper && (
             <button type="button" onClick={pickFromScreen} className="inline-flex min-h-8 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-text-muted hover:bg-surface-hover/55 hover:text-text-primary">
-              <Pipette className="h-3.5 w-3.5" />Pick from screen
-            </button>
+              <Pipette className="h-3.5 w-3.5" />{t("Pick from screen")}</button>
           )}
         </div>
         <ColorPicker value={value} onChange={onChange} />

@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { ArrowUp } from 'lucide-react';
 import { ProfileAvatar } from '../../components/modals/ProfileModal';
@@ -19,6 +20,7 @@ const SAMPLE = {
 };
 
 export default function AppearancePreview({ layout, fontClass, blur, codeTheme, lineNumbers }) {
+  const { t } = useI18n();
   const sample = SAMPLE;
   const { image } = sample;
   const theme = CODE_THEMES[codeTheme] || CODE_THEMES['github-dark'];
@@ -58,16 +60,16 @@ export default function AppearancePreview({ layout, fontClass, blur, codeTheme, 
             </>
           )}
           <div className="flex items-center gap-2 rounded-xl border border-accent/45 bg-surface-inset py-1.5 pl-3 pr-1.5 shadow-[0_0_0_3px] shadow-accent/15">
-            <span className="flex-1 truncate text-[0.8125rem] text-text-subtle">Write your next message…</span>
+            <span className="flex-1 truncate text-[0.8125rem] text-text-subtle">{t("Write your next message…")}</span>
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-on-accent"><ArrowUp className="h-3.5 w-3.5" strokeWidth={2.4} aria-hidden="true" /></span>
           </div>
         </div>
       </div>
-      <p className="caption mt-2.5">The Lighthouse, with these settings.</p>
+      <p className="caption mt-2.5">{t("The Lighthouse, with these settings.")}</p>
       <pre className="mt-3.5 overflow-hidden rounded-xl border border-tint/[0.08] px-3.5 py-3 font-mono text-xs leading-relaxed" style={{ background: theme.bg, color: theme.text }}>
-        {n(1)}<span style={{ color: theme.keyword }}>const</span> <span style={{ color: theme.name }}>scene</span> = {'{'}{'\n'}
-        {n(2)}  place: <span style={{ color: theme.string }}>"{sample.place}"</span>,{'\n'}
-        {n(3)}  hour: <span style={{ color: theme.number }}>14</span>,{'\n'}
+        {n(1)}<span style={{ color: theme.keyword }}>const</span> <span style={{ color: theme.name }}>{t("scene")}</span> = {'{'}{'\n'}
+        {n(2)}{' '}{t("place:")}{' '}<span style={{ color: theme.string }}>"{sample.place}"</span>,{'\n'}
+        {n(3)}{' '}{t("hour:")}{' '}<span style={{ color: theme.number }}>14</span>,{'\n'}
         {n(4)}{'};'}
       </pre>
     </div>

@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState, useEffect } from 'react';
 import { Search, Folder, Pin, Trash2, Eye, Paperclip, FileText, Image as ImageIcon, Video, Music, Code } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -11,6 +12,7 @@ export default function ChatFilesView({
   onPreviewFile,
   electronAPI
 }) {
+  const { t } = useI18n();
   const { showToast } = useApp();
   const [files, setFiles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -199,7 +201,7 @@ export default function ChatFilesView({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search workspace files..."
+            placeholder={t("Search workspace files...")}
             className="ws-well w-full bg-surface-canvas border border-gray-800/80 rounded-xl pl-8 pr-3 py-1.5 text-xs text-text-primary placeholder-gray-600 focus:outline-none focus:border-accent transition-colors"
           />
         </div>
@@ -214,12 +216,12 @@ export default function ChatFilesView({
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span className="text-[0.625rem] text-gray-500 uppercase tracking-widest font-bold">Scanning files...</span>
+            <span className="text-[0.625rem] text-gray-500 uppercase tracking-widest font-bold">{t("Scanning files...")}</span>
           </div>
         ) : filteredFiles.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <Folder className="w-12 h-12 text-gray-800 mb-3" />
-            <p className="caption font-medium">No files found matching the filter.</p>
+            <p className="caption font-medium">{t("No files found matching the filter.")}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
@@ -258,14 +260,10 @@ export default function ChatFilesView({
 
                     <div className="absolute top-2 left-2 flex flex-col space-y-1 z-10">
                       {isPinned && (
-                        <span className="bg-accent/15 border border-accent/30 text-accent text-[0.4375rem] font-bold px-1.5 py-0.5 rounded tracking-wider uppercase font-sans">
-                          Pinned
-                        </span>
+                        <span className="bg-accent/15 border border-accent/30 text-accent text-[0.4375rem] font-bold px-1.5 py-0.5 rounded tracking-wider uppercase font-sans">{t("Pinned")}</span>
                       )}
                       {file.isAiGenerated && (
-                        <span className="bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 text-[0.4375rem] font-bold px-1.5 py-0.5 rounded tracking-wider uppercase font-sans">
-                          AI Generated
-                        </span>
+                        <span className="bg-cyan-500/10 border border-cyan-500/25 text-cyan-400 text-[0.4375rem] font-bold px-1.5 py-0.5 rounded tracking-wider uppercase font-sans">{t("AI Generated")}</span>
                       )}
                     </div>
 
@@ -273,7 +271,7 @@ export default function ChatFilesView({
                       {!file.isAiGenerated && (
                         <button
                           onClick={(e) => { e.stopPropagation(); onReinject(file); }}
-                          title="Attach to current draft message"
+                          title={t("Attach to current draft message")}
                           className="p-2 bg-surface-hover hover:bg-accent text-accent hover:text-on-accent rounded-lg transition-colors border border-accent/20"
                         >
                           <Paperclip className="w-3.5 h-3.5" />
@@ -283,7 +281,7 @@ export default function ChatFilesView({
                       {!file.isAiGenerated && (
                         <button
                           onClick={(e) => { e.stopPropagation(); handlePinToggle(file); }}
-                          title={isPinned ? "Unpin file" : "Pin file"}
+                          title={isPinned ? t("Unpin file") : t("Pin file")}
                           className={`p-2 rounded-lg transition-colors border ${isPinned
                             ? 'bg-accent text-on-accent border-accent'
                             : 'bg-surface-hover hover:bg-accent/20 text-gray-400 hover:text-text-primary border-accent/20'
@@ -296,7 +294,7 @@ export default function ChatFilesView({
                       {!file.isAiGenerated && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setDeleteTarget(file); }}
-                          title="Delete file permanently"
+                          title={t("Delete file permanently")}
                           className="p-2 bg-status-danger/15 hover:bg-danger-solid-hover text-status-danger hover:text-on-danger border border-status-danger/30 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -324,11 +322,11 @@ export default function ChatFilesView({
       {deleteTarget && (
         <ConfirmDialog
           tone="danger"
-          title="Delete file"
+          title={t("Delete file")}
           message={`Delete ${deleteTarget.name}? This permanently removes the file from disk and clears its associated searchable memory chunks.`}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setDeleteTarget(null) },
-            { label: 'Delete', variant: 'danger', onClick: handleDeleteFile, autoFocus: true },
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setDeleteTarget(null) },
+            { label: t("Delete"), variant: 'danger', onClick: handleDeleteFile, autoFocus: true },
           ]}
           onClose={() => setDeleteTarget(null)}
         />

@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Trash2, X, RotateCcw, CornerDownLeft, ChevronDown, ChevronRight, CircleCheck } from 'lucide-react';
 import { AiGlyph, NoteGlyph } from './ui/glyphs';
@@ -18,6 +19,7 @@ const preview = (body) => {
 
 // Per-chapter review notes, with their excerpt and, for AI notes, provenance.
 export default function WritingNotesPanel({ documentId, documentTitle, workspaceId, electronAPI, onClose, onJump, onChange, refreshKey, expandId }) {
+  const { t } = useI18n();
   const { settings, showToast } = useApp();
   const tokenDebug = Boolean(settings?.advanced?.tokenDebug);
   const ragDebug = Boolean(settings?.advanced?.ragDebug);
@@ -90,7 +92,7 @@ export default function WritingNotesPanel({ documentId, documentTitle, workspace
   // Who wrote it on one line, what it was asked and what it cost on the next, so neither crowds the buttons.
   const source = (n) => {
     if (n.source !== 'ai') {
-      return <span className="flex min-w-0 flex-1 items-center gap-1.5 text-xs font-semibold text-text-secondary"><NoteGlyph className="h-3.5 w-3.5 shrink-0 text-text-subtle" />Your note</span>;
+      return <span className="flex min-w-0 flex-1 items-center gap-1.5 text-xs font-semibold text-text-secondary"><NoteGlyph className="h-3.5 w-3.5 shrink-0 text-text-subtle" />{t("Your note")}</span>;
     }
     const profile = profiles[n.profileId];
     return (
@@ -102,6 +104,7 @@ export default function WritingNotesPanel({ documentId, documentTitle, workspace
   };
 
   const OpenNote = (n) => {
+  const { t } = useI18n();
     const isOpen = !!expanded[n.id];
     const editing = editingId === n.id;
     if (!isOpen) {
@@ -111,8 +114,8 @@ export default function WritingNotesPanel({ documentId, documentTitle, workspace
             {n.source === 'ai' && <AiGlyph className="h-3.5 w-3.5 shrink-0" style={{ color: profiles[n.profileId]?.color || undefined }} />}
             <span className="min-w-0 flex-1 truncate">{preview(n.body)}</span>
           </button>
-          <IconButton icon={CircleCheck} label="Mark resolved" size="sm" tone="default" className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100" onClick={() => setStatus(n.id, 'resolved')} />
-          <IconButton icon={ChevronDown} label="Expand" size="sm" onClick={() => toggle(n.id)} />
+          <IconButton icon={CircleCheck} label={t("Mark resolved")} size="sm" tone="default" className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100" onClick={() => setStatus(n.id, 'resolved')} />
+          <IconButton icon={ChevronDown} label={t("Expand")} size="sm" onClick={() => toggle(n.id)} />
         </div>
       );
     }
@@ -120,9 +123,9 @@ export default function WritingNotesPanel({ documentId, documentTitle, workspace
       <div key={n.id} className={`group flex flex-col gap-2.5 rounded-card border bg-surface-panel/80 p-2.5 pl-3 ${editing ? 'border-accent/35' : 'border-border-subtle'}`}>
         <div className="flex min-h-7 items-center gap-1">
           {source(n)}
-          <IconButton icon={Trash2} label="Delete note" size="sm" tone="danger" className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100" onClick={() => setConfirmId(n.id)} />
-          <IconButton icon={CircleCheck} label="Mark resolved" size="sm" onClick={() => setStatus(n.id, 'resolved')} />
-          <IconButton icon={ChevronDown} label="Minimize" size="sm" className="[&_svg]:rotate-180" onClick={() => toggle(n.id)} />
+          <IconButton icon={Trash2} label={t("Delete note")} size="sm" tone="danger" className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100" onClick={() => setConfirmId(n.id)} />
+          <IconButton icon={CircleCheck} label={t("Mark resolved")} size="sm" onClick={() => setStatus(n.id, 'resolved')} />
+          <IconButton icon={ChevronDown} label={t("Minimize")} size="sm" className="[&_svg]:rotate-180" onClick={() => toggle(n.id)} />
         </div>
         {n.source === 'ai' && (n.instruction || n.debug) && (
           <div className="-mt-1.5 flex min-w-0 items-center gap-2">
@@ -138,14 +141,14 @@ export default function WritingNotesPanel({ documentId, documentTitle, workspace
             className="flex items-start gap-2 rounded-md bg-tint/[0.04] px-2.5 py-2 text-left text-xs leading-relaxed text-text-muted transition-colors hover:bg-tint/[0.07] hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
             <span className="line-clamp-2 flex-1 break-words italic">“{n.excerpt}”</span>
-            <CornerDownLeft className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-label="Go to the passage" />
+            <CornerDownLeft className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-label={t("Go to the passage")} />
           </button>
         )}
 
         {editing ? (
           <div className="flex flex-col gap-2">
             <label>
-              <span className="sr-only">Edit note</span>
+              <span className="sr-only">{t("Edit note")}</span>
               <textarea
                 autoFocus
                 value={editValue}
@@ -158,15 +161,15 @@ export default function WritingNotesPanel({ documentId, documentTitle, workspace
             <div className="flex items-center gap-1.5">
               <Kbd>Ctrl Enter</Kbd>
               <span className="flex-1" />
-              <Button variant="subtle" size="sm" onClick={() => setEditingId(null)}>Cancel</Button>
-              <Button size="sm" onClick={() => commitEdit(n.id)}>Save</Button>
+              <Button variant="subtle" size="sm" onClick={() => setEditingId(null)}>{t("Cancel")}</Button>
+              <Button size="sm" onClick={() => commitEdit(n.id)}>{t("Save")}</Button>
             </div>
           </div>
         ) : (
           <div
             role="button"
             tabIndex={0}
-            data-tooltip="Click to edit"
+            data-tooltip={t("Click to edit")}
             className="wd-note-body cursor-text select-text break-words text-sm leading-relaxed text-text-secondary"
             onClick={() => { setEditingId(n.id); setEditValue(n.body); }}
             onKeyDown={(e) => { if (e.key === 'Enter') { setEditingId(n.id); setEditValue(n.body); } }}
@@ -181,36 +184,36 @@ export default function WritingNotesPanel({ documentId, documentTitle, workspace
     <div key={n.id} className="group flex min-h-10 items-center gap-1.5 rounded-card border border-border-subtle bg-surface-panel/40 py-1 pl-3 pr-1">
       <CircleCheck className="h-4 w-4 shrink-0 text-status-success" aria-hidden="true" />
       <span className="min-w-0 flex-1 truncate text-sm text-text-subtle">{preview(n.body)}</span>
-      <IconButton icon={RotateCcw} label="Reopen note" size="sm" onClick={() => setStatus(n.id, 'open')} />
-      <IconButton icon={Trash2} label="Delete note" size="sm" tone="danger" onClick={() => setConfirmId(n.id)} />
+      <IconButton icon={RotateCcw} label={t("Reopen note")} size="sm" onClick={() => setStatus(n.id, 'open')} />
+      <IconButton icon={Trash2} label={t("Delete note")} size="sm" tone="danger" onClick={() => setConfirmId(n.id)} />
     </div>
   );
 
   return (
-    <aside aria-label="Notes" className="glass-rail flex w-[21rem] shrink-0 flex-col border-l border-border-subtle">
+    <aside aria-label={t("Notes")} className="glass-rail flex w-[21rem] shrink-0 flex-col border-l border-border-subtle">
       <div className="flex h-[3.25rem] shrink-0 items-center gap-2 border-b border-border-subtle pl-4 pr-2">
-        <h2 className="text-sm font-bold text-text-primary">Notes</h2>
-        {documentTitle && <span className="min-w-0 truncate text-xs text-text-subtle">on {documentTitle}</span>}
+        <h2 className="text-sm font-bold text-text-primary">{t("Notes")}</h2>
+        {documentTitle && <span className="min-w-0 truncate text-xs text-text-subtle">{t("on")}{' '}{documentTitle}</span>}
         <span className="flex-1" />
-        <IconButton icon={X} label="Close notes" size="sm" tooltipSide="left" onClick={onClose} />
+        <IconButton icon={X} label={t("Close notes")} size="sm" tooltipSide="left" onClick={onClose} />
       </div>
 
       <div className="custom-scrollbar flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-3 py-3.5 [&>*]:shrink-0">
         {notes.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2.5 px-3 text-center">
             <span className="flex h-11 w-11 items-center justify-center rounded-card bg-tint/5 text-text-subtle"><NoteGlyph className="h-5 w-5" /></span>
-            <p className="text-sm font-semibold text-text-secondary">No notes on this chapter</p>
-            <p className="text-xs leading-relaxed text-text-subtle">Write a reminder below. When you ask the AI to analyze a passage, its reading lands here too.</p>
+            <p className="text-sm font-semibold text-text-secondary">{t("No notes on this chapter")}</p>
+            <p className="text-xs leading-relaxed text-text-subtle">{t("Write a reminder below. When you ask the AI to analyze a passage, its reading lands here too.")}</p>
           </div>
         ) : (
           <>
-            <p className="px-0.5 text-xs leading-relaxed text-text-subtle">Your reminders for this chapter, and the AI analyses you keep.</p>
-            {open.length > 0 && <h3 className="px-0.5 pt-0.5 text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">Open · {open.length}</h3>}
+            <p className="px-0.5 text-xs leading-relaxed text-text-subtle">{t("Your reminders for this chapter, and the AI analyses you keep.")}</p>
+            {open.length > 0 && <h3 className="px-0.5 pt-0.5 text-xs font-semibold uppercase tracking-[0.08em] text-text-subtle">{t("Open ·")}{' '}{open.length}</h3>}
             {open.map(OpenNote)}
             {resolved.length > 0 && (
               <button type="button" aria-expanded={showResolved} onClick={() => setShowResolved(v => !v)} className="flex items-center gap-1.5 px-0.5 pt-1.5 text-text-subtle hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
                 <ChevronRight className={`h-3.5 w-3.5 transition-transform ${showResolved ? 'rotate-90' : ''}`} aria-hidden="true" />
-                <span className="text-xs font-semibold uppercase tracking-[0.08em]">Resolved · {resolved.length}</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.08em]">{t("Resolved ·")}{' '}{resolved.length}</span>
               </button>
             )}
             {showResolved && resolved.map(ResolvedNote)}
@@ -220,31 +223,31 @@ export default function WritingNotesPanel({ documentId, documentTitle, workspace
 
       <div className="flex flex-col gap-2 border-t border-border-subtle p-3">
         <label>
-          <span className="sr-only">New note</span>
+          <span className="sr-only">{t("New note")}</span>
           <textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); add(); } }}
             rows={2}
-            placeholder="Add a note for this chapter"
+            placeholder={t("Add a note for this chapter")}
             className="w-full resize-none rounded-control border border-border-default bg-surface-input px-2.5 py-2 text-sm text-text-primary placeholder:text-text-subtle focus:border-accent/70 focus:outline-none"
           />
         </label>
         <div className="flex items-center gap-2">
           <Kbd>Ctrl Enter</Kbd>
           <span className="flex-1" />
-          <Button size="sm" variant={draft.trim() ? 'primary' : 'ghost'} disabled={!draft.trim()} onClick={add}>Add note</Button>
+          <Button size="sm" variant={draft.trim() ? 'primary' : 'ghost'} disabled={!draft.trim()} onClick={add}>{t("Add note")}</Button>
         </div>
       </div>
 
       {confirmId && (
         <ConfirmDialog
           tone="danger"
-          title="Delete note"
-          message="This note will be permanently deleted. This cannot be undone."
+          title={t("Delete note")}
+          message={t("This note will be permanently deleted. This cannot be undone.")}
           actions={[
-            { label: 'Cancel', variant: 'ghost', onClick: () => setConfirmId(null) },
-            { label: 'Delete', variant: 'danger', autoFocus: true, onClick: () => remove(confirmId) },
+            { label: t("Cancel"), variant: 'ghost', onClick: () => setConfirmId(null) },
+            { label: t("Delete"), variant: 'danger', autoFocus: true, onClick: () => remove(confirmId) },
           ]}
           onClose={() => setConfirmId(null)}
         />

@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import enUS from './locales/en-US';
 import zhCN from './locales/zh-CN';
+import { translateMessage } from './messages';
 
 const STORAGE_KEY = 'kallamo.locale';
 const DEFAULT_LOCALE = 'en-US';
@@ -10,6 +11,14 @@ const localePacks = new Map([
   ['zh-CN', zhCN]
 ]);
 
+/**
+ * @typedef {Object} I18nValue
+ * @property {string} locale
+ * @property {(locale: string) => void} setLocale
+ * @property {Array<{value: string, label: string}>} locales
+ * @property {(key: string, fallback?: string | Record<string, unknown>, values?: Record<string, unknown>) => string} t
+ */
+/** @type {import('react').Context<I18nValue | null>} */
 const I18nContext = createContext(null);
 
 function readStoredLocale() {
@@ -19,18 +28,6 @@ function readStoredLocale() {
   } catch {
     return DEFAULT_LOCALE;
   }
-}
-
-function readMessage(messages, key) {
-  if (messages && Object.prototype.hasOwnProperty.call(messages, key)) return messages[key];
-  return key.split('.').reduce((value, part) => value && value[part], messages);
-}
-
-function interpolate(message, values) {
-  if (!values || typeof message !== 'string') return message;
-  return message.replace(/\{(\w+)\}/g, (_, name) => (
-    Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : `{${name}}`
-  ));
 }
 
 export function registerLocale(locale, pack) {
@@ -62,9 +59,7 @@ export function I18nProvider({ children }) {
   }, [locale]);
 
   const translate = useCallback((key, fallback = key, values) => {
-    const current = readMessage(localePacks.get(locale)?.messages, key);
-    const english = readMessage(localePacks.get(DEFAULT_LOCALE)?.messages, key);
-    return interpolate(current ?? english ?? fallback, values);
+    return translateMessage(localePacks.get(locale)?.messages, localePacks.get(DEFAULT_LOCALE)?.messages, key, fallback, values);
   }, [locale]);
 
   const value = useMemo(() => ({
@@ -82,5 +77,4 @@ export function useI18n() {
   if (!context) throw new Error('useI18n must be used inside I18nProvider.');
   return context;
 }
-
 

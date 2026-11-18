@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { ArrowRight, MessageSquare, Plug, Plus, Upload } from 'lucide-react';
 import Button from '../../components/ui/Button';
@@ -18,27 +19,26 @@ const Swapped = ({ children }) => (
 );
 
 export function VariablesIntro({ onNew, onStart }) {
+  const { t } = useI18n();
   return (
     <article className="rounded-2xl border border-border-subtle surface-card px-8 py-7">
       <div className="grid grid-cols-[1fr_4rem_1fr] items-stretch">
         <div className="rounded-[0.875rem] border border-border-subtle bg-tint/[0.02] px-5 py-[1.125rem]">
-          <span className="caption mb-2.5 block">What you write in a profile&apos;s rules</span>
-          <p className="text-[0.9375rem] leading-[2] text-text-secondary">
-            Write in <Token name="tone" />. Keep each scene under <Token name="scene_length" />, and follow <Token name="house_style" />.
+          <span className="caption mb-2.5 block">{t("What you write in a profile's rules")}</span>
+          <p className="text-[0.9375rem] leading-[2] text-text-secondary">{t("Write in")}<Token name="tone" />{t(". Keep each scene under")}{' '}<Token name="scene_length" />{t(", and follow")}{' '}<Token name="house_style" />.
           </p>
         </div>
         <div className="flex items-center justify-center text-text-disabled"><ArrowRight className="h-5 w-5" aria-hidden="true" /></div>
         <div className="rounded-[0.875rem] border border-border-subtle bg-tint/[0.02] px-5 py-[1.125rem]">
-          <span className="caption mb-2.5 block">What the AI reads, every time it runs</span>
-          <p className="text-[0.9375rem] leading-[2] text-text-muted">
-            Write in <Swapped>a dry, wry voice with short sentences</Swapped>. Keep each scene under <Swapped>400 words</Swapped>, and follow <Swapped>American spelling, no em dashes</Swapped>.
+          <span className="caption mb-2.5 block">{t("What the AI reads, every time it runs")}</span>
+          <p className="text-[0.9375rem] leading-[2] text-text-muted">{t("Write in")}<Swapped>{t("a dry, wry voice with short sentences")}</Swapped>{t(". Keep each scene under")}{' '}<Swapped>{t("400 words")}</Swapped>{t(", and follow")}{' '}<Swapped>{t("American spelling, no em dashes")}</Swapped>.
           </p>
         </div>
       </div>
       <IntroFooter
-        title="Write it once, use it in every profile"
-        text="Change a variable and every profile and workflow step that uses it changes too."
-        newLabel="New variable"
+        title={t("Write it once, use it in every profile")}
+        text={t("Change a variable and every profile and workflow step that uses it changes too.")}
+        newLabel={t("New variable")}
         onNew={onNew}
         starters={VARIABLE_STARTERS}
         onStart={onStart}
@@ -48,6 +48,7 @@ export function VariablesIntro({ onNew, onStart }) {
 }
 
 function IntroFooter({ title, text, newLabel, onNew, onImport, starters, onStart }) {
+  const { t } = useI18n();
   return (
     <div className="mt-6 flex flex-wrap items-center gap-6">
       <div className="min-w-[18rem] flex-1">
@@ -56,12 +57,12 @@ function IntroFooter({ title, text, newLabel, onNew, onImport, starters, onStart
       </div>
       <div className="flex flex-col items-end gap-2.5">
         <div className="flex gap-2">
-          {onImport && <Button variant="ghost" icon={Upload} onClick={onImport}>Import</Button>}
+          {onImport && <Button variant="ghost" icon={Upload} onClick={onImport}>{t("Import")}</Button>}
           <Button icon={Plus} onClick={onNew}>{newLabel}</Button>
         </div>
         {starters && (
           <div className="flex items-center gap-1.5 whitespace-nowrap">
-            <span className="caption">Or start with</span>
+            <span className="caption">{t("Or start with")}</span>
             {starters.map(starter => (
               <button
                 key={starter.label}
@@ -118,41 +119,40 @@ export const PROFILE_STARTERS = [
 ];
 
 export function ProfilesIntro({ onNew, onImport, onStart }) {
+  const { t } = useI18n();
   return (
     <article className="rounded-2xl border border-border-subtle surface-card px-8 py-7">
       <div className="grid grid-cols-[1fr_4rem_1fr] items-stretch">
-        <Panel caption="What you give it" className="pb-1.5">
-          <IntroRow label="Model">
+        <Panel caption={t("What you give it")} className="pb-1.5">
+          <IntroRow label={t("Model")}>
             <span className="inline-flex flex-wrap items-center gap-2">
               <span className="inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-md border border-border-default bg-tint/[0.04] px-2 text-xs font-medium text-text-secondary">
-                <Plug className="h-3 w-3" aria-hidden="true" />
-                Your connection
-              </span>
-              <span className="whitespace-nowrap font-mono text-xs text-text-subtle">any model it offers</span>
+                <Plug className="h-3 w-3" aria-hidden="true" />{t("Your connection")}</span>
+              <span className="whitespace-nowrap font-mono text-xs text-text-subtle">{t("any model it offers")}</span>
             </span>
           </IntroRow>
-          <IntroRow label="Rules"><i className="text-text-secondary">Tighten the prose. Keep the author&apos;s voice, names and facts exactly as written.</i></IntroRow>
-          <IntroRow label="Knowledge">Files and memories it can look up</IntroRow>
+          <IntroRow label={t("Rules")}><i className="text-text-secondary">{t("Tighten the prose. Keep the author's voice, names and facts exactly as written.")}</i></IntroRow>
+          <IntroRow label={t("Knowledge")}>{t("Files and memories it can look up")}</IntroRow>
         </Panel>
         <div className="flex items-center justify-center text-text-disabled"><ArrowRight className="h-5 w-5" aria-hidden="true" /></div>
-        <Panel caption="What you get">
+        <Panel caption={t("What you get")}>
           <div className="mt-1 flex flex-col gap-2.5 rounded-[0.875rem] border border-border-subtle p-4" style={{ background: 'radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, #3b82f6 10%, transparent), var(--theme-surface-well) 60%)' }}>
             <div className="flex items-center gap-3">
               <ProfileAvatar color="#3b82f6" size={40} />
               <div className="min-w-0">
-                <span className="block truncate text-[0.9375rem] font-bold text-text-primary">Line editor</span>
-                <span className="caption">Ready in every workspace</span>
+                <span className="block truncate text-[0.9375rem] font-bold text-text-primary">{t("Line editor")}</span>
+                <span className="caption">{t("Ready in every workspace")}</span>
               </div>
             </div>
-            <p className="text-[0.8125rem] leading-normal text-text-muted">Tightens prose in the Writing Desk without changing your voice.</p>
+            <p className="text-[0.8125rem] leading-normal text-text-muted">{t("Tightens prose in the Writing Desk without changing your voice.")}</p>
           </div>
-          <p className="caption mt-3">Call it from the chat, the Writing Desk or a workflow step.</p>
+          <p className="caption mt-3">{t("Call it from the chat, the Writing Desk or a workflow step.")}</p>
         </Panel>
       </div>
       <IntroFooter
-        title="Give each voice its own model and rules"
-        text="The rules are how it writes. The knowledge base is what it knows. Every workspace can use it."
-        newLabel="New profile"
+        title={t("Give each voice its own model and rules")}
+        text={t("The rules are how it writes. The knowledge base is what it knows. Every workspace can use it.")}
+        newLabel={t("New profile")}
         onNew={onNew}
         onImport={onImport}
         starters={PROFILE_STARTERS}
@@ -184,11 +184,12 @@ const ExampleLink = ({ from, to, short }) => (
 );
 
 export function WorkflowsIntro({ onNew, onImport }) {
+  const { t } = useI18n();
   return (
     <article className="rounded-2xl border border-border-subtle surface-card px-8 py-7">
-      <Panel caption="An example" className="pb-5">
+      <Panel caption={t("An example")} className="pb-5">
         <div className="mt-2 flex items-start">
-          <ExampleEnd label="Your message" sub="Starts the run" />
+          <ExampleEnd label={t("Your message")} sub="Starts the run" />
           <ExampleLink from={EDGE} to={EXAMPLE_STEPS[0].color} short />
           {EXAMPLE_STEPS.map((step, index) => (
             <React.Fragment key={step.name}>
@@ -203,13 +204,13 @@ export function WorkflowsIntro({ onNew, onImport }) {
             </React.Fragment>
           ))}
           <ExampleLink from={EXAMPLE_STEPS[EXAMPLE_STEPS.length - 1].color} to={EDGE} short />
-          <ExampleEnd label="Reply in chat" sub="The last step answers" />
+          <ExampleEnd label={t("Reply in chat")} sub="The last step answers" />
         </div>
       </Panel>
       <IntroFooter
-        title="Chain profiles into one reply"
-        text="Each step reads the text of the step before it. Only the last one answers in the chat."
-        newLabel="New workflow"
+        title={t("Chain profiles into one reply")}
+        text={t("Each step reads the text of the step before it. Only the last one answers in the chat.")}
+        newLabel={t("New workflow")}
         onNew={onNew}
         onImport={onImport}
       />

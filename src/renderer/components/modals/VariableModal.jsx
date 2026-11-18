@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
@@ -8,6 +9,7 @@ const KEY_PATTERN = /^[a-zA-Z0-9_]+$/;
 const keyFromName = (name) => name.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 
 export default function VariableModal({ variable, preset, onClose, onSave, inline = false }) {
+  const { t } = useI18n();
   const isEditing = !!variable;
   const [name, setName] = useState('');
   const [key, setKey] = useState('');
@@ -56,15 +58,15 @@ export default function VariableModal({ variable, preset, onClose, onSave, inlin
       onClose={onClose}
       size="xl"
       inline={inline}
-      title={isEditing ? 'Edit variable' : 'New variable'}
-      subtitle="A piece of text you can drop into any profile or workflow step."
+      title={isEditing ? t("Edit variable") : t("New variable")}
+      subtitle={t("A piece of text you can drop into any profile or workflow step.")}
       className="max-h-[calc(100vh-2rem)]"
     >
       <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto custom-scrollbar px-7 py-5">
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-          <TextInput label="Name" value={name} onChange={e => changeName(e.target.value)} placeholder="Tone" autoFocus={!isEditing} />
+          <TextInput label={t("Name")} value={name} onChange={e => changeName(e.target.value)} placeholder={t("Tone")} autoFocus={!isEditing} />
           <div className="flex flex-col">
-            <label htmlFor="variable-key" className="mb-1.5 block text-sm font-medium text-text-secondary">Tag</label>
+            <label htmlFor="variable-key" className="mb-1.5 block text-sm font-medium text-text-secondary">{t("Tag")}</label>
             <div className={`flex min-h-10 items-center rounded-control border bg-surface-input px-3 font-mono text-sm ${keyError ? 'border-status-danger/60' : 'border-border-default focus-within:border-accent'} ${isEditing ? 'opacity-60' : ''}`}>
               <span className="text-text-disabled">{'{{'}</span>
               <input
@@ -72,7 +74,7 @@ export default function VariableModal({ variable, preset, onClose, onSave, inlin
                 value={key}
                 onChange={e => { setKeyTouched(true); setKey(e.target.value); }}
                 disabled={isEditing}
-                placeholder="tone"
+                placeholder={t("tone")}
                 aria-invalid={!!keyError || undefined}
                 className="min-w-0 flex-1 bg-transparent py-2 text-text-secondary placeholder:text-text-subtle focus:outline-none disabled:cursor-not-allowed"
               />
@@ -83,19 +85,19 @@ export default function VariableModal({ variable, preset, onClose, onSave, inlin
             </span>
           </div>
         </div>
-        <TextInput label="Description (optional)" value={description} onChange={e => setDescription(e.target.value)} placeholder="The voice every narrator profile writes in" />
+        <TextInput label={t("Description (optional)")} value={description} onChange={e => setDescription(e.target.value)} placeholder={t("The voice every narrator profile writes in")} />
         <Textarea
-          label="Text"
+          label={t("Text")}
           value={value}
           onChange={e => setValue(e.target.value)}
-          placeholder="A dry, wry voice with short sentences."
+          placeholder={t("A dry, wry voice with short sentences.")}
           monospace
           className="min-h-[15rem]"
         />
       </div>
       <footer className="flex shrink-0 items-center justify-end gap-2.5 border-t border-border-subtle px-6 py-3.5">
-        <Button variant="subtle" onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} disabled={!canSave}>{isEditing ? 'Save variable' : 'Create variable'}</Button>
+        <Button variant="subtle" onClick={onClose}>{t("Cancel")}</Button>
+        <Button onClick={handleSave} disabled={!canSave}>{isEditing ? t("Save variable") : t("Create variable")}</Button>
       </footer>
     </Modal>
   );

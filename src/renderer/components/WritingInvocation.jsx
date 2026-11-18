@@ -1,3 +1,4 @@
+import { useI18n } from '../i18n';
 import React, { useState } from 'react';
 import { AlertTriangle, Pin } from 'lucide-react';
 import { AiGlyph } from './ui/glyphs';
@@ -34,6 +35,7 @@ const CHANNELS = [
 const countWords = (text) => (String(text || '').match(/\S+/g) || []).length;
 
 export function InvokeModal({ selection, profiles, initialChannel, directivesCount = 0, onSubmit, onClose }) {
+  const { t } = useI18n();
   const [profileId, setProfileId] = useState(profiles[0]?.id || '');
   const [prompt, setPrompt] = useState('');
   const [channel, setChannel] = useState(CHANNELS.some(c => c.value === initialChannel) ? initialChannel : 'replacement');
@@ -44,39 +46,37 @@ export function InvokeModal({ selection, profiles, initialChannel, directivesCou
   const words = countWords(selection);
 
   return (
-    <Modal onClose={onClose} size="xl" title="Invoke AI" icon={AiGlyph}>
+    <Modal onClose={onClose} size="xl" title={t("Invoke AI")} icon={AiGlyph}>
       <div className="custom-scrollbar flex max-h-[70vh] flex-col gap-5 overflow-y-auto px-5 py-5">
         <div>
-          <p className="mb-2 text-xs font-semibold text-text-secondary">Selection <span className="font-normal text-text-subtle">· {words} {words === 1 ? 'word' : 'words'}</span></p>
+          <p className="mb-2 text-xs font-semibold text-text-secondary">{t("Selection")}{' '}<span className="font-normal text-text-subtle">· {words} {words === 1 ? t("word") : t("words")}</span></p>
           <blockquote className="m-0 line-clamp-3 select-text whitespace-pre-wrap rounded-control bg-tint/[0.035] px-3 py-2.5 text-sm leading-relaxed text-text-secondary">{selection}</blockquote>
         </div>
 
         {profiles.length === 0 ? (
-          <p className="rounded-control border border-status-warning/30 bg-status-warning/[0.08] px-3 py-2.5 text-sm text-status-warning">
-            No writing profiles are active in this workspace. Turn one on in the Workspace tab to invoke the AI here.
-          </p>
+          <p className="rounded-control border border-status-warning/30 bg-status-warning/[0.08] px-3 py-2.5 text-sm text-status-warning">{t("No writing profiles are active in this workspace. Turn one on in the Workspace tab to invoke the AI here.")}</p>
         ) : (
           <div>
-            <p className="mb-2 text-xs font-semibold text-text-secondary">Profile</p>
+            <p className="mb-2 text-xs font-semibold text-text-secondary">{t("Profile")}</p>
             <SearchableSelect
               value={profileId}
               onChange={setProfileId}
-              ariaLabel="Profile"
+              ariaLabel={t("Profile")}
               options={profiles.map(profile => ({ id: profile.id, label: profile.name, color: profile.color }))}
-              placeholder="Search for a profile"
+              placeholder={t("Search for a profile")}
             />
             {selected?.needsSetup && (
               <div role="alert" className="mt-2.5 flex items-start gap-2.5 rounded-control border border-status-warning/30 bg-status-warning/[0.08] px-3 py-2.5 text-xs leading-relaxed text-status-warning">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>{selected.name} can't run yet. Create an API profile in Settings, then link it to this profile in the Library.</span>
+                <span>{selected.name}{' '}{t("can't run yet. Create an API profile in Settings, then link it to this profile in the Library.")}</span>
               </div>
             )}
           </div>
         )}
 
         <fieldset className="m-0 border-0 p-0">
-          <legend className="mb-2 p-0 text-xs font-semibold text-text-secondary">What comes back</legend>
-          <div role="radiogroup" aria-label="What comes back" className="grid grid-cols-3 gap-2.5">
+          <legend className="mb-2 p-0 text-xs font-semibold text-text-secondary">{t("What comes back")}</legend>
+          <div role="radiogroup" aria-label={t("What comes back")} className="grid grid-cols-3 gap-2.5">
             {CHANNELS.map(option => {
               const on = channel === option.value;
               return (
@@ -101,13 +101,13 @@ export function InvokeModal({ selection, profiles, initialChannel, directivesCou
         </fieldset>
 
         <label className="block">
-          <span className="mb-2 block text-xs font-semibold text-text-secondary">Instruction <span className="font-normal text-text-subtle">· optional</span></span>
+          <span className="mb-2 block text-xs font-semibold text-text-secondary">{t("Instruction")}{' '}<span className="font-normal text-text-subtle">{t("· optional")}</span></span>
           <textarea
             value={prompt}
             onChange={e => setPrompt(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); submit(); } }}
             rows={3}
-            placeholder="Tighten this, add tension, foreshadow the betrayal…"
+            placeholder={t("Tighten this, add tension, foreshadow the betrayal…")}
             className="w-full resize-none rounded-control border border-border-default bg-surface-input px-3 py-2.5 text-sm text-text-primary placeholder:text-text-subtle focus:border-accent/70 focus:outline-none"
           />
         </label>
@@ -117,12 +117,11 @@ export function InvokeModal({ selection, profiles, initialChannel, directivesCou
         {directivesCount > 0 && (
           <span className="inline-flex items-center gap-1.5 text-xs text-text-subtle">
             <Pin className="h-3.5 w-3.5" aria-hidden="true" />
-            {directivesCount} {directivesCount === 1 ? 'directive goes' : 'directives go'} with it
-          </span>
+            {directivesCount} {directivesCount === 1 ? t("directive goes") : t("directives go")}{t("with it")}</span>
         )}
         <span className="flex-1" />
-        <Button variant="subtle" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" disabled={!canSubmit} onClick={submit}>Invoke</Button>
+        <Button variant="subtle" onClick={onClose}>{t("Cancel")}</Button>
+        <Button variant="primary" disabled={!canSubmit} onClick={submit}>{t("Invoke")}</Button>
       </div>
     </Modal>
   );

@@ -1,6 +1,8 @@
+import { useI18n } from '../../i18n';
 import React, { useId } from 'react';
 
 export default function Field({ label, hint = null, error = null, optional = false, children, className = '' }) {
+  const { t } = useI18n();
   const hintId = useId();
   const child = React.isValidElement(children)
     ? React.cloneElement(children, {
@@ -13,7 +15,7 @@ export default function Field({ label, hint = null, error = null, optional = fal
     <div className={`flex flex-col gap-1.5 ${className}`}>
       <div className="flex items-baseline gap-1.5">
         <span className="text-xs font-medium text-text-muted">{label}</span>
-        {optional ? <span className="text-xs text-text-subtle">optional</span> : null}
+        {optional ? <span className="text-xs text-text-subtle">{t("optional")}</span> : null}
       </div>
       {child}
       {(hint || error) ? (

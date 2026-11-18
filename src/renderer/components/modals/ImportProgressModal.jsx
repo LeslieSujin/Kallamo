@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { Check, Loader2, Package } from 'lucide-react';
 import Modal from '../ui/Modal';
@@ -14,6 +15,7 @@ export const PROGRESS_STAGES = {
 const detailOf = status => String(status || '').replace(/\.{3}$|…$/, '').trim();
 
 export default function ImportProgressModal({ progress = 0, statusText, title = 'Importing', subtitle = null, subject = null, stages = null, footnote = 'Keep Kallamo open until it finishes.' }) {
+  const { t } = useI18n();
   const value = Math.max(0, Math.min(100, Math.round(progress || 0)));
   const currentIndex = stages ? stages.findIndex(stage => value < stage.until) : -1;
   return (
@@ -28,7 +30,7 @@ export default function ImportProgressModal({ progress = 0, statusText, title = 
                 {subject.detail && <p className="truncate text-xs text-text-subtle">{subject.detail}</p>}
               </>
             ) : (
-              <p className="truncate text-sm text-text-secondary">{detailOf(statusText) || 'Working'}</p>
+              <p className="truncate text-sm text-text-secondary">{detailOf(statusText) || t("Working")}</p>
             )}
           </div>
           <span className="text-2xl font-bold tabular-nums text-text-primary">{value}<span className="text-base text-text-muted">%</span></span>

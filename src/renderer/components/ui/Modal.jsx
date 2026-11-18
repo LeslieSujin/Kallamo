@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
@@ -33,6 +34,7 @@ export default function Modal({
   inline = false,
   children,
 }) {
+  const { t } = useI18n();
   const { settings } = useApp();
   const isBlurEnabled = settings?.interface?.blur ?? true;
   const dialogRef = useRef(null);
@@ -134,7 +136,7 @@ export default function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Close dialog"
+                aria-label={t("Close dialog")}
                 className="titlebar-nodrag relative z-10 min-h-8 min-w-8 inline-flex items-center justify-center text-text-muted hover:text-status-danger transition-colors cursor-pointer rounded-md hover:bg-surface-hover/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
               >
                 <X className="w-4 h-4" />

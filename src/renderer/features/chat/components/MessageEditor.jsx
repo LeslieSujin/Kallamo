@@ -1,3 +1,4 @@
+import { useI18n } from '../../../i18n';
 import { memo, useLayoutEffect, useRef, useState } from 'react';
 import { Info } from 'lucide-react';
 import Button from '../../../components/ui/Button';
@@ -16,6 +17,7 @@ export default memo(function MessageEditor({
   onSave,
   requireChange = false
 }) {
+  const { t } = useI18n();
   const [text, setText] = useState(initialValue);
   const textareaRef = useRef(null);
   const canSave = !requireChange || text !== initialValue;
@@ -46,17 +48,17 @@ export default memo(function MessageEditor({
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
         autoFocus
-        aria-label="Message text"
+        aria-label={t("Message text")}
         className={`w-full resize-none rounded-card border border-accent/70 bg-surface-input px-4 py-3.5 ${sizeClass} leading-relaxed text-text-primary placeholder-text-disabled ring-3 ring-accent/15 focus:outline-none custom-scrollbar`}
       />
       <div className="flex flex-wrap items-center gap-2 select-none">
         <div className="min-w-0 flex-1">
           <p className="chat-hint inline-flex max-w-full flex-wrap items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-text-secondary">
           {hint && <><Info aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /><span>{hint}</span></>}
-          <span className="inline-flex items-center gap-1">{hint && <span aria-hidden="true">·</span>}<Key>Esc</Key> cancel · <Key>Ctrl</Key><Key>Enter</Key> save</span>
+          <span className="inline-flex items-center gap-1">{hint && <span aria-hidden="true">·</span>}<Key>Esc</Key>{' '}{t("cancel ·")}{' '}<Key>Ctrl</Key><Key>Enter</Key>{' '}{t("save")}</span>
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
+        <Button variant="ghost" size="sm" onClick={onCancel}>{t("Cancel")}</Button>
         <Button variant="primary" size="sm" disabled={!canSave} onClick={() => onSave(text)}>{saveLabel}</Button>
       </div>
     </div>

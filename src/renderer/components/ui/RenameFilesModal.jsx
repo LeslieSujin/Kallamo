@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useMemo, useState } from 'react';
 import { FilePen } from 'lucide-react';
 import Modal from './Modal';
@@ -25,6 +26,7 @@ export default function RenameFilesModal({
   onCancel,
   onConfirm,
 }) {
+  const { t } = useI18n();
   // Initial suggestions: each name unique against existing + previously suggested.
   const initial = useMemo(() => {
     const taken = new Set(existingNames.map(n => n.toLowerCase()));
@@ -78,13 +80,10 @@ export default function RenameFilesModal({
           <div className="p-2 rounded-control shrink-0 bg-accent/10 text-accent">
             <FilePen className="w-5 h-5" />
           </div>
-          <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider">Rename Files</h3>
+          <h3 className="text-sm font-bold text-text-primary uppercase tracking-wider">{t("Rename Files")}</h3>
         </div>
 
-        <p className="text-xs text-text-muted leading-relaxed">
-          Give each file a new name to keep it alongside the existing one. The file is
-          vectorized after you confirm.
-        </p>
+        <p className="text-xs text-text-muted leading-relaxed">{t("Give each file a new name to keep it alongside the existing one. The file is vectorized after you confirm.")}</p>
 
         <div className="flex flex-col gap-3 max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
           {files.map((file) => (
@@ -104,10 +103,8 @@ export default function RenameFilesModal({
         </div>
 
         <div className="flex items-center justify-end gap-3 pt-1">
-          <Button variant="ghost" onClick={onCancel} disabled={loading}>Cancel</Button>
-          <Button variant="primary" onClick={handleConfirm} loading={loading} disabled={hasErrors}>
-            Rename &amp; Vectorize
-          </Button>
+          <Button variant="ghost" onClick={onCancel} disabled={loading}>{t("Cancel")}</Button>
+          <Button variant="primary" onClick={handleConfirm} loading={loading} disabled={hasErrors}>{t("Rename & Vectorize")}</Button>
         </div>
       </div>
     </Modal>

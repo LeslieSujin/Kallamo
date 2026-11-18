@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React, { useState } from 'react';
 import { Download, Workflow } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -14,6 +15,7 @@ const listOf = value => {
 export const workflowFileName = name => `${String(name || '').replace(/[^a-z0-9]/gi, '_').toLowerCase()}_workflow.klw`;
 
 export default function ExportWorkflowModal({ workflow, onClose, onExport }) {
+  const { t } = useI18n();
   const { writingProfiles } = useApp();
   const [exportKb, setExportKb] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -52,7 +54,7 @@ export default function ExportWorkflowModal({ workflow, onClose, onExport }) {
   if (exporting) {
     return (
       <ImportProgressModal
-        title="Exporting a workflow"
+        title={t("Exporting a workflow")}
         subtitle={workflowFileName(workflow?.name)}
         progress={progress}
         statusText={statusText}
@@ -69,8 +71,8 @@ export default function ExportWorkflowModal({ workflow, onClose, onExport }) {
     ...(exportKb ? [knowledge] : []),
   ];
   const stays = [
-    { key: 'connections', label: 'Connections and models' },
-    { key: 'where', label: 'Where it is turned on' },
+    { key: 'connections', label: t("Connections and models") },
+    { key: 'where', label: t("Where it is turned on") },
     ...(exportKb ? [] : [knowledge]),
   ];
 
@@ -90,14 +92,14 @@ export default function ExportWorkflowModal({ workflow, onClose, onExport }) {
           checked={exportKb}
           onChange={setExportKb}
           disabled={!files}
-          title="Include their knowledge bases"
-          description={files ? `${files} ${files === 1 ? 'file' : 'files'} across ${profiles.length} ${profiles.length === 1 ? 'profile' : 'profiles'}.` : 'None of its profiles has knowledge files yet.'}
+          title={t("Include their knowledge bases")}
+          description={files ? `${files} ${files === 1 ? 'file' : 'files'} across ${profiles.length} ${profiles.length === 1 ? 'profile' : 'profiles'}.` : t("None of its profiles has knowledge files yet.")}
         />
       </div>
       <div className="flex items-center gap-2 border-t border-border-subtle px-5 py-3.5">
         <FileName name={workflowFileName(workflow?.name)} />
-        <Button variant="subtle" onClick={onClose}>Cancel</Button>
-        <Button icon={Download} onClick={handleConfirmExport}>Export</Button>
+        <Button variant="subtle" onClick={onClose}>{t("Cancel")}</Button>
+        <Button icon={Download} onClick={handleConfirmExport}>{t("Export")}</Button>
       </div>
     </Modal>
   );

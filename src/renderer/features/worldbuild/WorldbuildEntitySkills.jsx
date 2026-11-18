@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Award, Check, CornerDownRight, Pencil, Plus, Trash2 } from 'lucide-react';
 import Button from '../../components/ui/Button';
@@ -11,6 +12,7 @@ import { FieldEye, SpoilerCover } from './Spoilers';
  * moves or takes away a skill at once; what the AI wants to change waits here to be approved.
  */
 export default function WorldbuildEntitySkills({ workspaceId, entity, api, showToast }) {
+  const { t } = useI18n();
   const [state, setState] = useState(null);
   const [catalog, setCatalog] = useState([]);
   const [ranks, setRanks] = useState([]);
@@ -72,12 +74,12 @@ export default function WorldbuildEntitySkills({ workspaceId, entity, api, showT
     <section className="ws-card overflow-hidden rounded-card border border-border-default bg-surface-panel-muted/60 backdrop-blur-md">
       <header className="flex min-h-11 items-center gap-2.5 border-b border-border-subtle pl-4 pr-2">
         <Award className="h-4 w-4 shrink-0 text-text-muted" aria-hidden="true" />
-        <h2 className="text-sm font-semibold text-text-primary">Skills</h2>
-        {editing && <span className="text-xs text-text-subtle">Editing</span>}
+        <h2 className="text-sm font-semibold text-text-primary">{t("Skills")}</h2>
+        {editing && <span className="text-xs text-text-subtle">{t("Editing")}</span>}
         <span className="flex-1" />
         {editing
-          ? <button type="button" onClick={() => { setEditing(false); setAdding(false); }} className={headerButton}><Check className="h-3.5 w-3.5" aria-hidden="true" />Done</button>
-          : <button type="button" onClick={() => setEditing(true)} aria-label="Edit Skills" className={headerButton}>{held.length ? <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> : <Plus className="h-3.5 w-3.5" aria-hidden="true" />}{held.length ? 'Edit' : 'Add'}</button>}
+          ? <button type="button" onClick={() => { setEditing(false); setAdding(false); }} className={headerButton}><Check className="h-3.5 w-3.5" aria-hidden="true" />{t("Done")}</button>
+          : <button type="button" onClick={() => setEditing(true)} aria-label={t("Edit Skills")} className={headerButton}>{held.length ? <Pencil className="h-3.5 w-3.5" aria-hidden="true" /> : <Plus className="h-3.5 w-3.5" aria-hidden="true" />}{held.length ? t("Edit") : t("Add")}</button>}
       </header>
 
       <div className="flex flex-col gap-3 p-4">
@@ -105,7 +107,7 @@ export default function WorldbuildEntitySkills({ workspaceId, entity, api, showT
             ))}
           </div>
         ) : !editing && (
-          <p className="text-sm text-text-disabled">{state.learns ? 'No skills yet. The AI can teach them as the story earns it.' : 'No skills yet.'}</p>
+          <p className="text-sm text-text-disabled">{state.learns ? t("No skills yet. The AI can teach them as the story earns it.") : t("No skills yet.")}</p>
         )}
 
         {editing && (adding ? (
@@ -115,16 +117,16 @@ export default function WorldbuildEntitySkills({ workspaceId, entity, api, showT
             onChange={skillId => { setAdding(false); if (skillId) setRank(skillId, 0); }}
             onClose={() => setAdding(false)}
             options={addOptions}
-            placeholder="Add a skill"
-            searchPlaceholder="Search skills"
-            ariaLabel="Add a skill"
+            placeholder={t("Add a skill")}
+            searchPlaceholder={t("Search skills")}
+            ariaLabel={t("Add a skill")}
             searchInTrigger
             autoOpen
           />
         ) : (
-          <Button variant="ghost" size="sm" icon={Plus} className="self-start" disabled={!catalog.length} onClick={() => setAdding(true)}>Add a skill</Button>
+          <Button variant="ghost" size="sm" icon={Plus} className="self-start" disabled={!catalog.length} onClick={() => setAdding(true)}>{t("Add a skill")}</Button>
         ))}
-        {editing && !catalog.length && <p className="caption">Create skills first, in Worldbuild, Rules, Skills.</p>}
+        {editing && !catalog.length && <p className="caption">{t("Create skills first, in Worldbuild, Rules, Skills.")}</p>}
 
         {!editing && pending.length > 0 && (
           <div className="flex flex-col gap-2">
@@ -134,8 +136,8 @@ export default function WorldbuildEntitySkills({ workspaceId, entity, api, showT
                   <span className="block text-[0.8125rem] font-semibold text-text-primary">{describeSkillChange(change, entity.canonicalName)}</span>
                   {change.reason && <span className="block text-xs leading-relaxed text-text-muted">{change.reason}</span>}
                 </div>
-                <Button variant="subtle" size="sm" onClick={() => resolve(change, 'rejected')}>Reject</Button>
-                <Button variant="ghost" size="sm" icon={Check} onClick={() => resolve(change, 'approved')}>Approve</Button>
+                <Button variant="subtle" size="sm" onClick={() => resolve(change, 'rejected')}>{t("Reject")}</Button>
+                <Button variant="ghost" size="sm" icon={Check} onClick={() => resolve(change, 'approved')}>{t("Approve")}</Button>
               </div>
             ))}
           </div>

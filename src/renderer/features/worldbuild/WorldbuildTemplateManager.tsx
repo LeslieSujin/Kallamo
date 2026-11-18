@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Eye, EyeOff, GripVertical, LayoutTemplate, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react';
 import Menu, { MenuItem, MenuSeparator } from '../../components/ui/Menu';
@@ -21,6 +22,7 @@ type FieldDraft = { definition?: EntityFieldDefinition; sectionId: string; label
 type DeleteTarget = { kind: 'field'; field: EntityFieldDefinition } | { kind: 'section'; section: WorldbuildTemplateSection; fields: EntityFieldDefinition[] };
 
 export default function WorldbuildTemplateManager({ workspaceId, api, templates, showToast, onClose, onSaved }: Props) {
+  const { t } = useI18n();
   const [typeId, setTypeId] = useState('Characters');
   const [draft, setDraft] = useState<WorldbuildEntityTemplate>(() => templateFor('Characters', templates));
   const [fields, setFields] = useState<EntityFieldDefinition[]>([]);
@@ -132,19 +134,19 @@ export default function WorldbuildTemplateManager({ workspaceId, api, templates,
 
   const requestClose = () => { if (dirty) setConfirmingClose(true); else onClose(); };
 
-  return <Modal size="2xl" title="Entity types" icon={LayoutTemplate} iconClassName="text-text-muted" onClose={requestClose} closeOnOverlay={!saving && !dirty} closeOnEsc={!saving && !dirty}>
+  return <Modal size="2xl" title={t("Entity types")} icon={LayoutTemplate} iconClassName="text-text-muted" onClose={requestClose} closeOnOverlay={!saving && !dirty} closeOnEsc={!saving && !dirty}>
     <div className="grid h-[min(42rem,calc(100vh-9rem))] min-h-0 grid-cols-[13rem_minmax(0,1fr)_20rem] overflow-hidden">
       <TypeList typeId={typeId} templates={templates} onSelect={setTypeId} />
       <TemplatePreview typeId={typeId} draft={draft} fields={fields} variantOf={variantOf} variants={variants} />
       <aside className="min-h-0 overflow-y-auto border-l border-border-subtle p-4 custom-scrollbar">
-        <label className="block"><span className="mb-1.5 block text-xs font-medium text-text-muted">Name in Worldbuild</span><input className={INPUT} value={draft.displayName} onChange={event => setDraft(current => ({ ...current, displayName: event.target.value }))} placeholder={typeId} /></label>
-        <p className="caption mt-1">The plural shown in lists and filters.</p>
+        <label className="block"><span className="mb-1.5 block text-xs font-medium text-text-muted">{t("Name in Worldbuild")}</span><input className={INPUT} value={draft.displayName} onChange={event => setDraft(current => ({ ...current, displayName: event.target.value }))} placeholder={typeId} /></label>
+        <p className="caption mt-1">{t("The plural shown in lists and filters.")}</p>
         <div className="my-4 border-t border-border-subtle" />
         <div className="mb-1 flex items-center justify-between">
-          <span className="text-sm font-semibold text-text-primary">Sections</span>
-          <button type="button" onClick={() => updateSections([...sections, { id: `custom-${crypto.randomUUID()}`, label: 'New section', kind: 'custom' }])} aria-label="Add a section" className="inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-muted hover:bg-surface-hover/60 hover:text-text-primary"><Plus className="h-3.5 w-3.5" />Add section</button>
+          <span className="text-sm font-semibold text-text-primary">{t("Sections")}</span>
+          <button type="button" onClick={() => updateSections([...sections, { id: `custom-${crypto.randomUUID()}`, label: t("New section"), kind: 'custom' }])} aria-label={t("Add a section")} className="inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs font-semibold text-text-muted hover:bg-surface-hover/60 hover:text-text-primary"><Plus className="h-3.5 w-3.5" />{t("Add section")}</button>
         </div>
-        <p className="caption mb-3">Drag to reorder. Inventory, connections, knowledge and occurrences are fixed tabs.</p>
+        <p className="caption mb-3">{t("Drag to reorder. Inventory, connections, knowledge and occurrences are fixed tabs.")}</p>
         <div className="space-y-2">{sections.map((section, index) => {
           const sectionFields = fields.filter(field => draft.layout.fieldSections?.[field.id] === section.id);
           const variant = variantOf(section);
@@ -157,10 +159,10 @@ export default function WorldbuildTemplateManager({ workspaceId, api, templates,
             className={`rounded-card border transition-colors ${dragIndex === index ? 'opacity-50' : ''} ${section.hidden ? 'border-border-subtle bg-surface-canvas/15' : 'border-border-default bg-surface-canvas/30'}`}>
             <div className="flex items-center gap-1.5 py-1.5 pl-1.5 pr-1">
               <span aria-hidden="true" className="cursor-grab text-text-disabled active:cursor-grabbing"><GripVertical className="h-4 w-4" /></span>
-              <input aria-label="Section name" className={`min-w-0 flex-1 rounded bg-transparent px-1 py-0.5 text-sm font-semibold outline-none focus:bg-surface-input/60 ${section.hidden ? 'text-text-muted' : 'text-text-primary'}`} value={section.label} onChange={event => updateSection(section.id, { label: event.target.value })} />
-              {section.kind === 'custom' && <Tag>Custom</Tag>}
-              {variant && <Tag tone="variant">{VARIANT_LABELS[variant as keyof typeof VARIANT_LABELS]} only</Tag>}
-              <IconButton label={section.hidden ? 'Show section' : 'Hide section'} onClick={() => updateSection(section.id, { hidden: !section.hidden })}>{section.hidden ? <EyeOff /> : <Eye />}</IconButton>
+              <input aria-label={t("Section name")} className={`min-w-0 flex-1 rounded bg-transparent px-1 py-0.5 text-sm font-semibold outline-none focus:bg-surface-input/60 ${section.hidden ? 'text-text-muted' : 'text-text-primary'}`} value={section.label} onChange={event => updateSection(section.id, { label: event.target.value })} />
+              {section.kind === 'custom' && <Tag>{t("Custom")}</Tag>}
+              {variant && <Tag tone="variant">{VARIANT_LABELS[variant as keyof typeof VARIANT_LABELS]}{' '}{t("only")}</Tag>}
+              <IconButton label={section.hidden ? t("Show section") : t("Hide section")} onClick={() => updateSection(section.id, { hidden: !section.hidden })}>{section.hidden ? <EyeOff /> : <Eye />}</IconButton>
               <SectionMenu
                 label={section.label}
                 canMoveUp={index > 0}
@@ -181,20 +183,20 @@ export default function WorldbuildTemplateManager({ workspaceId, api, templates,
               ))}
               {fieldDraft?.sectionId === section.id
                 ? <FieldEditor draft={fieldDraft} saving={saving} sectionLabel="" onChange={setFieldDraft} onCancel={() => setFieldDraft(null)} onSave={() => saveField()} />
-                : sectionFields.length > 0 && <button type="button" onClick={() => startField(section.id)} className="ml-5 inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-xs font-semibold text-text-muted hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><Plus className="h-3.5 w-3.5" aria-hidden="true" />Add field</button>}
+                : sectionFields.length > 0 && <button type="button" onClick={() => startField(section.id)} className="ml-5 inline-flex h-7 items-center gap-1 rounded-md px-1.5 text-xs font-semibold text-text-muted hover:bg-surface-hover/60 hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"><Plus className="h-3.5 w-3.5" aria-hidden="true" />{t("Add field")}</button>}
             </div>}
           </div>;
         })}</div>
       </aside>
     </div>
     <footer className="flex items-center justify-end gap-3 border-t border-border-subtle px-5 py-4">
-      {dirty && <span className="caption mr-auto">Section changes are not saved yet.</span>}
-      <Button variant="subtle" onClick={requestClose} disabled={saving}>Close</Button>
-      <Button onClick={saveTemplate} loading={saving} disabled={!dirty}>Save changes</Button>
+      {dirty && <span className="caption mr-auto">{t("Section changes are not saved yet.")}</span>}
+      <Button variant="subtle" onClick={requestClose} disabled={saving}>{t("Close")}</Button>
+      <Button onClick={saveTemplate} loading={saving} disabled={!dirty}>{t("Save changes")}</Button>
     </footer>
-    {deleting && <ConfirmDialog title={deleting.kind === 'section' ? 'Delete custom section' : 'Delete custom field'} message={deleting.kind === 'section' ? `Delete “${deleting.section.label}”? ${deleting.fields.length ? `Its ${deleting.fields.length} custom field${deleting.fields.length === 1 ? '' : 's'} and all stored values will also be permanently deleted.` : 'This section will be permanently removed.'}` : `Delete “${deleting.field.label}” from every ${typeId.toLowerCase()} entry? All stored values will be permanently removed.`} actions={[{ label: 'Cancel', variant: 'ghost', onClick: () => setDeleting(null) }, { label: 'Delete', variant: 'danger', loading: saving, autoFocus: true, onClick: removeCustomContent }]} onClose={() => setDeleting(null)} />}
-    {confirmingTypeChange && fieldDraft?.definition && <ConfirmDialog tone="warning" title="Change field type" message={`Change “${fieldDraft.definition.label}” from ${fieldDraft.definition.valueType} to ${fieldDraft.valueType}? Existing values in every ${typeId.toLowerCase()} entry will be permanently cleared.`} actions={[{ label: 'Cancel', variant: 'ghost', onClick: () => setConfirmingTypeChange(false) }, { label: 'Change type', variant: 'danger', loading: saving, autoFocus: true, onClick: () => saveField(true) }]} onClose={() => setConfirmingTypeChange(false)} />}
-    {confirmingClose && <ConfirmDialog tone="warning" title="Discard section changes" message="The renames, order and visibility you changed have not been saved. Close anyway?" actions={[{ label: 'Keep editing', variant: 'ghost', onClick: () => setConfirmingClose(false) }, { label: 'Discard', variant: 'danger', autoFocus: true, onClick: onClose }]} onClose={() => setConfirmingClose(false)} />}
+    {deleting && <ConfirmDialog title={deleting.kind === 'section' ? t("Delete custom section") : t("Delete custom field")} message={deleting.kind === 'section' ? `Delete “${deleting.section.label}”? ${deleting.fields.length ? `Its ${deleting.fields.length} custom field${deleting.fields.length === 1 ? '' : 's'} and all stored values will also be permanently deleted.` : 'This section will be permanently removed.'}` : `Delete “${deleting.field.label}” from every ${typeId.toLowerCase()} entry? All stored values will be permanently removed.`} actions={[{ label: t("Cancel"), variant: 'ghost', onClick: () => setDeleting(null) }, { label: t("Delete"), variant: 'danger', loading: saving, autoFocus: true, onClick: removeCustomContent }]} onClose={() => setDeleting(null)} />}
+    {confirmingTypeChange && fieldDraft?.definition && <ConfirmDialog tone="warning" title={t("Change field type")} message={`Change “${fieldDraft.definition.label}” from ${fieldDraft.definition.valueType} to ${fieldDraft.valueType}? Existing values in every ${typeId.toLowerCase()} entry will be permanently cleared.`} actions={[{ label: t("Cancel"), variant: 'ghost', onClick: () => setConfirmingTypeChange(false) }, { label: t("Change type"), variant: 'danger', loading: saving, autoFocus: true, onClick: () => saveField(true) }]} onClose={() => setConfirmingTypeChange(false)} />}
+    {confirmingClose && <ConfirmDialog tone="warning" title={t("Discard section changes")} message={t("The renames, order and visibility you changed have not been saved. Close anyway?")} actions={[{ label: t("Keep editing"), variant: 'ghost', onClick: () => setConfirmingClose(false) }, { label: t("Discard"), variant: 'danger', autoFocus: true, onClick: onClose }]} onClose={() => setConfirmingClose(false)} />}
   </Modal>;
 }
 
@@ -257,12 +259,13 @@ function TemplatePreview({ typeId, draft, fields, variantOf, variants }: {
   variantOf(section: WorldbuildTemplateSection): string | undefined;
   variants: string[];
 }) {
+  const { t } = useI18n();
   const visible = (draft.layout.sections || []).filter(section => !section.hidden);
   return <main className="min-h-0 min-w-0 overflow-y-auto bg-surface-panel-muted/55 p-5 custom-scrollbar">
     <div className="mb-5">
-      <p className="text-xs font-medium text-text-muted">Preview of the Data tab</p>
+      <p className="text-xs font-medium text-text-muted">{t("Preview of the Data tab")}</p>
       {variants.length > 0 && (
-        <p className="caption mt-1.5">This type has two shapes. A section marked <span className="text-entity-creature">{VARIANT_LABELS.individual} only</span> appears on that shape alone.</p>
+        <p className="caption mt-1.5">{t("This type has two shapes. A section marked")}{' '}<span className="text-entity-creature">{VARIANT_LABELS.individual}{' '}{t("only")}</span>{' '}{t("appears on that shape alone.")}</p>
       )}
     </div>
     <div className="space-y-3">{visible.map(section => {
@@ -278,13 +281,14 @@ function TemplatePreview({ typeId, draft, fields, variantOf, variants }: {
         </div>
       </div>;
     })}
-    {!visible.length && <p className="rounded-card border border-dashed border-border-subtle px-4 py-6 text-center text-sm text-text-disabled">Every section is hidden.</p>}
+    {!visible.length && <p className="rounded-card border border-dashed border-border-subtle px-4 py-6 text-center text-sm text-text-disabled">{t("Every section is hidden.")}</p>}
     </div>
   </main>;
 }
 
 // Short fields share the section's grid, native ones first; long fields take the full width below.
 function SectionPreview({ grid, native, fields }: { grid: string[]; native: boolean; fields: EntityFieldDefinition[] }) {
+  const { t } = useI18n();
   const isLong = (field: EntityFieldDefinition) => ['long-text', 'multiple-choice', 'entity-reference-list'].includes(field.valueType);
   const name = (field: EntityFieldDefinition) => field.label.replace(/\s*:\s*$/, '');
   const cells = [...grid, ...fields.filter(field => !isLong(field)).map(name)];
@@ -296,7 +300,7 @@ function SectionPreview({ grid, native, fields }: { grid: string[]; native: bool
   const prose = native && !grid.length;
   return <>
     {prose && <><div className="h-2 w-5/6 rounded bg-surface-hover/55" /><div className="mt-2 h-2 w-1/2 rounded bg-surface-hover/40" /></>}
-    {!native && !fields.length && <p className="text-xs text-text-disabled">No fields yet</p>}
+    {!native && !fields.length && <p className="text-xs text-text-disabled">{t("No fields yet")}</p>}
     {(cells.length > 0 || long.length > 0) && <div className={`grid grid-cols-3 gap-x-4 gap-y-3 ${prose ? 'mt-4' : ''}`}>
       {cells.map((label, index) => cell(label, `cell-${index}`))}
       {long.map((label, index) => cell(label, `long-${index}`, true))}
@@ -305,46 +309,49 @@ function SectionPreview({ grid, native, fields }: { grid: string[]; native: bool
 }
 
 function FieldEditor({ draft, saving, sectionLabel, onChange, onCancel, onSave }: { draft: FieldDraft; saving: boolean; sectionLabel: string; onChange(draft: FieldDraft): void; onCancel(): void; onSave(): void }) {
+  const { t } = useI18n();
   const update = (patch: Partial<FieldDraft>) => onChange({ ...draft, ...patch });
   const isChoice = draft.valueType === 'single-choice' || draft.valueType === 'multiple-choice';
   return <div className="my-2 space-y-2 rounded-control border border-border-strong bg-surface-hover/30 p-3">
-    <p className="text-sm font-semibold text-text-primary">{draft.definition ? 'Edit field' : 'New field'}{sectionLabel ? ` · ${sectionLabel}` : ''}</p>
-    <input aria-label="Field name" className={INPUT} value={draft.label} onChange={event => update({ label: event.target.value })} placeholder="Field name" autoFocus />
-    <SelectMenu ariaLabel="Field type" value={draft.valueType} onChange={(valueType: EntityFieldType) => update({ valueType, optionsText: '' })} options={Object.entries(VALUE_TYPE_LABELS).map(([value, label]) => ({ value, label }))} />
-    {isChoice && <textarea aria-label="Available options" className={`${INPUT} min-h-20 resize-y`} value={draft.optionsText} onChange={event => update({ optionsText: event.target.value })} placeholder="One option per line" />}
-    <SelectMenu ariaLabel="AI access" value={draft.aiAccess} onChange={(aiAccess: FieldDraft['aiAccess']) => update({ aiAccess })} options={[{ value: 'read-write', label: 'The AI reads it and suggests edits' }, { value: 'read-only', label: 'The AI reads it only' }, { value: 'hidden', label: 'Hidden from the AI' }]} />
-    {draft.aiAccess !== 'hidden' && <label className="block"><span className="mb-1.5 block text-xs font-medium text-text-muted">AI guidance</span><textarea className={`${INPUT} min-h-20 resize-y`} value={draft.aiGuidance} onChange={event => update({ aiGuidance: event.target.value })} placeholder="How the AI should read or fill this field" /><span className="caption mt-1 block">Optional. Describe the field's purpose and what the AI should not infer.</span></label>}
-    <div className="flex items-center gap-2.5 rounded-control border border-border-subtle px-3 py-2.5"><Checkbox checked={draft.required} onChange={required => update({ required })} ariaLabel="Required field" /><span className="text-xs text-text-secondary">Required</span></div>
-    <div className="flex justify-end gap-2"><Button size="sm" variant="ghost" onClick={onCancel}>Cancel</Button><Button size="sm" onClick={onSave} disabled={!draft.label.trim()} loading={saving}>{draft.definition ? 'Save field' : 'Add field'}</Button></div>
+    <p className="text-sm font-semibold text-text-primary">{draft.definition ? t("Edit field") : t("New field")}{sectionLabel ? ` · ${sectionLabel}` : ''}</p>
+    <input aria-label={t("Field name")} className={INPUT} value={draft.label} onChange={event => update({ label: event.target.value })} placeholder={t("Field name")} autoFocus />
+    <SelectMenu ariaLabel={t("Field type")} value={draft.valueType} onChange={(valueType: EntityFieldType) => update({ valueType, optionsText: '' })} options={Object.entries(VALUE_TYPE_LABELS).map(([value, label]) => ({ value, label }))} />
+    {isChoice && <textarea aria-label={t("Available options")} className={`${INPUT} min-h-20 resize-y`} value={draft.optionsText} onChange={event => update({ optionsText: event.target.value })} placeholder={t("One option per line")} />}
+    <SelectMenu ariaLabel={t("AI access")} value={draft.aiAccess} onChange={(aiAccess: FieldDraft['aiAccess']) => update({ aiAccess })} options={[{ value: 'read-write', label: t("The AI reads it and suggests edits") }, { value: 'read-only', label: t("The AI reads it only") }, { value: 'hidden', label: t("Hidden from the AI") }]} />
+    {draft.aiAccess !== 'hidden' && <label className="block"><span className="mb-1.5 block text-xs font-medium text-text-muted">{t("AI guidance")}</span><textarea className={`${INPUT} min-h-20 resize-y`} value={draft.aiGuidance} onChange={event => update({ aiGuidance: event.target.value })} placeholder={t("How the AI should read or fill this field")} /><span className="caption mt-1 block">{t("Optional. Describe the field's purpose and what the AI should not infer.")}</span></label>}
+    <div className="flex items-center gap-2.5 rounded-control border border-border-subtle px-3 py-2.5"><Checkbox checked={draft.required} onChange={required => update({ required })} ariaLabel={t("Required field")} /><span className="text-xs text-text-secondary">{t("Required")}</span></div>
+    <div className="flex justify-end gap-2"><Button size="sm" variant="ghost" onClick={onCancel}>{t("Cancel")}</Button><Button size="sm" onClick={onSave} disabled={!draft.label.trim()} loading={saving}>{draft.definition ? t("Save field") : t("Add field")}</Button></div>
   </div>;
 }
 
 function SectionMenu({ label, canMoveUp, canMoveDown, onMoveUp, onMoveDown, onAddField, onDelete }: {
   label: string; canMoveUp: boolean; canMoveDown: boolean; onMoveUp(): void; onMoveDown(): void; onAddField(): void; onDelete?(): void;
 }) {
+  const { t } = useI18n();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const run = (action: () => void) => () => { setOpen(false); action(); };
   return <>
     <UiIconButton ref={anchorRef} icon={MoreHorizontal} size="sm" label={`${label} actions`} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(value => !value)} />
     <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={`${label} actions`} className="w-52" align="right">
-      <MenuItem icon={Plus} label="Add field" onSelect={run(onAddField)} />
-      <MenuItem icon={ArrowUp} label="Move up" disabled={!canMoveUp} onSelect={run(onMoveUp)} />
-      <MenuItem icon={ArrowDown} label="Move down" disabled={!canMoveDown} onSelect={run(onMoveDown)} />
-      {onDelete && <><MenuSeparator /><MenuItem icon={Trash2} label="Delete section" danger onSelect={run(onDelete)} /></>}
+      <MenuItem icon={Plus} label={t("Add field")} onSelect={run(onAddField)} />
+      <MenuItem icon={ArrowUp} label={t("Move up")} disabled={!canMoveUp} onSelect={run(onMoveUp)} />
+      <MenuItem icon={ArrowDown} label={t("Move down")} disabled={!canMoveDown} onSelect={run(onMoveDown)} />
+      {onDelete && <><MenuSeparator /><MenuItem icon={Trash2} label={t("Delete section")} danger onSelect={run(onDelete)} /></>}
     </Menu>
   </>;
 }
 
 function FieldMenu({ label, onEdit, onDelete }: { label: string; onEdit(): void; onDelete(): void }) {
+  const { t } = useI18n();
   const anchorRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   return <>
     <UiIconButton ref={anchorRef} icon={MoreHorizontal} size="sm" label={`${label} actions`} aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen(value => !value)} />
     <Menu anchorRef={anchorRef} open={open} onClose={() => setOpen(false)} label={`${label} actions`} className="w-44" align="right">
-      <MenuItem icon={Pencil} label="Edit field" onSelect={() => { setOpen(false); onEdit(); }} />
+      <MenuItem icon={Pencil} label={t("Edit field")} onSelect={() => { setOpen(false); onEdit(); }} />
       <MenuSeparator />
-      <MenuItem icon={Trash2} label="Delete field" danger onSelect={() => { setOpen(false); onDelete(); }} />
+      <MenuItem icon={Trash2} label={t("Delete field")} danger onSelect={() => { setOpen(false); onDelete(); }} />
     </Menu>
   </>;
 }

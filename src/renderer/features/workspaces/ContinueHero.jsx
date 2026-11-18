@@ -1,12 +1,14 @@
+import { useI18n } from '../../i18n';
 import React, { useState } from 'react';
 import { ArrowRight, BookOpen, Clock, MapPin, MessageSquare, Users } from 'lucide-react';
 import { WorldbuildGlyph, WritingGlyph } from '../../components/ui/glyphs';
 import ContourCover from './ContourCover';
 import RoleplayChip from './RoleplayChip';
-import { displayDescription, isExampleWorkspace, leadImage, plural, timeAgo } from './workspaceFormat';
+import { displayDescription, isExampleWorkspace, leadImage, timeAgo } from './workspaceFormat';
 
 // The most recent workspace as a full-width banner: its cover, what it is, and a way straight back in.
 export default function ContinueHero({ chat, onOpen, onBegin }) {
+  const { t, locale } = useI18n();
   // A picture that fails to load steps down: the scene's place, then the cover, then none.
   const [failed, setFailed] = useState(0);
   const sceneImage = chat.experienceMode === 'roleplay' && Boolean(chat.roleplayScene?.background?.path);
@@ -19,9 +21,9 @@ export default function ContinueHero({ chat, onOpen, onBegin }) {
   // An example story nobody has played yet starts from the beginning, which may need a model first.
   const unstarted = example && roleplay && !chat.messageCount;
   const stats = [
-    [MessageSquare, plural(chat.messageCount || 0, 'message')],
-    [Users, `${chat.entityCount || 0} ${chat.entityCount === 1 ? 'entity' : 'entities'}`],
-    [BookOpen, plural(chat.documentCount || 0, 'document')],
+    [MessageSquare, t(chat.messageCount === 1 ? '{count} message' : '{count} messages', { count: chat.messageCount || 0 })],
+    [Users, t(chat.entityCount === 1 ? '{count} entity' : '{count} entities', { count: chat.entityCount || 0 })],
+    [BookOpen, t(chat.documentCount === 1 ? '{count} document' : '{count} documents', { count: chat.documentCount || 0 })],
   ];
 
   return (
@@ -38,8 +40,8 @@ export default function ContinueHero({ chat, onOpen, onBegin }) {
 
       <div className="relative mx-auto flex h-full w-full max-w-[75rem] flex-col gap-4 px-8 pb-10 pt-24">
         <div className="flex items-center gap-2.5">
-          <span className="text-xs font-semibold text-text-secondary">{example ? 'Start here' : `Last opened ${timeAgo(chat.updatedAt).toLowerCase()}`}</span>
-          {example && <HeroChip>Example</HeroChip>}
+          <span className="text-xs font-semibold text-text-secondary">{example ? t("Start here") : t('Last opened {time}', { time: timeAgo(chat.updatedAt, undefined, locale).toLowerCase() })}</span>
+          {example && <HeroChip>{t("Example")}</HeroChip>}
           {roleplay && <RoleplayChip />}
         </div>
         <h2 className="line-clamp-2 min-w-0 shrink-0 break-words pb-1 text-[3.5rem] font-extrabold leading-[1.1] tracking-[-0.03em] text-text-primary">{chat.title}</h2>
@@ -68,11 +70,11 @@ export default function ContinueHero({ chat, onOpen, onBegin }) {
             onClick={() => (unstarted && onBegin ? onBegin(chat) : onOpen(chat, 'chat'))}
             className="inline-flex h-11 items-center gap-2 rounded-xl bg-accent px-5 text-sm font-semibold text-on-accent shadow-sm transition-[filter,transform] hover:brightness-110 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            {unstarted ? 'Begin' : 'Continue'}
+            {unstarted ? t("Begin") : t("Continue")}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
-          <HeroButton icon={WorldbuildGlyph} onClick={() => onOpen(chat, 'worldbuild')}>Worldbuild</HeroButton>
-          <HeroButton icon={WritingGlyph} onClick={() => onOpen(chat, 'writing')}>Writing Desk</HeroButton>
+          <HeroButton icon={WorldbuildGlyph} onClick={() => onOpen(chat, 'worldbuild')}>{t("Worldbuild")}</HeroButton>
+          <HeroButton icon={WritingGlyph} onClick={() => onOpen(chat, 'writing')}>{t("Writing Desk")}</HeroButton>
           <div className="ml-4 flex gap-4 text-xs text-text-secondary">
             {stats.map(([Icon, label]) => (
               <span key={label} className="inline-flex items-center gap-1.5 tabular-nums">

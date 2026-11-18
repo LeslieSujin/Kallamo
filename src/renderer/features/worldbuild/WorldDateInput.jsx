@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { CalendarDays, X } from 'lucide-react';
 import SelectMenu from '../../components/ui/SelectMenu';
@@ -45,6 +46,7 @@ export default function WorldDateInput({
   className = '',
   ...rest
 }) {
+  const { t } = useI18n();
   if (!calendar) return null;
   const defaultDate = {
     eraId: calendar.defaultEraId,
@@ -84,11 +86,11 @@ export default function WorldDateInput({
         <div className="flex min-w-0 items-start gap-1.5">
         <div className={`grid min-w-0 flex-1 gap-2 ${includeTime ? '@min-[34rem]:grid-cols-[minmax(0,1fr)_11rem]' : ''}`}>
           <div className="min-w-0" role="group" aria-label={`${label} date`}>
-            {includeTime ? <span className={`${COMPOUND_LABEL} mb-1.5 px-1`}>Date</span> : null}
+            {includeTime ? <span className={`${COMPOUND_LABEL} mb-1.5 px-1`}>{t("Date")}</span> : null}
             <div className="overflow-hidden rounded-card border border-border-default bg-border-subtle transition-[border-color,box-shadow] focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
               <div className="grid grid-cols-[minmax(4.5rem,0.7fr)_minmax(8rem,1.3fr)] gap-px bg-border-subtle @min-[26rem]:grid-cols-[minmax(3.75rem,0.55fr)_minmax(8rem,1.45fr)_minmax(4.5rem,0.7fr)_minmax(5rem,0.9fr)]">
                 <CompoundNumberField
-                  label="Day"
+                  label={t("Day")}
                   ariaLabel={`${label} day`}
                   min="1"
                   max={maxDay}
@@ -96,18 +98,18 @@ export default function WorldDateInput({
                   onChange={day => set({ day })}
                 />
                 <div className={COMPOUND_SEGMENT}>
-                  <span className={COMPOUND_LABEL}>Month</span>
+                  <span className={COMPOUND_LABEL}>{t("Month")}</span>
                   <SelectMenu unboxed ariaLabel={`${label} month`} value={date.month} onChange={month => setCalendarPart({ month: Number(month) })} options={calendar.months.map((month, index) => ({ value: index + 1, label: month.name }))} />
                 </div>
                 <CompoundNumberField
-                  label="Year"
+                  label={t("Year")}
                   ariaLabel={`${label} year`}
                   min="1"
                   value={date.year}
                   onChange={year => setCalendarPart({ year })}
                 />
                 <div className={COMPOUND_SEGMENT}>
-                  <span className={COMPOUND_LABEL}>Era</span>
+                  <span className={COMPOUND_LABEL}>{t("Era")}</span>
                   <SelectMenu unboxed ariaLabel={`${label} era`} value={date.eraId} onChange={eraId => setCalendarPart({ eraId })} options={calendar.eras.map(era => ({ value: era.id, label: era.shortName || era.name }))} />
                 </div>
               </div>
@@ -116,10 +118,10 @@ export default function WorldDateInput({
 
           {includeTime && (
             <div className="min-w-0" role="group" aria-label={`${label} time`}>
-              <span className={`${COMPOUND_LABEL} mb-1.5 px-1`}>Time</span>
+              <span className={`${COMPOUND_LABEL} mb-1.5 px-1`}>{t("Time")}</span>
               <div className="grid grid-cols-[1fr_auto_1fr] overflow-hidden rounded-card border border-border-default bg-border-subtle transition-[border-color,box-shadow] focus-within:border-accent/50 focus-within:ring-2 focus-within:ring-accent/15">
                 <CompoundNumberField
-                  label="Hour"
+                  label={t("Hour")}
                   ariaLabel={`${label} hour`}
                   min="0"
                   max={calendar.hoursPerDay - 1}
@@ -128,7 +130,7 @@ export default function WorldDateInput({
                 />
                 <span aria-hidden="true" className="flex items-end bg-surface-input pb-2.5 text-sm font-semibold text-text-subtle">:</span>
                 <CompoundNumberField
-                  label="Minute"
+                  label={t("Minute")}
                   ariaLabel={`${label} minute`}
                   min="0"
                   max="59"
@@ -145,7 +147,7 @@ export default function WorldDateInput({
             type="button"
             onClick={() => onChange(null)}
             aria-label={`Clear ${label.toLowerCase()}`}
-            data-tooltip="Clear date"
+            data-tooltip={t("Clear date")}
             className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-control text-text-muted transition-colors hover:bg-status-danger/10 hover:text-status-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${includeTime ? 'mt-6' : 'mt-2'}`}
           >
             <X className="h-4 w-4" aria-hidden="true" />

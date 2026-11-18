@@ -1,3 +1,4 @@
+import { useI18n } from '../../i18n';
 import React from 'react';
 import { RotateCw, SkipForward, Square, Workflow } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -8,6 +9,7 @@ import { MarkedAvatar, ProviderError, StepChain, ToneTile } from './ModalParts';
 
 // One error window for a profile reply and for a workflow step: who failed, what the provider said, and what to do next.
 export default function GenerationError({ workflow = false }) {
+  const { t } = useI18n();
   const { errorData, handleRespondToError, writingProfiles, apiProfiles } = useApp();
   if (!errorData) return null;
 
@@ -35,8 +37,8 @@ export default function GenerationError({ workflow = false }) {
   const explain = !canRetry
     ? 'Nothing more can be done with this request. Close this, fix what the message points to, and send again.'
     : workflow
-      ? <><b className="font-semibold text-text-secondary">Retry step</b> sends this step again. <b className="font-semibold text-text-secondary">Skip</b> passes the last reply on. <b className="font-semibold text-text-secondary">Stop</b> keeps the replies so far.</>
-      : <><b className="font-semibold text-text-secondary">Retry</b> sends the same request again. <b className="font-semibold text-text-secondary">Stop</b> keeps the conversation as it is.</>;
+      ? <><b className="font-semibold text-text-secondary">{t("Retry step")}</b>{' '}{t("sends this step again.")}{' '}<b className="font-semibold text-text-secondary">{t("Skip")}</b>{' '}{t("passes the last reply on.")}{' '}<b className="font-semibold text-text-secondary">{t("Stop")}</b>{' '}{t("keeps the replies so far.")}</>
+      : <><b className="font-semibold text-text-secondary">{t("Retry")}</b>{' '}{t("sends the same request again.")}{' '}<b className="font-semibold text-text-secondary">{t("Stop")}</b>{' '}{t("keeps the conversation as it is.")}</>;
 
   return (
     <Modal
@@ -57,15 +59,15 @@ export default function GenerationError({ workflow = false }) {
       <div className="flex items-center gap-2 border-t border-border-subtle px-5 py-3.5">
         {canRetry ? (
           <>
-            <Button variant="ghost" icon={Square} onClick={() => handleRespondToError('interrupt')}>Stop</Button>
+            <Button variant="ghost" icon={Square} onClick={() => handleRespondToError('interrupt')}>{t("Stop")}</Button>
             <span className="flex-1" />
-            {workflow && <Button variant="subtle" icon={SkipForward} onClick={() => handleRespondToError('skip')}>Skip step</Button>}
-            <Button icon={RotateCw} onClick={() => handleRespondToError('retry')}>{workflow ? 'Retry step' : 'Retry'}</Button>
+            {workflow && <Button variant="subtle" icon={SkipForward} onClick={() => handleRespondToError('skip')}>{t("Skip step")}</Button>}
+            <Button icon={RotateCw} onClick={() => handleRespondToError('retry')}>{workflow ? t("Retry step") : t("Retry")}</Button>
           </>
         ) : (
           <>
             <span className="flex-1" />
-            <Button onClick={() => handleRespondToError('interrupt')}>Close</Button>
+            <Button onClick={() => handleRespondToError('interrupt')}>{t("Close")}</Button>
           </>
         )}
       </div>
